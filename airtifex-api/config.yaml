@@ -1,0 +1,20 @@
+---
+listen_addr: 127.0.0.1
+listen_port: 6901
+db_url: sqlite://data.db
+#db_url: postgres://airtifex:airtifex@localhost/airtifex
+jwt_secret: change-me!
+
+llms:
+  - model_path: ./llm/ggml-alpaca-7b-q4.bin
+    model_description: Alpaca 7B, quantized
+    float16: false
+  # - model_path: ./llm/ggml-alpaca-13b-q4.bin
+  #   model_description: Alpaca 13B, quantized
+  #   float16: false
+  #- model_path: ./llm/ggml-vicuna-13b-4bit-rev1.bin
+    #model_description: Vicuna 13B, quantized
+    #float16: false
+  #- model_path: ./llm/ggml-alpaca-30b-q4-r1.bin
+    #model_description: Alpaca 30B, quantized, rev. 1
+    #float16: false

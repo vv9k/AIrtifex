@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "airtifex-api",
+    "airtifex-core",
+    "airtifex-web"
+]

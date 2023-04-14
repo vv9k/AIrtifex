@@ -1,0 +1,48 @@
+use crate::components::status_message::*;
+use crate::pages::PageStack;
+use crate::Page;
+
+use airtifex_core::user::AuthenticatedUser;
+use leptos::*;
+use leptos_router::*;
+
+#[component]
+pub fn Home(
+    cx: Scope,
+    user_info: RwSignal<Option<AuthenticatedUser>>,
+    page_stack: RwSignal<PageStack>,
+    global_message: RwSignal<Message>,
+) -> impl IntoView {
+    page_stack.update(|p| p.push(Page::Home));
+
+    view! { cx,
+      {move || {
+       let inner_view = match user_info.get() {
+        Some(_info) => view!{ cx,
+           <div class="col-md-8 mx-auto">
+               <StatusMessage message=global_message></StatusMessage>
+           </div>
+        }.into_view(cx),
+        None => view!{ cx,
+            <div class="col-md-8 mx-auto align-items-center d-flex flex-column">
+                <h1 class="display-5 text-center font-monospace">"Welcome to "<span class="fw-bold"><span class="text-airtifex">"AI"</span>"rtifex"</span></h1>
+                <p class="pt-5 pb-3">"You are not logged in."</p>
+                <A href=Page::Login.path() class="btn btn-airtifex">
+                    "Go to login page"
+                </A>
+            </div>
+        }.into_view(cx)
+       };
+
+       view!{ cx,
+         <main class="bg-dark text-white" >
+             <div class="container d-flex h-100 justify-content-center">
+                 <div class="row align-items-center h-100">
+                 { inner_view }
+                 </div>
+             </div>
+         </main>
+       }.into_view(cx)
+      }}
+    }
+}

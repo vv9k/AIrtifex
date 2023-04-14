@@ -1,0 +1,4 @@
+[[proxy]]
+rewrite = "/api/"
+backend = "http://127.0.0.1:6901/api/v1/"
+

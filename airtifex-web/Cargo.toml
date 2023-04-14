@@ -1,0 +1,33 @@
+[package]
+name = "airtifex-web"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "airtifex_web"
+path = "./src/main.rs"
+
+[dependencies]
+airtifex-core = { path = "../airtifex-core" }
+
+leptos = { version = "0.2", features = ["stable", "csr"] }
+leptos_meta = { version = "0.2", features = ["stable", "csr"] }
+leptos_router = { version = "0.2", features = ["stable", "csr"] }
+
+log = "0.4"
+console_error_panic_hook = "0.1"
+console_log = "1"
+gloo-net = "0.2"
+gloo-storage = "0.2"
+serde = "1"
+serde_json = "1"
+thiserror = "1"
+tracing = "0.1.37"
+email_address = "0.2"
+futures = "0.3"
+wasm-bindgen = "0.2"
+js-sys = "0.3"
+web-sys = { version = "0.3", features = ["ReadableStreamDefaultReader", "ReadableStreamReadResult"] }
+wasm-streams = "0.3"
+wasm-bindgen-futures = "0.4.34"
+
