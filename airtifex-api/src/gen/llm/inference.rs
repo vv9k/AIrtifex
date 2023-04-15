@@ -14,10 +14,10 @@ use tokio::runtime::Runtime;
 
 use flume::{unbounded, Receiver, Sender};
 
-const ANSWER_PREFIX: &str = "Llama: ";
+const ANSWER_PREFIX: &str = "Assistant: ";
 const USER_PREFIX: &str = "User: ";
-const CONVERSATION_PROMPT: &str = r#"Your name is Llama and you are a helpful virtual assistant.
-As Llama, you fulfill users request in the most effective way and your answer is never empty.
+const CONVERSATION_PROMPT: &str = r#"Your name is Assistant and you are a helpful virtual assistant.
+As Assistant, you fulfill users request in the most effective way and your answer is never empty.
 Below is a dialog between a user and you.
 Write a response to the request in the '### Request:' section that appropriately completes the request.
 
