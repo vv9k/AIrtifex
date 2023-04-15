@@ -126,6 +126,7 @@ pub fn ImageView(
                      <th scope="col" class="border-0 font-monospace">"N Steps: "<span class="text-airtifex-yellow">{metadata.n_steps}</span></th>
                      <th scope="col" class="border-0 font-monospace">"Seed: "<span class="text-airtifex-yellow">{metadata.seed}</span></th>
                      <th scope="col" class="border-0 font-monospace">"N Samples: "<span class="text-airtifex-yellow">{metadata.num_samples}</span></th>
+                     <th scope="col" class="border-0 font-monospace">"Guidance Scale: "<span class="text-airtifex-yellow">{metadata.guidance_scale}</span></th>
                      <th scope="col" class="border-0 font-monospace">"Created Date: "<span class="text-airtifex-yellow">{metadata.create_date.format("%a, %d %b %Y %H:%M:%S").to_string()}</span></th>
                    </tr>
                    </thead>

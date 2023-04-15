@@ -50,15 +50,32 @@ async fn text_to_image(
         Err(e) => return ApiResponse::failure(e).internal_server_error(),
     };
 
+    let guidance_scale = if let Some(scale) = request.guidance_scale {
+        scale.max(20.0)
+    } else {
+        7.5
+    };
+    let num_samples = if let Some(samples) = request.num_samples {
+        samples.max(16)
+    } else {
+        1
+    };
+    let n_steps = if let Some(steps) = request.n_steps {
+        steps.max(500) as i64
+    } else {
+        25
+    };
+
     let image = Image::new(
         user_id,
         request.model,
         request.width.unwrap_or(512),
         request.height.unwrap_or(512),
         request.prompt,
-        request.n_steps.map(|x| x as i64).unwrap_or(15),
+        n_steps,
         request.seed.unwrap_or_else(|| rand::thread_rng().gen()),
-        request.num_samples.unwrap_or(1),
+        num_samples,
+        guidance_scale,
     );
 
     if let Err(e) = image.create(db).await {
@@ -73,6 +90,7 @@ async fn text_to_image(
         n_steps: image.n_steps as usize,
         seed: image.seed,
         num_samples: image.num_samples,
+        guidance_scale: image.guidance_scale,
     });
 
     if let Some(tx_gen_req) = state.tx_image_gen_req.get(&image.model) {
@@ -111,6 +129,7 @@ async fn list_images(claims: Claims, state: State<SharedAppState>) -> Response {
                         num_samples: e.num_samples,
                         processing: e.processing,
                         create_date: e.create_date,
+                        guidance_scale: e.guidance_scale,
                     })
                     .collect::<Vec<_>>()
             })
@@ -192,6 +211,7 @@ async fn get_image_metadata(
                 num_samples: image.num_samples,
                 processing: image.processing,
                 create_date: image.create_date,
+                guidance_scale: image.guidance_scale,
             })
             .map_err(Error::from),
     )

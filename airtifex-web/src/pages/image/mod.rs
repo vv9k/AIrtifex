@@ -27,6 +27,7 @@ pub fn TextToImage(
     let n_steps = create_rw_signal(cx, None::<usize>);
     let seed = create_rw_signal(cx, None::<i64>);
     let num_samples = create_rw_signal(cx, None::<i64>);
+    let guidance_scale = create_rw_signal(cx, None::<f64>);
 
     let images = create_resource(
         cx,
@@ -84,6 +85,7 @@ pub fn TextToImage(
                 n_steps: n_steps.get(),
                 seed: seed.get(),
                 num_samples: num_samples.get(),
+                guidance_scale: guidance_scale.get(),
             };
             match api.text_to_image(request).await {
                 Ok(response) => {
@@ -134,7 +136,7 @@ pub fn TextToImage(
                  </div>
                  <TextToImageForm
                      authorized_api status_message prompt width height n_steps seed num_samples
-                     selected_model dispatch_new_image_action
+                     selected_model dispatch_new_image_action guidance_scale
                  />
                  <div class="card bg-darker m-3">
                     <StatusMessage message=status_message />
@@ -158,6 +160,7 @@ fn TextToImageForm<F>(
     n_steps: RwSignal<Option<usize>>,
     seed: RwSignal<Option<i64>>,
     num_samples: RwSignal<Option<i64>>,
+    guidance_scale: RwSignal<Option<f64>>,
     selected_model: RwSignal<String>,
     dispatch_new_image_action: F,
 ) -> impl IntoView
@@ -358,6 +361,25 @@ where
                                          _=> {
                                             let val = event_target_value(&ev);
                                             num_samples.update(|v|*v = val.parse().ok());
+                                         }
+                                     }
+                                   }
+                                 />
+                              </div>
+
+                              <div class="input-group mb-3">
+                                 <label class="input-group-text">"Guidance Scale"</label>
+                                 <input
+                                   class = "form-control"
+                                   placeholder = "7.5"
+                                   on:keyup = move |ev: ev::KeyboardEvent| {
+                                     match &*ev.key() {
+                                         "Enter" => {
+                                            dispatch_new_image_action();
+                                         }
+                                         _=> {
+                                            let val = event_target_value(&ev);
+                                            guidance_scale.update(|v|*v = val.parse().ok());
                                          }
                                      }
                                    }

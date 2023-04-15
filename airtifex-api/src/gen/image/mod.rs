@@ -21,6 +21,7 @@ pub struct TextToImageData {
     pub n_steps: usize,
     pub seed: i64,
     pub num_samples: i64,
+    pub guidance_scale: f64,
 }
 
 #[derive(Debug, Default, Deserialize, Serialize)]

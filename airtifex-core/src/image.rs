@@ -9,6 +9,7 @@ pub struct TextToImageRequest {
     pub n_steps: Option<usize>,
     pub seed: Option<i64>,
     pub num_samples: Option<i64>,
+    pub guidance_scale: Option<f64>,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
@@ -27,6 +28,7 @@ pub struct ImageInspect {
     pub n_steps: i64,
     pub seed: i64,
     pub num_samples: i64,
+    pub guidance_scale: f64,
     pub processing: bool,
     pub create_date: chrono::DateTime<chrono::Utc>,
 }

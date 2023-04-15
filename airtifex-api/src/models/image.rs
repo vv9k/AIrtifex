@@ -30,6 +30,7 @@ pub struct Image {
     pub n_steps: i64,
     pub seed: i64,
     pub num_samples: i64,
+    pub guidance_scale: f64,
     pub processing: bool,
     pub create_date: chrono::DateTime<chrono::Utc>,
 }
@@ -44,6 +45,7 @@ impl Image {
         n_steps: i64,
         seed: i64,
         num_samples: i64,
+        guidance_scale: f64,
     ) -> Self {
         Self {
             id: Uuid::new_v4(),
@@ -55,6 +57,7 @@ impl Image {
             n_steps,
             seed,
             num_samples,
+            guidance_scale,
             processing: true,
             create_date: chrono::Utc::now(),
         }
@@ -66,8 +69,8 @@ impl Image {
         sqlx::query(
             r#"
             INSERT INTO images
-                    (id, user_id, model, width, height, prompt, n_steps, seed, num_samples, processing, create_date)
-            VALUES  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+                    (id, user_id, model, width, height, prompt, n_steps, seed, num_samples, guidance_scale, processing, create_date)
+            VALUES  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
             "#,
         )
         .bind(&self.id)
@@ -79,6 +82,7 @@ impl Image {
         .bind(&self.n_steps)
         .bind(&self.seed)
         .bind(&self.num_samples)
+        .bind(&self.guidance_scale)
         .bind(&self.processing)
         .bind(&self.create_date)
         .execute(db)
@@ -91,7 +95,7 @@ impl Image {
     pub async fn list(db: &DbPool) -> Result<Vec<Self>> {
         sqlx::query_as(
             r#"
-            SELECT id, user_id, model, width, height, prompt, n_steps, seed, num_samples, processing, create_date
+            SELECT id, user_id, model, width, height, prompt, n_steps, seed, num_samples, guidance_scale, processing, create_date
             FROM images
             "#,
         )
@@ -104,7 +108,7 @@ impl Image {
     pub async fn get_by_id(db: &DbPool, id: &Uuid) -> Result<Self> {
         sqlx::query_as(
             r#"
-            SELECT id, user_id, model, width, height, prompt, n_steps, seed, num_samples, processing, create_date
+            SELECT id, user_id, model, width, height, prompt, n_steps, seed, num_samples, guidance_scale, processing, create_date
             FROM images
             WHERE id = $1
             "#,

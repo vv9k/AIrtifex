@@ -161,6 +161,12 @@ impl AsRef<str> for StableDiffusionVersion {
 fn default_max_image_gen_sessions() -> usize {
     2
 }
+fn default_max_timesteps() -> usize {
+    420
+}
+fn default_max_guidance_scale() -> f32 {
+    20.0
+}
 #[derive(Clone, Deserialize, Serialize)]
 pub struct StableDiffusionConfig {
     pub model_description: Option<String>,
@@ -177,4 +183,8 @@ pub struct StableDiffusionConfig {
     pub unet_cpu: bool,
     #[serde(default = "default_max_image_gen_sessions")]
     pub max_image_gen_sessions: usize,
+    #[serde(default = "default_max_timesteps")]
+    pub max_timesteps: usize,
+    #[serde(default = "default_max_guidance_scale")]
+    pub max_guidance_scale: f32,
 }
