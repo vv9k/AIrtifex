@@ -1,6 +1,6 @@
 use crate::auth::Claims;
+use crate::gen::llm::{ChatData, InferenceRequest};
 use crate::id::Uuid;
-use crate::llm::{ChatData, InferenceRequest};
 use crate::models::{chat::Chat, chat_entry::ChatEntry, llm::LargeLanguageModel};
 use crate::routes::handle_db_result_as_json;
 use crate::Error;

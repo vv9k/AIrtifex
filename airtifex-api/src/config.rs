@@ -3,6 +3,7 @@ use crate::{Error, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::env;
+use std::path::PathBuf;
 
 #[derive(Deserialize, Serialize)]
 struct RawConfig {
@@ -10,7 +11,10 @@ struct RawConfig {
     listen_port: u16,
     db_url: String,
     jwt_secret: String,
+    #[serde(default)]
     llms: Vec<LlmConfig>,
+    #[serde(default)]
+    stable_diffusion: Vec<StableDiffusionConfig>,
 }
 
 fn default_num_ctx_tokens() -> usize {
@@ -77,6 +81,7 @@ pub struct Config {
     pub db_url: String,
     pub jwt_secret: String,
     pub llms: HashMap<String, LlmConfig>,
+    pub stable_diffusion: Vec<StableDiffusionConfig>,
 }
 
 impl Config {
@@ -125,6 +130,51 @@ impl Config {
             db_url,
             jwt_secret,
             llms,
+            stable_diffusion: config.stable_diffusion,
         })
     }
+}
+
+fn default_is_cpu() -> bool {
+    true
+}
+
+#[derive(Clone, Deserialize, Serialize)]
+pub enum StableDiffusionVersion {
+    #[serde(rename = "v1.5")]
+    V1_5,
+    #[serde(rename = "v2.1")]
+    V2_1,
+    Custom(String),
+}
+
+impl AsRef<str> for StableDiffusionVersion {
+    fn as_ref(&self) -> &str {
+        match self {
+            StableDiffusionVersion::V1_5 => "v1.5",
+            StableDiffusionVersion::V2_1 => "v2.1",
+            StableDiffusionVersion::Custom(s) => &s,
+        }
+    }
+}
+
+fn default_max_image_gen_sessions() -> usize {
+    2
+}
+#[derive(Clone, Deserialize, Serialize)]
+pub struct StableDiffusionConfig {
+    pub model_description: Option<String>,
+    pub version: StableDiffusionVersion,
+    pub clip_weights_path: PathBuf,
+    pub vae_weights_path: PathBuf,
+    pub unet_weights_path: PathBuf,
+    pub vocab_file: PathBuf,
+    #[serde(default = "default_is_cpu")]
+    pub clip_cpu: bool,
+    #[serde(default = "default_is_cpu")]
+    pub vae_cpu: bool,
+    #[serde(default = "default_is_cpu")]
+    pub unet_cpu: bool,
+    #[serde(default = "default_max_image_gen_sessions")]
+    pub max_image_gen_sessions: usize,
 }

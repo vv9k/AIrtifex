@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 
 pub mod api_response;
 pub mod auth;
+pub mod image;
 pub mod llm;
 pub mod query;
 pub mod user;

@@ -1,15 +1,16 @@
 use crate::components::{modal::*, status_message::*};
 use crate::{api, Page, PageStack};
-use airtifex_core::llm::{ChatListEntry, ChatSettings, ChatStartRequest};
+use airtifex_core::image::{ImageInspect, TextToImageRequest};
 
 use leptos::*;
 use leptos_router::*;
 
 pub mod view;
+
 pub use view::*;
 
 #[component]
-pub fn Chat(
+pub fn TextToImage(
     cx: Scope,
     authorized_api: RwSignal<Option<api::AuthorizedApi>>,
     page_stack: RwSignal<PageStack>,
@@ -17,26 +18,23 @@ pub fn Chat(
     let current_list_page = create_rw_signal::<u32>(cx, 1);
 
     let status_message = create_rw_signal(cx, Message::Empty);
-    let remove_chat_id = create_rw_signal(cx, None::<String>);
-    let remove_chat_title = create_rw_signal(cx, None::<String>);
+    let remove_image_id = create_rw_signal(cx, None::<String>);
 
-    let chat_title = create_rw_signal(cx, String::new());
+    let width = create_rw_signal(cx, None::<i64>);
+    let height = create_rw_signal(cx, None::<i64>);
+    let prompt = create_rw_signal(cx, String::new());
     let selected_model = create_rw_signal(cx, String::new());
+    let n_steps = create_rw_signal(cx, None::<usize>);
+    let seed = create_rw_signal(cx, None::<i64>);
+    let num_samples = create_rw_signal(cx, None::<i64>);
 
-    let num_predict = create_rw_signal(cx, None::<usize>);
-    let n_batch = create_rw_signal(cx, None::<usize>);
-    let top_k = create_rw_signal(cx, None::<usize>);
-    let top_p = create_rw_signal(cx, None::<f32>);
-    let repeat_penalty = create_rw_signal(cx, None::<f32>);
-    let temp = create_rw_signal(cx, None::<f32>);
-
-    let chats = create_resource(
+    let images = create_resource(
         cx,
         move || current_list_page.get(),
         move |_current_list_page| async move {
             match authorized_api.get() {
-                Some(api) => match api.chats().await {
-                    Ok(chats) => chats,
+                Some(api) => match api.images().await {
+                    Ok(images) => images,
                     Err(e) => {
                         let e = e.to_string();
                         crate::pages::goto_login_if_expired(cx, &e, authorized_api);
@@ -53,18 +51,18 @@ pub fn Chat(
         },
     );
 
-    let remove_chat_action = create_action(cx, move |_| async move {
+    let remove_image_action = create_action(cx, move |_| async move {
         if let Some(api) = authorized_api.get() {
-            if let (Some(title), Some(id)) = (remove_chat_title.get(), remove_chat_id.get()) {
-                if let Err(e) = api.remove_chat(&id).await {
+            if let Some(id) = remove_image_id.get() {
+                if let Err(e) = api.image_delete(&id).await {
                     let e = e.to_string();
                     crate::pages::goto_login_if_expired(cx, &e, authorized_api);
                     status_message.update(|m| {
-                        *m = Message::Error(format!("failed to remove chat - {e}"));
+                        *m = Message::Error(format!("failed to remove image - {e}"));
                     });
                 } else {
                     status_message.update(|m| {
-                        *m = Message::Success(format!("successfully removed chat \"{title}\""));
+                        *m = Message::Success(format!("successfully removed image {id}"));
                     });
                     current_list_page.update(|p| *p = *p);
                 }
@@ -76,28 +74,26 @@ pub fn Chat(
         }
     });
 
-    let new_chat_action = create_action(cx, move |_| async move {
+    let new_image_action = create_action(cx, move |_| async move {
         if let Some(api) = authorized_api.get() {
-            let title = chat_title.get();
-            let title = if title.is_empty() { None } else { Some(title) };
-            let request = ChatStartRequest {
-                title,
-                model: Some(selected_model.get()),
-                settings: ChatSettings {
-                    num_predict: num_predict.get(),
-                    system_prompt: None,
-                    n_batch: n_batch.get(),
-                    top_k: top_k.get(),
-                    top_p: top_p.get(),
-                    repeat_penalty: repeat_penalty.get(),
-                    temp: temp.get(),
-                },
+            let request = TextToImageRequest {
+                prompt: prompt.get(),
+                model: selected_model.get(),
+                width: width.get(),
+                height: height.get(),
+                n_steps: n_steps.get(),
+                seed: seed.get(),
+                num_samples: num_samples.get(),
             };
-            match api.start_new_chat(request).await {
+            match api.text_to_image(request).await {
                 Ok(response) => {
-                    let navigate = use_navigate(cx);
-                    navigate(&format!("/chat/{}", response.chat_id), Default::default())
-                        .expect("chat page");
+                    status_message.update(|m| {
+                        *m = Message::Success(format!(
+                            "successfuly registered image {}",
+                            response.image_id
+                        ));
+                    });
+                    current_list_page.update(|p| *p = *p);
                 }
                 Err(e) => {
                     status_message.update(|m| {
@@ -112,16 +108,16 @@ pub fn Chat(
         }
     });
 
-    let dispatch_new_chat_action = move || new_chat_action.dispatch(());
-    let dispatch_remove_chat_action = move || remove_chat_action.dispatch(());
+    let dispatch_new_image_action = move || new_image_action.dispatch(());
+    let dispatch_remove_image_action = move || remove_image_action.dispatch(());
 
     let remove_confirm_modal = move || {
         view! { cx,
           <RemoveModal
-            modal_id="removeChatModal"
+            modal_id="removeImageModal"
             target="chat"
-            entry=remove_chat_title.read_only()
-            remove_action_fn=dispatch_remove_chat_action
+            entry=remove_image_id.read_only()
+            remove_action_fn=dispatch_remove_image_action
           />
         }
         .into_view(cx)
@@ -129,20 +125,20 @@ pub fn Chat(
 
     view! { cx,
       {move || {
-        page_stack.update(|p| p.push(Page::Chat));
+        page_stack.update(|p| p.push(Page::TextToImage));
 
         view!{cx,
            <main class="bg-dark text-white d-flex flex-column p-1 pt-3 overflow-auto" >
                  <div class="d-flex pb-3">
-                     <h1 class="display-5 p-1">{Page::Chat.title()}</h1>
+                     <h1 class="display-5 p-1">{Page::TextToImage.title()}</h1>
                  </div>
-                 <NewChatForm
-                     authorized_api selected_model status_message chat_title dispatch_new_chat_action
-                     num_predict n_batch top_k top_p repeat_penalty temp
+                 <TextToImageForm
+                     authorized_api status_message prompt width height n_steps seed num_samples
+                     selected_model dispatch_new_image_action
                  />
                  <div class="card bg-darker m-3">
                     <StatusMessage message=status_message />
-                    <ChatListEntries chats remove_chat_id=remove_chat_id remove_chat_title=remove_chat_title />
+                    <ImageListEntries images remove_image_id />
                  </div>
            </main>
            {remove_confirm_modal}
@@ -152,25 +148,23 @@ pub fn Chat(
 }
 
 #[component]
-fn NewChatForm<F>(
+fn TextToImageForm<F>(
     cx: Scope,
     authorized_api: RwSignal<Option<api::AuthorizedApi>>,
     status_message: RwSignal<Message>,
+    prompt: RwSignal<String>,
+    width: RwSignal<Option<i64>>,
+    height: RwSignal<Option<i64>>,
+    n_steps: RwSignal<Option<usize>>,
+    seed: RwSignal<Option<i64>>,
+    num_samples: RwSignal<Option<i64>>,
     selected_model: RwSignal<String>,
-    chat_title: RwSignal<String>,
-    num_predict: RwSignal<Option<usize>>,
-    n_batch: RwSignal<Option<usize>>,
-    top_k: RwSignal<Option<usize>>,
-    top_p: RwSignal<Option<f32>>,
-    repeat_penalty: RwSignal<Option<f32>>,
-    temp: RwSignal<Option<f32>>,
-    dispatch_new_chat_action: F,
+    dispatch_new_image_action: F,
 ) -> impl IntoView
 where
     F: FnOnce() -> () + Copy + 'static,
 {
-    let current_list_page = create_rw_signal::<u32>(cx, 1);
-
+    let current_list_page = create_rw_signal(cx, 1);
     let is_advanced_settings_open = create_rw_signal(cx, false);
 
     let settings_icon = Signal::derive(cx, move || {
@@ -180,12 +174,13 @@ where
             "/icons/plus-circle.svg"
         }
     });
+
     let models = create_resource(
         cx,
         move || current_list_page.get(),
         move |_current_list_page| async move {
             match authorized_api.get() {
-                Some(api) => match api.large_language_models().await {
+                Some(api) => match api.image_models().await {
                     Ok(models) => models,
                     Err(e) => {
                         status_message.update(|msg| *msg = Message::Error(e.to_string()));
@@ -219,18 +214,18 @@ where
                     >
 
                       <div class="input-group mb-3">
-                         <label class="input-group-text">"Title"</label>
+                         <label class="input-group-text">"Prompt"</label>
                          <input
                            class = "form-control"
                            placeholder = "..."
                            on:keyup = move |ev: ev::KeyboardEvent| {
                              match &*ev.key() {
                                  "Enter" => {
-                                    dispatch_new_chat_action();
+                                    dispatch_new_image_action();
                                  }
                                  _=> {
                                     let val = event_target_value(&ev);
-                                    chat_title.update(|v|*v = val);
+                                    prompt.update(|v|*v = val);
                                  }
                              }
                            }
@@ -274,18 +269,18 @@ where
                           view!{ cx,
                           <div>
                               <div class="input-group mb-3">
-                                 <label class="input-group-text">"Max new tokens"</label>
+                                 <label class="input-group-text">"Width"</label>
                                  <input
                                    class = "form-control"
-                                   placeholder = "1024"
+                                   placeholder = "256"
                                    on:keyup = move |ev: ev::KeyboardEvent| {
                                      match &*ev.key() {
                                          "Enter" => {
-                                            dispatch_new_chat_action();
+                                            dispatch_new_image_action();
                                          }
                                          _=> {
                                             let val = event_target_value(&ev);
-                                            num_predict.update(|v|*v = val.parse().ok());
+                                            width.update(|v|*v = val.parse().ok());
                                          }
                                      }
                                    }
@@ -293,18 +288,18 @@ where
                               </div>
 
                               <div class="input-group mb-3">
-                                 <label class="input-group-text">"batch size"</label>
+                                 <label class="input-group-text">"Height"</label>
                                  <input
                                    class = "form-control"
-                                   placeholder = "8"
+                                   placeholder = "256"
                                    on:keyup = move |ev: ev::KeyboardEvent| {
                                      match &*ev.key() {
                                          "Enter" => {
-                                            dispatch_new_chat_action();
+                                            dispatch_new_image_action();
                                          }
                                          _=> {
                                             let val = event_target_value(&ev);
-                                            n_batch.update(|v|*v = val.parse().ok());
+                                            height.update(|v|*v = val.parse().ok());
                                          }
                                      }
                                    }
@@ -313,36 +308,36 @@ where
 
                               <div class="row">
                                 <div class="input-group mb-3">
-                                   <label class="input-group-text">"top K"</label>
+                                   <label class="input-group-text">"N Steps"</label>
                                    <input
                                      class = "form-control"
-                                     placeholder = "40"
+                                     placeholder = "15"
                                      on:keyup = move |ev: ev::KeyboardEvent| {
                                        match &*ev.key() {
                                            "Enter" => {
-                                              dispatch_new_chat_action();
+                                              dispatch_new_image_action();
                                            }
                                            _=> {
                                               let val = event_target_value(&ev);
-                                              top_k.update(|v|*v = val.parse().ok());
+                                              n_steps.update(|v|*v = val.parse().ok());
                                            }
                                        }
                                      }
                                    />
                                 </div>
                                 <div class="input-group mb-3">
-                                   <label class="input-group-text">"top P"</label>
+                                   <label class="input-group-text">"Seed"</label>
                                    <input
                                      class = "form-control"
-                                     placeholder = "0.95"
+                                     placeholder = "1337"
                                      on:keyup = move |ev: ev::KeyboardEvent| {
                                        match &*ev.key() {
                                            "Enter" => {
-                                              dispatch_new_chat_action();
+                                              dispatch_new_image_action();
                                            }
                                            _=> {
                                               let val = event_target_value(&ev);
-                                              top_p.update(|v|*v = val.parse().ok());
+                                              seed.update(|v|*v = val.parse().ok());
                                            }
                                        }
                                      }
@@ -351,37 +346,18 @@ where
                               </div>
 
                               <div class="input-group mb-3">
-                                 <label class="input-group-text">"repeat penalty"</label>
+                                 <label class="input-group-text">"N samples"</label>
                                  <input
                                    class = "form-control"
-                                   placeholder = "1.30"
+                                   placeholder = "1"
                                    on:keyup = move |ev: ev::KeyboardEvent| {
                                      match &*ev.key() {
                                          "Enter" => {
-                                            dispatch_new_chat_action();
+                                            dispatch_new_image_action();
                                          }
                                          _=> {
                                             let val = event_target_value(&ev);
-                                            repeat_penalty.update(|v|*v = val.parse().ok());
-                                         }
-                                     }
-                                   }
-                                 />
-                              </div>
-
-                              <div class="input-group mb-3">
-                                 <label class="input-group-text">"temperature"</label>
-                                 <input
-                                   class = "form-control"
-                                   placeholder = "0.80"
-                                   on:keyup = move |ev: ev::KeyboardEvent| {
-                                     match &*ev.key() {
-                                         "Enter" => {
-                                            dispatch_new_chat_action();
-                                         }
-                                         _=> {
-                                            let val = event_target_value(&ev);
-                                            temp.update(|v|*v = val.parse().ok());
+                                            num_samples.update(|v|*v = val.parse().ok());
                                          }
                                      }
                                    }
@@ -400,10 +376,10 @@ where
 
                       <button
                          class="btn btn-outline-lighter rounded mt-3 w-25 mx-auto"
-                         on:click=move |_| dispatch_new_chat_action()
+                         on:click=move |_| dispatch_new_image_action()
                       >
-                      <img class="me-2" src="/icons/message-circle.svg" />
-                      "New chat"
+                      <img class="me-2" src="/icons/send.svg" />
+                      "New image"
                       </button>
                     </form>
                   </div>
@@ -414,30 +390,34 @@ where
 }
 
 #[component]
-fn ChatListEntries(
+fn ImageListEntries(
     cx: Scope,
-    chats: Resource<u32, Vec<ChatListEntry>>,
-    remove_chat_id: RwSignal<Option<String>>,
-    remove_chat_title: RwSignal<Option<String>>,
+    images: Resource<u32, Vec<ImageInspect>>,
+    remove_image_id: RwSignal<Option<String>>,
 ) -> impl IntoView {
     view! { cx, { move || {
-        if let Some(chats) = chats.read(cx) {
-            if !chats.is_empty() {
+        if let Some(images) = images.read(cx) {
+            if !images.is_empty() {
                 return view! { cx,
                 <div class="card-body d-flex flex-column px-5 pb-5">
                   <table class="table table-hover table-striped table-responsive text-white">
                     <thead>
                     <tr>
-                      <th scope="col">"Previous conversations"</th>
+                      <th class="col-3" scope="col">"Prompt"</th>
                       <th scope="col">"Model"</th>
-                      <th scope="col">"Start date"</th>
+                      <th scope="col">"Width"</th>
+                      <th scope="col">"Height"</th>
+                      <th scope="col">"Seed"</th>
+                      <th scope="col">"N Steps"</th>
+                      <th scope="col">"N Samples"</th>
+                      <th scope="col">"Finished"</th>
                       <th scope="col"></th>
                     </tr>
                     </thead>
                     <tbody>
                    {
-                      chats.into_iter().map(|chat| {
-                          view!{cx, <ChatListEntry chat remove_chat_id remove_chat_title />}.into_view(cx)
+                      images.into_iter().map(|image| {
+                          view!{cx, <ImageListEntry image remove_image_id />}.into_view(cx)
                       }).collect::<Vec<_>>()
                    }
                     </tbody>
@@ -452,30 +432,36 @@ fn ChatListEntries(
 }
 
 #[component]
-fn ChatListEntry(
+fn ImageListEntry(
     cx: Scope,
-    chat: ChatListEntry,
-    remove_chat_id: RwSignal<Option<String>>,
-    remove_chat_title: RwSignal<Option<String>>,
+    image: ImageInspect,
+    remove_image_id: RwSignal<Option<String>>,
 ) -> impl IntoView {
-    let edit_href = format!("/chat/{}", chat.id);
+    let view_href = format!("/image/tti/{}", image.id);
+    let is_finished = if !image.processing {
+        view! { cx, <span class="text-airtifex-green">"✓"</span>}
+    } else {
+        view! { cx, <span class="text-airtifex-yellow">"✗"</span>}
+    };
     view! {cx, <tr
                 class="text-white border-lighter"
               >
-                  <td>
-                    {chat.title.clone()}
-                  </td>
-                  <td>{chat.model}</td>
-                  <td>{chat.start_date.format("%a, %d %b %Y %H:%M:%S").to_string()}</td>
+                  <td>{image.prompt}</td>
+                  <td>{image.model}</td>
+                  <td>{image.width}</td>
+                  <td>{image.height}</td>
+                  <td>{image.seed}</td>
+                  <td>{image.n_steps}</td>
+                  <td>{image.num_samples}</td>
+                  <td>{is_finished}</td>
                   <td>
                       <div class="btn-group" role="chat toolbar" aria-label="chat toolbar">
                           <button
                             class="btn btn-outline-lighter"
                             data-bs-toggle="modal"
-                            data-bs-target="#removeChatModal"
+                            data-bs-target="#removeImageModal"
                             on:focus=move |_| {
-                                remove_chat_id.update(|c| *c = Some(chat.id.clone()));
-                                remove_chat_title.update(|c| *c = Some(chat.title.clone()))
+                                remove_image_id.update(|c| *c = Some(image.id.clone()));
                             }
                           >
                               <img src="/icons/minus-circle.svg" class="me-2" />
@@ -485,7 +471,7 @@ fn ChatListEntry(
                             class="btn btn-outline-lighter"
                             on:click=move |_| {
                                 let navigate = use_navigate(cx);
-                                navigate(&edit_href, Default::default()).expect("chat page");
+                                navigate(&view_href, Default::default()).expect("image page");
                             }
                           >
                               <img src="/icons/edit.svg" class="me-2" />

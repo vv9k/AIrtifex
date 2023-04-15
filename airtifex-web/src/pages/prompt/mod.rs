@@ -131,7 +131,7 @@ where
         move || current_list_page.get(),
         move |_current_list_page| async move {
             match authorized_api.get() {
-                Some(api) => match api.models().await {
+                Some(api) => match api.large_language_models().await {
                     Ok(models) => models,
                     Err(e) => {
                         status_message.update(|msg| *msg = Message::Error(e.to_string()));

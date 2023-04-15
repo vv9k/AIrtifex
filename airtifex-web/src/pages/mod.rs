@@ -1,10 +1,11 @@
 pub mod chat;
 pub mod home;
+pub mod image;
 pub mod login;
 pub mod prompt;
 pub mod users;
 
-pub use self::{chat::*, home::*, login::*, prompt::*, users::*};
+pub use self::{chat::*, home::*, image::*, login::*, prompt::*, users::*};
 
 use leptos::*;
 use wasm_bindgen::prelude::*;
@@ -21,6 +22,8 @@ pub enum Page {
     Chat,
     ChatView,
     Prompt,
+    TextToImage,
+    TextToImageView,
     Login,
 }
 
@@ -33,6 +36,7 @@ impl Page {
             | Self::UserPasswordChange
             | Self::UserProfile => Self::Users,
             Self::Chat | Self::ChatView => Self::Chat,
+            Self::TextToImage | Self::TextToImageView => Self::TextToImage,
             Self::Prompt | Self::Home | Self::Login => *self,
         }
     }
@@ -47,6 +51,8 @@ impl Page {
             Self::Chat => "/chat",
             Self::ChatView => "/chat/:chat_id",
             Self::Prompt => "/prompt",
+            Self::TextToImage => "/image/tti",
+            Self::TextToImageView => "/image/tti/:image_id",
             Self::Login => "/login",
         }
     }
@@ -62,6 +68,7 @@ impl Page {
             Self::Chat | Self::ChatView => "/icons/message-circle.svg",
             Self::Prompt => "/icons/terminal.svg",
             Self::Login => "/icons/login.svg",
+            Self::TextToImage | Self::TextToImageView => "/icons/image.svg",
         }
     }
 
@@ -76,15 +83,22 @@ impl Page {
             Self::Chat | Self::ChatView => "Chat",
             Self::Prompt => "Prompt",
             Self::Login => "Login",
+            Self::TextToImage | Self::TextToImageView => "Text to Image",
         }
     }
 
     pub fn main_user_pages() -> &'static [Self] {
-        &[Self::Home, Self::Chat, Self::Prompt]
+        &[Self::Home, Self::Chat, Self::Prompt, Self::TextToImage]
     }
 
     pub fn main_admin_pages() -> &'static [Self] {
-        &[Self::Home, Self::Users, Self::Chat, Self::Prompt]
+        &[
+            Self::Home,
+            Self::Users,
+            Self::Chat,
+            Self::Prompt,
+            Self::TextToImage,
+        ]
     }
 }
 

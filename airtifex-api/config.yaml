@@ -18,3 +18,17 @@ llms:
   #- model_path: ./llm/ggml-alpaca-30b-q4-r1.bin
     #model_description: Alpaca 30B, quantized, rev. 1
     #float16: false
+
+stable_diffusion:
+  - version: v2.1
+    clip_weights_path: ./sd/clip_v2.1.ot
+    vae_weights_path: ./sd/vae_v2.1.ot
+    unet_weights_path: ./sd/unet_v2.1.ot
+    vocab_file: ./sd/bpe_simple_vocab_16e6.txt
+    max_image_gen_sessions: 2
+  - version: v1.5
+    clip_weights_path: ./sd/clip_v1.5.ot
+    vae_weights_path: ./sd/vae_v1.5.ot
+    unet_weights_path: ./sd/unet_v1.5.ot
+    vocab_file: ./sd/bpe_simple_vocab_16e6.txt
+    max_image_gen_sessions: 2

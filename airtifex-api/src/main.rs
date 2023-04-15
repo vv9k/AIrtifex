@@ -1,7 +1,7 @@
 use airtifex_api::config::Config;
+use airtifex_api::gen;
 use airtifex_api::id::V1Context as ClockContext;
-use airtifex_api::llm::{llama, InferenceRequest, ModelName};
-use airtifex_api::models::{llm::LargeLanguageModel, user::User};
+use airtifex_api::models::user::User;
 use airtifex_api::routes::{api, r#static};
 use airtifex_api::{DbPool, Error, InnerAppState, Result, SharedAppState};
 use airtifex_core::user::AccountType;
@@ -9,7 +9,6 @@ use airtifex_core::user::AccountType;
 use axum::Router;
 use axum_extra::extract::cookie::Key;
 use clap::Parser;
-use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::runtime::Runtime;
@@ -32,31 +31,6 @@ pub struct Opts {
 #[derive(Debug, Parser)]
 pub enum Command {
     Serve,
-}
-
-async fn initialize_models(
-    db: Arc<DbPool>,
-    config: &Config,
-    runtime: Arc<Runtime>,
-) -> Result<HashMap<ModelName, flume::Sender<InferenceRequest>>> {
-    let mut txs = HashMap::new();
-    for (model, config) in config.llms.iter() {
-        let exists = LargeLanguageModel::get_by_name(&db, &model).await.is_ok();
-
-        log::info!("initializing model {model}, exists in db: {exists}");
-
-        if !exists {
-            let llm = LargeLanguageModel::new(model.clone(), config.model_description.clone());
-            llm.create(&db).await?;
-        }
-        let tx_inference_req = llama::initialize_model_and_handle_inferences(
-            db.clone(),
-            config.clone(),
-            runtime.clone(),
-        );
-        txs.insert(model.clone(), tx_inference_req);
-    }
-    Ok(txs)
 }
 
 async fn inner(runtime: Arc<Runtime>) -> Result<()> {
@@ -108,7 +82,9 @@ async fn inner(runtime: Arc<Runtime>) -> Result<()> {
             let listen = (config.listen_addr.clone(), config.listen_port.clone());
 
             let tx_inference_req =
-                initialize_models(db_pool.clone(), &config, runtime.clone()).await?;
+                gen::llm::initialize_models(db_pool.clone(), &config, runtime.clone()).await?;
+            let tx_image_gen_req =
+                gen::image::initialize_models(db_pool.clone(), &config, runtime.clone()).await?;
 
             std::env::set_var("JWT_SECRET", &config.jwt_secret);
 
@@ -121,6 +97,7 @@ async fn inner(runtime: Arc<Runtime>) -> Result<()> {
                     key: Key::generate(),
                     config,
                     tx_inference_req,
+                    tx_image_gen_req,
                 })))
                 .layer(
                     tower_http::trace::TraceLayer::new_for_http()

@@ -50,6 +50,19 @@ where
          <hr/>
          <ul class="nav nav-pills flex-column mb-auto">
          { nav_items }
+            // <li class="nav-item sb-item">
+            //   <button class="btn btn-toggle align-items-center collapsed text-white fw-bold" data-bs-toggle="collapse" data-bs-target="#images-collapse" aria-expanded="false">
+            //       <img src=""/>
+            //       "Stable Diffusion"
+            //   </button>
+            //   <div id="images-collapse" class="collapse">
+            //     <ul class="list-unstyled fw-normal pb-1">
+            //       <li class="ms-5 ps-2 nav-link">
+            //         <a href="" class="text-white text-decoration-none fw-bold">"└ Text to image"</a>
+            //       </li>
+            //     </ul>
+            //   </div>
+            // </li>
          </ul>
          <hr/>
          <div class="dropdown">

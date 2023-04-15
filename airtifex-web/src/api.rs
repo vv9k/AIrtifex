@@ -1,5 +1,7 @@
+use airtifex_core::image::{ImageModelListEntry, TextToImageResponse};
 use airtifex_core::{api_response::ApiResponse, auth::Credentials};
 use airtifex_core::{
+    image::{ImageInspect, ImageSampleInspect, TextToImageRequest},
     llm::{
         ChatEntryListEntry, ChatListEntry, ChatResponseRequest, ChatStartRequest,
         ChatStartResponse, LlmListEntry, OneshotInferenceRequest,
@@ -127,8 +129,32 @@ impl AuthorizedApi {
         let url = format!("{}/llm/chat", self.url);
         self.send_json(Request::get(&url)).await
     }
-    pub async fn models(&self) -> Result<Vec<LlmListEntry>> {
+    pub async fn images(&self) -> Result<Vec<ImageInspect>> {
+        let url = format!("{}/image", self.url);
+        self.send_json(Request::get(&url)).await
+    }
+    pub async fn image_delete(&self, id: &str) -> Result<()> {
+        let url = format!("{}/image/{id}", self.url);
+        self.send_json(Request::delete(&url)).await
+    }
+    pub async fn image_metadata(&self, id: &str) -> Result<ImageInspect> {
+        let url = format!("{}/image/{id}", self.url);
+        self.send_json(Request::get(&url)).await
+    }
+    pub async fn image_samples(&self, id: &str) -> Result<Vec<ImageSampleInspect>> {
+        let url = format!("{}/image/{id}/samples", self.url);
+        self.send_json(Request::get(&url)).await
+    }
+    pub async fn text_to_image(&self, request: TextToImageRequest) -> Result<TextToImageResponse> {
+        let url = format!("{}/image/from-text", self.url);
+        self.send_json(Request::post(&url).json(&request)?).await
+    }
+    pub async fn large_language_models(&self) -> Result<Vec<LlmListEntry>> {
         let url = format!("{}/llm/models", self.url);
+        self.send_json(Request::get(&url)).await
+    }
+    pub async fn image_models(&self) -> Result<Vec<ImageModelListEntry>> {
+        let url = format!("{}/image/models", self.url);
         self.send_json(Request::get(&url)).await
     }
     pub fn token(&self) -> &JsonWebToken {
