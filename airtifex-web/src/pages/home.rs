@@ -24,12 +24,16 @@ pub fn Home(
            </div>
         }.into_view(cx),
         None => view!{ cx,
-            <div class="col-md-8 mx-auto align-items-center d-flex flex-column">
-                <h1 class="display-5 text-center font-monospace">"Welcome to "<span class="fw-bold"><span class="text-airtifex">"AI"</span>"rtifex"</span></h1>
-                <p class="pt-5 pb-3">"You are not logged in."</p>
-                <A href=Page::Login.path() class="btn btn-airtifex">
-                    "Go to login page"
-                </A>
+            <div class="card bg-darker">
+                <div style="padding-left: 0 !important;padding-right: 0 !important;" class="card-body py-5">
+                    <div class="col-md-8 mx-auto align-items-center d-flex flex-column">
+                        <h1 class="display-5 text-center font-monospace">"Welcome to "<span class="fw-bold"><span class="text-airtifex">"AI"</span>"rtifex"</span></h1>
+                        <p class="pt-5 pb-3">"You are not logged in."</p>
+                        <A href=Page::Login.path() class="btn btn-airtifex">
+                            "Go to login page"
+                        </A>
+                    </div>
+                </div>
             </div>
         }.into_view(cx)
        };

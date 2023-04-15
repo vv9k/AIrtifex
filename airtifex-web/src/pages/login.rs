@@ -42,15 +42,19 @@ where
         <main class="bg-dark text-white form-signin" >
             <div class="container d-flex h-100 justify-content-center">
                 <div class="row align-items-center h-100">
-                    <div class="col-md-8 mx-auto text-center">
-                        <h1 class="display-5 font-monospace">"Welcome to "<span class="fw-bold"><span class="text-airtifex">"AI"</span>"rtifex"</span></h1>
-                         <CredentialsForm
-                           title = "Please login to your account"
-                           action_label = "Login"
-                           action = login_action
-                           message
-                           disabled
-                         />
+                    <div class="card bg-darker">
+                        <div style="padding-left: 0 !important;padding-right: 0 !important;" class="card-body py-5">
+                            <div class="col-md-8 mx-auto text-center py-5">
+                                <h1 class="display-5 font-monospace">"Welcome to "<span class="fw-bold"><span class="text-airtifex">"AI"</span>"rtifex"</span></h1>
+                                <CredentialsForm
+                                title = "Please login to your account"
+                                action_label = "Login"
+                                action = login_action
+                                message
+                                disabled
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
