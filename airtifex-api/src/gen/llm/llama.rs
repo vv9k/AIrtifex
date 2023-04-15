@@ -1,6 +1,7 @@
 use crate::config::LlmConfig;
 use crate::id::Uuid;
 use crate::models::chat_entry::ChatEntry;
+use crate::queue;
 use airtifex_core::llm::{ChatEntryType, ChatStreamResult};
 
 use llama_rs::{
@@ -72,8 +73,7 @@ pub fn initialize_model_and_handle_inferences(
     config: LlmConfig,
     runtime: Arc<Runtime>,
 ) -> Sender<InferenceRequest> {
-    static REQUEST_QUEUE: std::sync::RwLock<VecDeque<InferenceRequest>> =
-        std::sync::RwLock::new(VecDeque::new());
+    let request_queue = queue::empty_queue();
 
     // Create a channel and thread responsible for saving chat entries to database
     let (tx_results, rx_results): (Sender<SaveDataRequest>, Receiver<SaveDataRequest>) =
@@ -104,23 +104,8 @@ pub fn initialize_model_and_handle_inferences(
     });
 
     // Create a thread that'll receive InferenceRequests
-    let (tx_request, rx_request) = unbounded();
-    std::thread::spawn(move || {
-        let rx: Receiver<InferenceRequest> = rx_request.clone();
-        let mut temp_queue = VecDeque::new();
-        loop {
-            if let Ok(inference_request) = rx.recv() {
-                if let Ok(mut queue) = REQUEST_QUEUE.try_write() {
-                    while let Some(req) = temp_queue.pop_front() {
-                        queue.push_back(req);
-                    }
-                    queue.push_back(inference_request);
-                } else {
-                    temp_queue.push_back(inference_request);
-                }
-            }
-        }
-    });
+    let queue = request_queue.clone();
+    let tx_request = queue::start_queue_thread::<InferenceRequest>(queue);
 
     // Create a thread that will handle inference
     std::thread::spawn(move || {
@@ -132,7 +117,7 @@ pub fn initialize_model_and_handle_inferences(
             let mut free_spots =
                 inference_session_manager.config.max_inference_sessions - running_sessions.len();
             if free_spots > 0 {
-                if let Ok(mut queue) = REQUEST_QUEUE.try_write() {
+                if let Ok(mut queue) = request_queue.try_write() {
                     while let Some(inference_request) = queue.pop_front() && free_spots > 0 {
                         let mut session = inference_session_manager.get_inference_session(inference_request);
 

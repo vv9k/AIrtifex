@@ -1,6 +1,5 @@
 #![feature(path_file_prefix)]
 #![feature(let_chains)]
-use crate::llm::{InferenceRequest, ModelName};
 pub use airtifex_core::api_response::{ApiResponse, ApiVersion};
 pub use errors::Error;
 
@@ -9,6 +8,7 @@ use axum::http::StatusCode;
 use axum::response::Response;
 use axum_extra::extract::cookie::Key;
 use flume::Sender;
+use std::collections::HashMap;
 use std::ops::Deref;
 
 #[macro_use]
@@ -17,11 +17,14 @@ mod guard;
 pub mod auth;
 pub mod config;
 pub mod errors;
+pub mod gen;
 pub mod id;
-pub mod llm;
 pub mod models;
 pub mod permissions;
+pub mod queue;
 pub mod routes;
+
+use gen::{image::GenerateImageRequest, llm::InferenceRequest, ModelName};
 
 #[cfg(feature = "postgres")]
 pub type DbPool = sqlx::PgPool;
@@ -35,7 +38,8 @@ pub struct InnerAppState {
     pub db: std::sync::Arc<crate::DbPool>,
     pub key: Key,
     pub config: config::Config,
-    pub tx_inference_req: std::collections::HashMap<ModelName, Sender<InferenceRequest>>,
+    pub tx_inference_req: HashMap<ModelName, Sender<InferenceRequest>>,
+    pub tx_image_gen_req: HashMap<ModelName, (String, Sender<GenerateImageRequest>)>,
 }
 
 #[derive(Clone)]

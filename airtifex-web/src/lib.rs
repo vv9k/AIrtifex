@@ -245,6 +245,39 @@ pub fn App(cx: Scope) -> impl IntoView {
 
     //####################################################################################################
 
+                <ProtectedRoute
+                  path=Page::TextToImage.path()
+                  condition=move |_| {
+                      user_info.get().is_some()
+                  }
+                  redirect_path=Page::Home.path()
+                  view=move |cx| {
+                      subtitle.update(|sub| *sub = Some(Page::TextToImage.title().into()));
+
+                      view! { cx,
+                        <NavBar page_stack user_info on_logout />
+                        <TextToImage authorized_api page_stack />
+                      }
+                  }
+                />
+                <ProtectedRoute
+                  path=Page::TextToImageView.path()
+                  condition=move |_| {
+                      user_info.get().is_some()
+                  }
+                  redirect_path=Page::Home.path()
+                  view=move |cx| {
+                      subtitle.update(|sub| *sub = Some(Page::TextToImageView.title().into()));
+
+                      view! { cx,
+                        <NavBar page_stack user_info on_logout />
+                        <ImageView authorized_api page_stack />
+                      }
+                  }
+                />
+
+    //####################################################################################################
+
                 <Route
                   path=Page::Login.path()
                   view=move |cx| {
