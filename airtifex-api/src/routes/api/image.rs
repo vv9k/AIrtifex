@@ -50,21 +50,9 @@ async fn text_to_image(
         Err(e) => return ApiResponse::failure(e).internal_server_error(),
     };
 
-    let guidance_scale = if let Some(scale) = request.guidance_scale {
-        scale.max(20.0)
-    } else {
-        7.5
-    };
-    let num_samples = if let Some(samples) = request.num_samples {
-        samples.max(16)
-    } else {
-        1
-    };
-    let n_steps = if let Some(steps) = request.n_steps {
-        steps.max(500) as i64
-    } else {
-        25
-    };
+    let guidance_scale = request.guidance_scale.unwrap_or(7.5).min(20.0);
+    let num_samples =  request.num_samples.unwrap_or(1).min(16);
+    let n_steps = request.n_steps.unwrap_or(25).min(420) as i64;
 
     let image = Image::new(
         user_id,
