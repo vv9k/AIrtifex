@@ -39,7 +39,7 @@ pub struct InnerAppState {
     pub key: Key,
     pub config: config::Config,
     pub tx_inference_req: HashMap<ModelName, Sender<InferenceRequest>>,
-    pub tx_image_gen_req: HashMap<ModelName, (String, Sender<GenerateImageRequest>)>,
+    pub tx_image_gen_req: HashMap<ModelName, Sender<GenerateImageRequest>>,
 }
 
 #[derive(Clone)]

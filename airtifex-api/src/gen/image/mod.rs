@@ -41,7 +41,7 @@ pub async fn initialize_models(
     db: Arc<DbPool>,
     config: &Config,
     runtime: Arc<Runtime>,
-) -> Result<HashMap<String, (String, flume::Sender<GenerateImageRequest>)>> {
+) -> Result<HashMap<String, flume::Sender<GenerateImageRequest>>> {
     tch::maybe_init_cuda();
     log::info!("Cuda available: {}", tch::Cuda::is_available());
     log::info!("Cudnn available: {}", tch::Cuda::cudnn_is_available());
@@ -59,7 +59,7 @@ pub async fn initialize_models(
             image_model.create(&db).await?;
         }
         let tx_inference_req = sd::initialize(db.clone(), model_config.clone(), runtime.clone());
-        txs.insert(model.clone(), (model, tx_inference_req));
+        txs.insert(model.clone(), tx_inference_req);
     }
     Ok(txs)
 }

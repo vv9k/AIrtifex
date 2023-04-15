@@ -75,8 +75,7 @@ async fn text_to_image(
         num_samples: image.num_samples,
     });
 
-    if let Some((model, tx_gen_req)) = state.tx_image_gen_req.get(&image.model) {
-        log::error!("sending request to model {} == {model}", image.model);
+    if let Some(tx_gen_req) = state.tx_image_gen_req.get(&image.model) {
         if let Err(e) = tx_gen_req.send_async(request).await {
             return ApiResponse::failure(e).internal_server_error();
         }
