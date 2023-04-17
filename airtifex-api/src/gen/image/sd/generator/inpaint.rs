@@ -66,13 +66,13 @@ impl InpaintImageGenerator {
             masked_image_dist,
         };
 
-        g.init_latents(0);
+        g.init_latents();
 
         Ok(g)
     }
 
-    pub fn init_latents(&mut self, idx: i64) {
-        tch::manual_seed(self.base_generator.request.seed + idx);
+    pub fn init_latents(&mut self) {
+        tch::manual_seed(self.base_generator.request.seed + self.base_generator.sample_idx());
         let masked_image_latents =
             (self.masked_image_dist.sample() * LATENTS_SCALE).to(self.base_generator.unet_device);
         self.masked_image_latents = Tensor::cat(&[&masked_image_latents, &masked_image_latents], 0);
@@ -106,15 +106,13 @@ impl ImageGenerator for InpaintImageGenerator {
             return false;
         }
         let _no_grad_guard = tch::no_grad_guard();
-        let idx = (self.base_generator.processed_samples + 1) as i64;
 
         self.log_timestep();
 
         if self.base_generator.processed_timesteps == self.base_generator.request.n_steps {
             self.log(log::Level::Debug, "generating image");
             self.latents = self.latents.to(self.base_generator.vae_device);
-            self.base_generator
-                .decode_and_save_image(&self.latents, idx);
+            self.base_generator.decode_and_save_image(&self.latents);
 
             if self.base_generator.processed_samples
                 == self.base_generator.request.num_samples as usize
@@ -122,7 +120,7 @@ impl ImageGenerator for InpaintImageGenerator {
                 return true;
             }
 
-            self.init_latents(idx);
+            self.init_latents();
         }
 
         let Some(&timestep) = self.base_generator.scheduler.timesteps().get(self.base_generator.processed_timesteps) else {

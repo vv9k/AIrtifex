@@ -158,6 +158,10 @@ impl BaseImageGenerator {
         })
     }
 
+    pub fn sample_idx(&self) -> i64 {
+        self.processed_samples as i64
+    }
+
     pub fn is_finished(&self) -> bool {
         self.processed_samples as i64 >= self.request.num_samples
     }
@@ -168,7 +172,8 @@ impl BaseImageGenerator {
         (decoded * 255.).to_kind(Kind::Uint8)
     }
 
-    pub fn save_image(&mut self, image: Tensor, idx: i64) {
+    pub fn save_image(&mut self, image: Tensor) {
+        let idx = self.sample_idx() + 1;
         let path = self.save_dir.join(format!("{}-{idx}.png", self.request.id));
         if let Err(e) = tch::vision::image::save(&image, &path) {
             log::error!(
@@ -191,14 +196,13 @@ impl BaseImageGenerator {
                 self.request.num_samples
             );
         }
-
         self.processed_timesteps = 0;
         self.processed_samples += 1;
     }
 
-    pub fn decode_and_save_image(&mut self, latents: &Tensor, idx: i64) {
+    pub fn decode_and_save_image(&mut self, latents: &Tensor) {
         let image = self.decode_latents(latents);
-        self.save_image(image, idx);
+        self.save_image(image);
     }
 
     pub fn log_timestep(&self, type_: &'static str) {
