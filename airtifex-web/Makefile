@@ -11,7 +11,7 @@ all: clean test serve
 all_release: clean test serve_release
 
 serve:
-	@trunk serve --release
+	@trunk serve
 
 serve_release:
 	@trunk serve --release

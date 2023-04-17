@@ -7,13 +7,24 @@ use tokio::runtime::Runtime;
 
 use crate::{config::Config, models::image_model::ImageModel, DbPool, Result};
 
-#[derive(Debug, Deserialize, Serialize)]
 pub enum GenerateImageRequest {
-    TextToImages(TextToImageData),
+    TextToImage(BaseImageData),
+    ImageToImage(ImageToImageData),
+    Inpaint(InpaintData),
+}
+
+impl GenerateImageRequest {
+    pub fn id(&self) -> &str {
+        match self {
+            Self::TextToImage(data) => &data.id,
+            Self::ImageToImage(data) => &data.data.id,
+            Self::Inpaint(data) => &data.data.id,
+        }
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct TextToImageData {
+pub struct BaseImageData {
     pub id: String,
     pub prompt: String,
     pub width: i64,
@@ -22,6 +33,19 @@ pub struct TextToImageData {
     pub seed: i64,
     pub num_samples: i64,
     pub guidance_scale: f64,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct ImageToImageData {
+    pub data: BaseImageData,
+    pub input_image: Vec<u8>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct InpaintData {
+    pub data: BaseImageData,
+    pub input_image: Vec<u8>,
+    pub mask: Vec<u8>,
 }
 
 #[derive(Debug, Default, Deserialize, Serialize)]
@@ -49,14 +73,20 @@ pub async fn initialize_models(
     log::info!("MPS available: {}", tch::utils::has_mps());
     let mut txs = HashMap::new();
     for model_config in config.stable_diffusion.iter() {
-        let model = format!("stable-diffusion-{}", model_config.version.as_ref());
+        let model = model_config
+            .name
+            .clone()
+            .unwrap_or_else(|| format!("stable-diffusion-{}", model_config.version.as_ref()));
         let exists = ImageModel::get_by_name(&db, &model).await.is_ok();
 
         log::info!("initializing image model {model}, exists in db: {exists}");
 
         if !exists {
-            let image_model =
-                ImageModel::new(model.clone(), model_config.model_description.clone());
+            let image_model = ImageModel::new(
+                model.clone(),
+                model_config.model_description.clone(),
+                model_config.features(),
+            );
             image_model.create(&db).await?;
         }
         let tx_inference_req = sd::initialize(db.clone(), model_config.clone(), runtime.clone());

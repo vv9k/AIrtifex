@@ -9,6 +9,7 @@ mod api;
 mod components;
 mod inference;
 mod pages;
+mod web_util;
 
 use components::{navbar::*, status_message::Message};
 use pages::*;
@@ -246,28 +247,28 @@ pub fn App(cx: Scope) -> impl IntoView {
     //####################################################################################################
 
                 <ProtectedRoute
-                  path=Page::TextToImage.path()
+                  path=Page::GenerateImage.path()
                   condition=move |_| {
                       user_info.get().is_some()
                   }
                   redirect_path=Page::Home.path()
                   view=move |cx| {
-                      subtitle.update(|sub| *sub = Some(Page::TextToImage.title().into()));
+                      subtitle.update(|sub| *sub = Some(Page::GenerateImage.title().into()));
 
                       view! { cx,
                         <NavBar page_stack user_info on_logout />
-                        <TextToImage authorized_api page_stack />
+                        <GenerateImage authorized_api page_stack />
                       }
                   }
                 />
                 <ProtectedRoute
-                  path=Page::TextToImageView.path()
+                  path=Page::GeneratedImageView.path()
                   condition=move |_| {
                       user_info.get().is_some()
                   }
                   redirect_path=Page::Home.path()
                   view=move |cx| {
-                      subtitle.update(|sub| *sub = Some(Page::TextToImageView.title().into()));
+                      subtitle.update(|sub| *sub = Some(Page::GeneratedImageView.title().into()));
 
                       view! { cx,
                         <NavBar page_stack user_info on_logout />

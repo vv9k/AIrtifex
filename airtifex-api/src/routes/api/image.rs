@@ -1,5 +1,5 @@
 use crate::auth::Claims;
-use crate::gen::image::{GenerateImageRequest, TextToImageData};
+use crate::gen::image::{BaseImageData, GenerateImageRequest, ImageToImageData, InpaintData};
 use crate::id::Uuid;
 use crate::models::image::Image;
 use crate::models::image_model::ImageModel;
@@ -8,10 +8,10 @@ use crate::models::user::User;
 use crate::routes::handle_db_result_as_json;
 use crate::Error;
 use crate::{SharedAppState, ToAxumResponse};
-use airtifex_core::image::{ImageModelListEntry, ImageSampleInspect};
+use airtifex_core::image::{ImageModelFeatures, ImageModelListEntry, ImageSampleInspect};
 use airtifex_core::{
     api_response::ApiResponse,
-    image::{ImageInspect, TextToImageRequest, TextToImageResponse},
+    image::{ImageGenerateRequest, ImageInspect, TextToImageResponse},
 };
 
 use axum::extract::Path;
@@ -38,7 +38,7 @@ pub fn router() -> Router<SharedAppState> {
 async fn text_to_image(
     claims: Claims,
     State(state): State<SharedAppState>,
-    Json(request): Json<TextToImageRequest>,
+    Json(request): Json<ImageGenerateRequest>,
 ) -> Response {
     let db = &state.db;
     with_user_guard!(claims, db);
@@ -51,7 +51,7 @@ async fn text_to_image(
     };
 
     let guidance_scale = request.guidance_scale.unwrap_or(7.5).min(20.0);
-    let num_samples =  request.num_samples.unwrap_or(1).min(16);
+    let num_samples = request.num_samples.unwrap_or(1).min(16);
     let n_steps = request.n_steps.unwrap_or(25).min(420) as i64;
 
     let image = Image::new(
@@ -60,6 +60,8 @@ async fn text_to_image(
         request.width.unwrap_or(512),
         request.height.unwrap_or(512),
         request.prompt,
+        request.input_image,
+        request.mask,
         n_steps,
         request.seed.unwrap_or_else(|| rand::thread_rng().gen()),
         num_samples,
@@ -70,16 +72,29 @@ async fn text_to_image(
         return ApiResponse::failure(e).internal_server_error();
     }
 
-    let request = GenerateImageRequest::TextToImages(TextToImageData {
+    let data = BaseImageData {
         id: image.id.to_string(),
         prompt: image.prompt,
+        // input_image: image.input_image,
+        // mask: image.mask,
         width: image.width,
         height: image.height,
         n_steps: image.n_steps as usize,
         seed: image.seed,
         num_samples: image.num_samples,
         guidance_scale: image.guidance_scale,
-    });
+    };
+    let request = match (image.input_image, image.mask) {
+        (Some(input_image), Some(mask)) => GenerateImageRequest::Inpaint(InpaintData {
+            data,
+            input_image,
+            mask,
+        }),
+        (Some(input_image), None) => {
+            GenerateImageRequest::ImageToImage(ImageToImageData { data, input_image })
+        }
+        (None, None) | (None, Some(_)) => GenerateImageRequest::TextToImage(data),
+    };
 
     if let Some(tx_gen_req) = state.tx_image_gen_req.get(&image.model) {
         if let Err(e) = tx_gen_req.send_async(request).await {
@@ -112,6 +127,8 @@ async fn list_images(claims: Claims, state: State<SharedAppState>) -> Response {
                         width: e.width,
                         height: e.height,
                         prompt: e.prompt,
+                        input_image: e.input_image,
+                        mask: e.mask,
                         n_steps: e.n_steps,
                         seed: e.seed,
                         num_samples: e.num_samples,
@@ -194,6 +211,8 @@ async fn get_image_metadata(
                 width: image.width,
                 height: image.height,
                 prompt: image.prompt,
+                input_image: image.input_image,
+                mask: image.mask,
                 n_steps: image.n_steps,
                 seed: image.seed,
                 num_samples: image.num_samples,
@@ -230,6 +249,11 @@ async fn list_models(claims: Claims, state: State<SharedAppState>) -> Response {
                         model_id: model.model_id.to_string(),
                         name: model.name,
                         description: model.description,
+                        features: ImageModelFeatures {
+                            inpaint: model.feature_inpaint,
+                            text_to_image: model.feature_text_to_image,
+                            image_to_image: model.feature_image_to_image,
+                        },
                     })
                     .collect::<Vec<_>>()
             })

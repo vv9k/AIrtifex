@@ -1,6 +1,6 @@
 use crate::components::status_message::*;
 use crate::inference::read_inference_stream;
-use crate::{api, wasm_sleep, Page, PageStack};
+use crate::{api, web_util, Page, PageStack};
 use airtifex_core::llm::OneshotInferenceRequest;
 
 use leptos::*;
@@ -33,7 +33,7 @@ pub fn PromptView(
             if is_inference_running.get() && !should_cancel.get() {
                 should_cancel.update(|c| *c = true);
                 // wait for any other job to cancel
-                let _ = wasm_sleep(100).await;
+                let _ = web_util::sleep(100).await;
             }
             is_inference_running.update(|r| *r = true);
 

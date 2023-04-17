@@ -6,7 +6,7 @@ use airtifex_core::llm::{ChatEntryType, ChatStreamResult};
 
 use llama_rs::{
     InferenceError, InferenceParameters, InferenceSession, InferenceSessionParameters,
-    LoadProgress, Model, ModelKVMemoryType, TokenBias, Vocabulary,
+    LoadProgress, Model, ModelKVMemoryType, TokenBias,
 };
 use rand::{rngs::ThreadRng, thread_rng};
 use std::{collections::VecDeque, sync::Arc};
@@ -121,7 +121,7 @@ pub fn initialize_model_and_handle_inferences(
                     while let Some(inference_request) = queue.pop_front() && free_spots > 0 {
                         let mut session = inference_session_manager.get_inference_session(inference_request);
 
-                        if let Err(e) = session.feed_prompt(&inference_session_manager.model, &inference_session_manager.vocabulary) {
+                        if let Err(e) = session.feed_prompt(&inference_session_manager.model) {
                             log::error!("failed to initialize inference session - {e}");
                         } else {
                             running_sessions.push_back(session);
@@ -156,70 +156,64 @@ pub fn initialize_model_and_handle_inferences(
 
 struct InferenceSessionManager {
     model: llama_rs::Model,
-    vocabulary: llama_rs::Vocabulary,
     config: LlmConfig,
 }
 
 impl InferenceSessionManager {
     fn new(config: LlmConfig) -> Self {
         // Load model
-        let (model, vocabulary) =
-            llama_rs::Model::load(&config.model_path, config.num_ctx_tokens, |progress| {
-                match progress {
-                    LoadProgress::HyperparametersLoaded(hparams) => {
-                        log::debug!("Loaded hyperparameters {hparams:#?}")
-                    }
-                    //LoadProgress::BadToken { index } => {
-                    //log::info!("Warning: Bad token in vocab at index {index}")
-                    //}
-                    LoadProgress::ContextSize { bytes } => log::info!(
-                        "ggml ctx size = {:.2} MB\n",
-                        bytes as f64 / (1024.0 * 1024.0)
-                    ),
-                    LoadProgress::PartLoading {
-                        file,
+        let model = llama_rs::Model::load(&config.model_path, config.num_ctx_tokens, |progress| {
+            match progress {
+                LoadProgress::HyperparametersLoaded(hparams) => {
+                    log::debug!("Loaded hyperparameters {hparams:#?}")
+                }
+                //LoadProgress::BadToken { index } => {
+                //log::info!("Warning: Bad token in vocab at index {index}")
+                //}
+                LoadProgress::ContextSize { bytes } => log::info!(
+                    "ggml ctx size = {:.2} MB\n",
+                    bytes as f64 / (1024.0 * 1024.0)
+                ),
+                LoadProgress::PartLoading {
+                    file,
+                    current_part,
+                    total_parts,
+                } => {
+                    let current_part = current_part + 1;
+                    log::info!(
+                        "Loading model part {}/{} from '{}'\n",
                         current_part,
                         total_parts,
-                    } => {
-                        let current_part = current_part + 1;
-                        log::info!(
-                            "Loading model part {}/{} from '{}'\n",
-                            current_part,
-                            total_parts,
-                            file.to_string_lossy(),
-                        )
-                    }
-                    LoadProgress::PartTensorLoaded {
-                        current_tensor,
-                        tensor_count,
-                        ..
-                    } => {
-                        let current_tensor = current_tensor + 1;
-                        if current_tensor % 8 == 0 {
-                            log::info!("Loaded tensor {current_tensor}/{tensor_count}");
-                        }
-                    }
-                    LoadProgress::PartLoaded {
-                        file,
-                        byte_size,
-                        tensor_count,
-                    } => {
-                        log::info!("Loading of '{}' complete", file.to_string_lossy());
-                        log::info!(
-                            "Model size = {:.2} MB / num tensors = {}",
-                            byte_size as f64 / 1024.0 / 1024.0,
-                            tensor_count
-                        );
+                        file.to_string_lossy(),
+                    )
+                }
+                LoadProgress::PartTensorLoaded {
+                    current_tensor,
+                    tensor_count,
+                    ..
+                } => {
+                    let current_tensor = current_tensor + 1;
+                    if current_tensor % 8 == 0 {
+                        log::info!("Loaded tensor {current_tensor}/{tensor_count}");
                     }
                 }
-            })
-            .expect("Could not load model");
+                LoadProgress::PartLoaded {
+                    file,
+                    byte_size,
+                    tensor_count,
+                } => {
+                    log::info!("Loading of '{}' complete", file.to_string_lossy());
+                    log::info!(
+                        "Model size = {:.2} MB / num tensors = {}",
+                        byte_size as f64 / 1024.0 / 1024.0,
+                        tensor_count
+                    );
+                }
+            }
+        })
+        .expect("Could not load model");
 
-        Self {
-            model,
-            vocabulary,
-            config,
-        }
+        Self { model, config }
     }
 
     fn get_inference_session(&mut self, request: InferenceRequest) -> RunningInferenceSession {
@@ -291,7 +285,7 @@ struct RunningInferenceSession {
 }
 
 impl RunningInferenceSession {
-    fn feed_prompt(&mut self, model: &Model, vocab: &Vocabulary) -> Result<(), crate::Error> {
+    fn feed_prompt(&mut self, model: &Model) -> Result<(), crate::Error> {
         log::debug!(
             "[{}] Feeding prompt `{}`",
             self.id,
@@ -300,7 +294,6 @@ impl RunningInferenceSession {
         self.session
             .feed_prompt(
                 model,
-                vocab,
                 &self.params,
                 &self.state.processed_prompt,
                 move |b| {
@@ -340,7 +333,6 @@ impl RunningInferenceSession {
         loop {
             let token = match self.session.infer_next_token(
                 &inference_session_manager.model,
-                &inference_session_manager.vocabulary,
                 &self.params,
                 rng,
             ) {

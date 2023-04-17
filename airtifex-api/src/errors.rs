@@ -25,7 +25,7 @@ pub enum Error {
     #[error(transparent)]
     ModelError(#[from] crate::models::Error),
     #[error(transparent)]
-    TextToImageError(#[from] crate::gen::image::sd::TextToImageError),
+    TextToImageError(#[from] crate::gen::image::sd::GenImageError),
     #[error(transparent)]
     MigrationError(#[from] sqlx::migrate::MigrateError),
     #[error(transparent)]

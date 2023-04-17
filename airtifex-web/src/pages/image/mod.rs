@@ -1,6 +1,7 @@
 use crate::components::{modal::*, status_message::*};
+use crate::web_util;
 use crate::{api, Page, PageStack};
-use airtifex_core::image::{ImageInspect, TextToImageRequest};
+use airtifex_core::image::{ImageGenerateRequest, ImageInspect};
 
 use leptos::*;
 use leptos_router::*;
@@ -10,7 +11,7 @@ pub mod view;
 pub use view::*;
 
 #[component]
-pub fn TextToImage(
+pub fn GenerateImage(
     cx: Scope,
     authorized_api: RwSignal<Option<api::AuthorizedApi>>,
     page_stack: RwSignal<PageStack>,
@@ -19,6 +20,9 @@ pub fn TextToImage(
 
     let status_message = create_rw_signal(cx, Message::Empty);
     let remove_image_id = create_rw_signal(cx, None::<String>);
+
+    let input_image = create_rw_signal(cx, None::<web_sys::File>);
+    let mask = create_rw_signal(cx, None::<web_sys::File>);
 
     let width = create_rw_signal(cx, None::<i64>);
     let height = create_rw_signal(cx, None::<i64>);
@@ -77,8 +81,42 @@ pub fn TextToImage(
 
     let new_image_action = create_action(cx, move |_| async move {
         if let Some(api) = authorized_api.get() {
-            let request = TextToImageRequest {
+            let input_image = if let Some(f) = input_image.get() {
+                match web_util::read_file(f).await {
+                    Ok(data) => Some(data),
+                    Err(e) => {
+                        status_message.update(|m| {
+                            *m = Message::Error(format!(
+                                "failed to read input image - {}",
+                                e.as_string().unwrap_or_default()
+                            ));
+                        });
+                        return;
+                    }
+                }
+            } else {
+                None
+            };
+            let mask = if let Some(f) = mask.get() {
+                match web_util::read_file(f).await {
+                    Ok(data) => Some(data),
+                    Err(e) => {
+                        status_message.update(|m| {
+                            *m = Message::Error(format!(
+                                "failed to read mask image - {}",
+                                e.as_string().unwrap_or_default()
+                            ));
+                        });
+                        return;
+                    }
+                }
+            } else {
+                None
+            };
+            let request = ImageGenerateRequest {
                 prompt: prompt.get(),
+                input_image,
+                mask,
                 model: selected_model.get(),
                 width: width.get(),
                 height: height.get(),
@@ -127,16 +165,16 @@ pub fn TextToImage(
 
     view! { cx,
       {move || {
-        page_stack.update(|p| p.push(Page::TextToImage));
+        page_stack.update(|p| p.push(Page::GenerateImage));
 
         view!{cx,
            <main class="bg-dark text-white d-flex flex-column p-1 pt-3 overflow-auto" >
                  <div class="d-flex pb-3">
-                     <h1 class="display-5 p-1">{Page::TextToImage.title()}</h1>
+                     <h1 class="display-5 p-1">{Page::GenerateImage.title()}</h1>
                  </div>
-                 <TextToImageForm
+                 <GenerateImageForm
                      authorized_api status_message prompt width height n_steps seed num_samples
-                     selected_model dispatch_new_image_action guidance_scale
+                     selected_model dispatch_new_image_action guidance_scale input_image mask
                  />
                  <div class="card bg-darker m-3">
                     <StatusMessage message=status_message />
@@ -150,7 +188,7 @@ pub fn TextToImage(
 }
 
 #[component]
-fn TextToImageForm<F>(
+fn GenerateImageForm<F>(
     cx: Scope,
     authorized_api: RwSignal<Option<api::AuthorizedApi>>,
     status_message: RwSignal<Message>,
@@ -162,6 +200,8 @@ fn TextToImageForm<F>(
     num_samples: RwSignal<Option<i64>>,
     guidance_scale: RwSignal<Option<f64>>,
     selected_model: RwSignal<String>,
+    input_image: RwSignal<Option<web_sys::File>>,
+    mask: RwSignal<Option<web_sys::File>>,
     dispatch_new_image_action: F,
 ) -> impl IntoView
 where
@@ -169,6 +209,8 @@ where
 {
     let current_list_page = create_rw_signal(cx, 1);
     let is_advanced_settings_open = create_rw_signal(cx, false);
+    let is_input_image_visible = create_rw_signal(cx, false);
+    let is_mask_visible = create_rw_signal(cx, false);
 
     let settings_icon = Signal::derive(cx, move || {
         if is_advanced_settings_open.get() {
@@ -203,6 +245,9 @@ where
         if let Some(models) = models.read(cx) {
             if let Some(first) = models.first() {
                 selected_model.update(|m| *m = first.name.clone());
+                is_input_image_visible
+                    .update(|v| *v = first.features.inpaint || first.features.image_to_image);
+                is_mask_visible.update(|v| *v = first.features.inpaint);
             }
         }
     });
@@ -259,6 +304,41 @@ where
                         }}
                         </select>
                       </div>
+                      {move || if is_input_image_visible.get() {
+                        view!{ cx,
+                        <div class="input-group mb-3">
+                            <label class="input-group-text">"Input Image (optional)"</label>
+                            <input
+                            type="file"
+                            accept="image/png, image/jpeg"
+                            class="form-control"
+                            on:change = move |ev| {
+                                input_image.update(|v| *v = web_util::extract_file_from_html_input(ev));
+                            }
+                            />
+                        </div>
+                        }.into_view(cx)
+                      } else {
+                        view!{ cx, <></> }.into_view(cx)
+                      }}
+
+                      {move || if is_mask_visible.get() {
+                        view!{ cx,
+                        <div class="input-group mb-3">
+                          <label class="input-group-text">"Mask (optional)"</label>
+                          <input
+                            type="file"
+                            accept="image/png, image/jpeg"
+                            class="form-control"
+                            on:change = move |ev| {
+                              mask.update(|v| *v = web_util::extract_file_from_html_input(ev));
+                            }
+                          />
+                        </div>
+                        }.into_view(cx)
+                      } else {
+                        view!{ cx, <></> }.into_view(cx)
+                      }}
 
                     <button
                        class="btn-btn-airtifex btn-outline rounded mx-auto mb-2"
@@ -459,7 +539,7 @@ fn ImageListEntry(
     image: ImageInspect,
     remove_image_id: RwSignal<Option<String>>,
 ) -> impl IntoView {
-    let view_href = format!("/image/tti/{}", image.id);
+    let view_href = format!("{}/{}", Page::GenerateImage.path(), image.id);
     let is_finished = if !image.processing {
         view! { cx, <span class="text-airtifex-green">"✓"</span>}
     } else {

@@ -1,5 +1,6 @@
 use crate::{Error, Result};
 
+use airtifex_core::image::ImageModelFeatures;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::env;
@@ -167,8 +168,16 @@ fn default_max_timesteps() -> usize {
 fn default_max_guidance_scale() -> f32 {
     20.0
 }
+fn off() -> bool {
+    false
+}
+fn on() -> bool {
+    true
+}
+
 #[derive(Clone, Deserialize, Serialize)]
 pub struct StableDiffusionConfig {
+    pub name: Option<String>,
     pub model_description: Option<String>,
     pub version: StableDiffusionVersion,
     pub clip_weights_path: PathBuf,
@@ -187,4 +196,21 @@ pub struct StableDiffusionConfig {
     pub max_timesteps: usize,
     #[serde(default = "default_max_guidance_scale")]
     pub max_guidance_scale: f32,
+
+    #[serde(default = "off")]
+    pub feature_inpaint: bool,
+    #[serde(default = "on")]
+    pub feature_text_to_image: bool,
+    #[serde(default = "on")]
+    pub feature_image_to_image: bool,
+}
+
+impl StableDiffusionConfig {
+    pub fn features(&self) -> ImageModelFeatures {
+        ImageModelFeatures {
+            inpaint: self.feature_inpaint,
+            text_to_image: self.feature_text_to_image,
+            image_to_image: self.feature_image_to_image,
+        }
+    }
 }

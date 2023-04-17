@@ -1,17 +1,21 @@
-mod tti;
+mod generator;
 
-pub use tti::TextToImageError;
+pub use generator::GenImageError;
 
 use crate::config::StableDiffusionConfig;
 use crate::gen::image::{GenerateImageRequest, SaveImageFsResult};
 use crate::models::image::Image;
 use crate::models::image_sample::ImageSample;
 use crate::queue;
-use tti::TextToImageGenerator;
+use generator::img2img::ImageToImageGenerator;
+use generator::inpaint::InpaintImageGenerator;
+use generator::txt2img::TextToImageGenerator;
 
 use flume::{unbounded, Receiver, Sender};
 use std::sync::Arc;
 use tokio::runtime::Runtime;
+
+use self::generator::ImageGenerator;
 
 pub fn initialize(
     db: Arc<crate::DbPool>,
@@ -104,27 +108,89 @@ pub fn initialize(
             if free_spots > 0 {
                 if let Ok(mut queue) = request_queue.try_write() {
                     'inner: while let Some(request) = queue.pop_front() {
-                        match request {
-                            GenerateImageRequest::TextToImages(data) => {
-                                let id = data.id.clone();
-                                let generator = match TextToImageGenerator::new(
-                                    data,
-                                    &config,
-                                    clip_device.clone(),
-                                    unet_device.clone(),
-                                    vae_device.clone(),
-                                    tx_results.clone(),
-                                    tmp.path(),
-                                ) {
-                                    Ok(generator) => generator,
-                                    Err(e) => {
-                                        log::error!("[{}] {}", id, e);
-                                        continue;
+                        let id = request.id().to_string();
+                        let generator = match request {
+                            GenerateImageRequest::ImageToImage(data) => {
+                                if config.feature_image_to_image {
+                                    match ImageToImageGenerator::new(
+                                        data,
+                                        &config,
+                                        clip_device.clone(),
+                                        unet_device.clone(),
+                                        vae_device.clone(),
+                                        tx_results.clone(),
+                                        tmp.path(),
+                                    ) {
+                                        Ok(generator) => {
+                                            Box::new(generator) as Box<dyn ImageGenerator>
+                                        }
+                                        Err(e) => {
+                                            log::error!("[{id}] {e}");
+                                            continue 'inner;
+                                        }
                                     }
-                                };
-                                running_sessions.push(generator);
+                                } else {
+                                    log::error!("[{id}] feature image-to-image is disabled");
+                                    continue 'inner;
+                                    // # TODO return an error somehow
+                                }
                             }
-                        }
+                            GenerateImageRequest::Inpaint(data) => {
+                                if config.feature_inpaint {
+                                    match InpaintImageGenerator::new(
+                                        data,
+                                        &config,
+                                        clip_device.clone(),
+                                        unet_device.clone(),
+                                        vae_device.clone(),
+                                        tx_results.clone(),
+                                        tmp.path(),
+                                    ) {
+                                        Ok(generator) => {
+                                            Box::new(generator) as Box<dyn ImageGenerator>
+                                        }
+                                        Err(e) => {
+                                            log::error!("[{id}] {e}");
+                                            continue;
+                                        }
+                                    }
+                                } else {
+                                    log::error!(
+                                        "[{id}] feature inpaint is disabled for this model"
+                                    );
+                                    continue 'inner;
+                                    // # TODO return an error somehow
+                                }
+                            }
+                            GenerateImageRequest::TextToImage(data) => {
+                                if config.feature_text_to_image {
+                                    match TextToImageGenerator::new(
+                                        data,
+                                        &config,
+                                        clip_device.clone(),
+                                        unet_device.clone(),
+                                        vae_device.clone(),
+                                        tx_results.clone(),
+                                        tmp.path(),
+                                    ) {
+                                        Ok(generator) => {
+                                            Box::new(generator) as Box<dyn ImageGenerator>
+                                        }
+                                        Err(e) => {
+                                            log::error!("[{id}] {e}");
+                                            continue;
+                                        }
+                                    }
+                                } else {
+                                    log::error!(
+                                        "[{id}] feature text-to-image is disabled for this model"
+                                    );
+                                    continue 'inner;
+                                    // # TODO return an error somehow
+                                }
+                            }
+                        };
+                        running_sessions.push(generator);
 
                         if free_spots == 0 {
                             break 'inner;
@@ -134,7 +200,7 @@ pub fn initialize(
             }
 
             for session in &mut running_sessions {
-                session.process_next_timestep(1);
+                session.process_next_timestep();
             }
 
             running_sessions.retain(|s| !s.is_finished());

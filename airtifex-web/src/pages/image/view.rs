@@ -144,7 +144,7 @@ pub fn ImageView(
 
     view! { cx,
       {move || {
-        page_stack.update(|p| p.push(Page::TextToImageView));
+        page_stack.update(|p| p.push(Page::GeneratedImageView));
         let engine = base64::engine::GeneralPurpose::new(
             &base64::alphabet::STANDARD,
             base64::engine::general_purpose::PAD,
@@ -153,7 +153,7 @@ pub fn ImageView(
 
         view!{cx,
            <main class="bg-dark text-white d-flex flex-column p-1 pt-3 overflow-auto" >
-             <TitledChildPage title={image_id} parent_href=Page::TextToImage.path()></TitledChildPage>
+             <TitledChildPage title={image_id} parent_href=Page::GenerateImage.path()></TitledChildPage>
              <div class="text-center w-100">
                  <p class="text-airtifex-yellow font-monospace py-1">{model}</p>
                  <p class="text-airtifex-light font-monospace py-2">{prompt}</p>

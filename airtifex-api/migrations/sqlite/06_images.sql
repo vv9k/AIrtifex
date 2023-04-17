@@ -5,6 +5,8 @@ CREATE TABLE images (
      height         INTEGER NOT NULL,
      model          VARCHAR NOT NULL references image_models(name),
      prompt         VARCHAR NOT NULL,
+     input_image    BLOB,
+     mask           BLOB,
      n_steps        INTEGER NOT NULL,
      seed           INTEGER NOT NULL,
      num_samples    INTEGER NOT NULL,

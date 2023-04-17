@@ -1,4 +1,5 @@
 [[proxy]]
 rewrite = "/api/"
-backend = "http://10.0.0.10:6901/api/v1/"
+backend = "http://127.0.0.1:6901/api/v1/"
+#backend = "http://10.0.0.10:6901/api/v1/"
 

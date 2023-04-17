@@ -1,7 +1,7 @@
 use airtifex_core::image::{ImageModelListEntry, TextToImageResponse};
 use airtifex_core::{api_response::ApiResponse, auth::Credentials};
 use airtifex_core::{
-    image::{ImageInspect, ImageSampleInspect, TextToImageRequest},
+    image::{ImageGenerateRequest, ImageInspect, ImageSampleInspect},
     llm::{
         ChatEntryListEntry, ChatListEntry, ChatResponseRequest, ChatStartRequest,
         ChatStartResponse, LlmListEntry, OneshotInferenceRequest,
@@ -145,7 +145,10 @@ impl AuthorizedApi {
         let url = format!("{}/image/{id}/samples", self.url);
         self.send_json(Request::get(&url)).await
     }
-    pub async fn text_to_image(&self, request: TextToImageRequest) -> Result<TextToImageResponse> {
+    pub async fn text_to_image(
+        &self,
+        request: ImageGenerateRequest,
+    ) -> Result<TextToImageResponse> {
         let url = format!("{}/image/from-text", self.url);
         self.send_json(Request::post(&url).json(&request)?).await
     }

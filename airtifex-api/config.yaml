@@ -9,6 +9,9 @@ llms:
   - model_path: ./llm_models/ggml-alpaca-7b-q4.bin
     model_description: Alpaca 7B, quantized
     float16: false
+  # - model_path: ./llm_models/int4_fixed_zero.bin
+  #   model_description: Dolly v2 12B, 4bit quantized
+  #   float16: false
   # - model_path: ./llm_models/ggml-alpaca-13b-q4.bin
   #   model_description: Alpaca 13B, quantized
   #   float16: false
@@ -25,10 +28,18 @@ stable_diffusion:
     vae_weights_path: ./sd_models/vae_v2.1.ot
     unet_weights_path: ./sd_models/unet_v2.1.ot
     vocab_file: ./sd_models/bpe_simple_vocab_16e6.txt
-    max_image_gen_sessions: 2
+
   - version: v1.5
     clip_weights_path: ./sd_models/clip_v1.5.ot
     vae_weights_path: ./sd_models/vae_v1.5.ot
     unet_weights_path: ./sd_models/unet_v1.5.ot
     vocab_file: ./sd_models/bpe_simple_vocab_16e6.txt
-    max_image_gen_sessions: 2
+
+  - version: v1.5
+    name: stable-diffusion-inpaint-v1.5
+    clip_weights_path: ./sd_models/clip_inpaint.ot
+    vae_weights_path: ./sd_models/vae_v1.5.ot
+    unet_weights_path: ./sd_models/unet_v1.5.ot
+    vocab_file: ./sd_models/bpe_simple_vocab_16e6.txt
+    feature_inpaint: true
+

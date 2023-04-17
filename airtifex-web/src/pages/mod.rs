@@ -8,7 +8,6 @@ pub mod users;
 pub use self::{chat::*, home::*, image::*, login::*, prompt::*, users::*};
 
 use leptos::*;
-use wasm_bindgen::prelude::*;
 
 #[derive(Debug, Clone, Copy, Default, PartialEq)]
 pub enum Page {
@@ -22,8 +21,8 @@ pub enum Page {
     Chat,
     ChatView,
     Prompt,
-    TextToImage,
-    TextToImageView,
+    GenerateImage,
+    GeneratedImageView,
     Login,
 }
 
@@ -36,7 +35,7 @@ impl Page {
             | Self::UserPasswordChange
             | Self::UserProfile => Self::Users,
             Self::Chat | Self::ChatView => Self::Chat,
-            Self::TextToImage | Self::TextToImageView => Self::TextToImage,
+            Self::GenerateImage | Self::GeneratedImageView => Self::GenerateImage,
             Self::Prompt | Self::Home | Self::Login => *self,
         }
     }
@@ -51,8 +50,8 @@ impl Page {
             Self::Chat => "/chat",
             Self::ChatView => "/chat/:chat_id",
             Self::Prompt => "/prompt",
-            Self::TextToImage => "/image/tti",
-            Self::TextToImageView => "/image/tti/:image_id",
+            Self::GenerateImage => "/gen/image",
+            Self::GeneratedImageView => "/gen/image/:image_id",
             Self::Login => "/login",
         }
     }
@@ -68,7 +67,7 @@ impl Page {
             Self::Chat | Self::ChatView => "/icons/message-circle.svg",
             Self::Prompt => "/icons/terminal.svg",
             Self::Login => "/icons/login.svg",
-            Self::TextToImage | Self::TextToImageView => "/icons/image.svg",
+            Self::GenerateImage | Self::GeneratedImageView => "/icons/image.svg",
         }
     }
 
@@ -83,12 +82,12 @@ impl Page {
             Self::Chat | Self::ChatView => "Chat",
             Self::Prompt => "Prompt",
             Self::Login => "Login",
-            Self::TextToImage | Self::TextToImageView => "Text to Image",
+            Self::GenerateImage | Self::GeneratedImageView => "Generate Image",
         }
     }
 
     pub fn main_user_pages() -> &'static [Self] {
-        &[Self::Home, Self::Chat, Self::Prompt, Self::TextToImage]
+        &[Self::Home, Self::Chat, Self::Prompt, Self::GenerateImage]
     }
 
     pub fn main_admin_pages() -> &'static [Self] {
@@ -97,7 +96,7 @@ impl Page {
             Self::Users,
             Self::Chat,
             Self::Prompt,
-            Self::TextToImage,
+            Self::GenerateImage,
         ]
     }
 }
@@ -137,18 +136,4 @@ pub fn goto_login_if_expired(
         let navigate = use_navigate(cx);
         navigate(Page::Login.path(), Default::default()).expect("login page");
     }
-}
-
-#[wasm_bindgen]
-pub fn sleep(ms: i32) -> js_sys::Promise {
-    js_sys::Promise::new(&mut |resolve, _| {
-        web_sys::window()
-            .unwrap()
-            .set_timeout_with_callback_and_timeout_and_arguments_0(&resolve, ms)
-            .unwrap();
-    })
-}
-
-pub fn wasm_sleep(ms: i32) -> wasm_bindgen_futures::JsFuture {
-    wasm_bindgen_futures::JsFuture::from(sleep(ms))
 }

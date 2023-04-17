@@ -27,6 +27,8 @@ pub struct Image {
     pub width: i64,
     pub height: i64,
     pub prompt: String,
+    pub input_image: Option<Vec<u8>>,
+    pub mask: Option<Vec<u8>>,
     pub n_steps: i64,
     pub seed: i64,
     pub num_samples: i64,
@@ -42,6 +44,8 @@ impl Image {
         width: i64,
         height: i64,
         prompt: String,
+        input_image: Option<Vec<u8>>,
+        mask: Option<Vec<u8>>,
         n_steps: i64,
         seed: i64,
         num_samples: i64,
@@ -54,6 +58,8 @@ impl Image {
             width,
             height,
             prompt,
+            input_image,
+            mask,
             n_steps,
             seed,
             num_samples,
@@ -69,8 +75,8 @@ impl Image {
         sqlx::query(
             r#"
             INSERT INTO images
-                    (id, user_id, model, width, height, prompt, n_steps, seed, num_samples, guidance_scale, processing, create_date)
-            VALUES  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+                    (id, user_id, model, width, height, prompt, input_image, mask, n_steps, seed, num_samples, guidance_scale, processing, create_date)
+            VALUES  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
             "#,
         )
         .bind(&self.id)
@@ -79,6 +85,8 @@ impl Image {
         .bind(&self.width)
         .bind(&self.height)
         .bind(&self.prompt)
+        .bind(&self.input_image)
+        .bind(&self.mask)
         .bind(&self.n_steps)
         .bind(&self.seed)
         .bind(&self.num_samples)
@@ -95,7 +103,7 @@ impl Image {
     pub async fn list(db: &DbPool) -> Result<Vec<Self>> {
         sqlx::query_as(
             r#"
-            SELECT id, user_id, model, width, height, prompt, n_steps, seed, num_samples, guidance_scale, processing, create_date
+            SELECT id, user_id, model, width, height, prompt, input_image, mask, n_steps, seed, num_samples, guidance_scale, processing, create_date
             FROM images
             "#,
         )
@@ -108,7 +116,7 @@ impl Image {
     pub async fn get_by_id(db: &DbPool, id: &Uuid) -> Result<Self> {
         sqlx::query_as(
             r#"
-            SELECT id, user_id, model, width, height, prompt, n_steps, seed, num_samples, guidance_scale, processing, create_date
+            SELECT id, user_id, model, width, height, prompt, input_image, mask, n_steps, seed, num_samples, guidance_scale, processing, create_date
             FROM images
             WHERE id = $1
             "#,

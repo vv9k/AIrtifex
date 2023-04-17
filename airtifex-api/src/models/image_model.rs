@@ -2,6 +2,7 @@ use crate::id::Uuid;
 use crate::models::{Error, Result};
 use crate::DbPool;
 
+use airtifex_core::image::ImageModelFeatures;
 use serde::{Deserialize, Serialize};
 use thiserror::Error as ErrorType;
 
@@ -25,14 +26,21 @@ pub struct ImageModel {
     pub model_id: Uuid,
     pub name: String,
     pub description: Option<String>,
+    #[serde(default)]
+    pub feature_inpaint: bool,
+    pub feature_text_to_image: bool,
+    pub feature_image_to_image: bool,
 }
 
 impl ImageModel {
-    pub fn new(name: String, description: Option<String>) -> Self {
+    pub fn new(name: String, description: Option<String>, features: ImageModelFeatures) -> Self {
         Self {
             model_id: Uuid::new_v4(),
             name,
             description,
+            feature_inpaint: features.inpaint,
+            feature_text_to_image: features.text_to_image,
+            feature_image_to_image: features.image_to_image,
         }
     }
 
@@ -46,13 +54,16 @@ impl ImageModel {
         sqlx::query(
             r#"
             INSERT INTO image_models
-                    (model_id, name, description)
-            VALUES  ($1, $2, $3)
+                    (model_id, name, description, feature_inpaint, feature_text_to_image, feature_image_to_image)
+            VALUES  ($1, $2, $3, $4, $5, $6)
             "#,
         )
         .bind(&self.model_id)
         .bind(&self.name)
         .bind(&self.description)
+        .bind(self.feature_inpaint)
+        .bind(self.feature_text_to_image)
+        .bind(self.feature_image_to_image)
         .execute(db)
         .await
         .map(|_| ())
@@ -83,7 +94,7 @@ impl ImageModel {
     pub async fn list(db: &DbPool) -> Result<Vec<Self>> {
         sqlx::query_as(
             r#"
-                    SELECT model_id, name, description
+                    SELECT model_id, name, description, feature_inpaint, feature_text_to_image, feature_image_to_image
                     FROM image_models
                     ORDER BY name
                 "#,
@@ -97,7 +108,7 @@ impl ImageModel {
     pub async fn get_by_name(db: &DbPool, name: &str) -> Result<Self> {
         sqlx::query_as(
             r#"
-                    SELECT model_id, name, description
+                    SELECT model_id, name, description, feature_inpaint, feature_text_to_image, feature_image_to_image
                     FROM image_models
                     WHERE name = $1
                 "#,
