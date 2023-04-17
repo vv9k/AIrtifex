@@ -6,6 +6,7 @@ use airtifex_api::routes::{api, r#static};
 use airtifex_api::{DbPool, Error, InnerAppState, Result, SharedAppState};
 use airtifex_core::user::AccountType;
 
+use axum::extract::DefaultBodyLimit;
 use axum::Router;
 use axum_extra::extract::cookie::Key;
 use clap::Parser;
@@ -99,6 +100,7 @@ async fn inner(runtime: Arc<Runtime>) -> Result<()> {
                     tx_inference_req,
                     tx_image_gen_req,
                 })))
+                .layer(DefaultBodyLimit::max(8 * 1000 * 1000))
                 .layer(
                     tower_http::trace::TraceLayer::new_for_http()
                         .make_span_with(

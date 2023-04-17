@@ -1,20 +1,26 @@
 use debug_stub_derive::DebugStub;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Default, Deserialize, Serialize, DebugStub)]
+#[derive(Clone, Default, Deserialize, Serialize, Debug)]
 pub struct ImageGenerateRequest {
     pub prompt: String,
-    #[debug_stub = "InputImage"]
-    pub input_image: Option<Vec<u8>>,
-    #[debug_stub = "Mask"]
-    pub mask: Option<Vec<u8>>,
     pub model: String,
+    pub input_image: Option<InputImage>,
     pub width: Option<i64>,
     pub height: Option<i64>,
     pub n_steps: Option<usize>,
     pub seed: Option<i64>,
     pub num_samples: Option<i64>,
     pub guidance_scale: Option<f64>,
+}
+
+#[derive(Clone, Default, Deserialize, Serialize, DebugStub)]
+pub struct InputImage {
+    #[debug_stub = "InputImage"]
+    pub data: Vec<u8>,
+    #[debug_stub = "Mask"]
+    pub mask: Option<Vec<u8>>,
+    pub strength: Option<f64>,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]

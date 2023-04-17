@@ -19,7 +19,7 @@ pub fn extract_file_from_html_input(event: Event) -> Option<web_sys::File> {
 pub async fn read_file(file: web_sys::File) -> Result<Vec<u8>, JsValue> {
     let (tx, rx) = oneshot::channel::<Result<Vec<u8>, JsValue>>();
 
-    let file_reader = FileReader::new().unwrap();
+    let file_reader = FileReader::new()?;
     let reader = file_reader.clone();
     let onloadend_cb = Closure::once(move || {
         let result = match reader.result() {

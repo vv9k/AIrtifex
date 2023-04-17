@@ -39,6 +39,7 @@ pub struct BaseImageData {
 pub struct ImageToImageData {
     pub data: BaseImageData,
     pub input_image: Vec<u8>,
+    pub strength: f64,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

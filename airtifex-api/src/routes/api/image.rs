@@ -54,14 +54,20 @@ async fn text_to_image(
     let num_samples = request.num_samples.unwrap_or(1).min(16);
     let n_steps = request.n_steps.unwrap_or(25).min(420) as i64;
 
+    let (data, mask, strength) = request
+        .input_image
+        .map(|i| (Some(i.data), i.mask, i.strength))
+        .unwrap_or_default();
+
     let image = Image::new(
         user_id,
         request.model,
         request.width.unwrap_or(512),
         request.height.unwrap_or(512),
         request.prompt,
-        request.input_image,
-        request.mask,
+        data,
+        mask,
+        strength,
         n_steps,
         request.seed.unwrap_or_else(|| rand::thread_rng().gen()),
         num_samples,
@@ -90,9 +96,11 @@ async fn text_to_image(
             input_image,
             mask,
         }),
-        (Some(input_image), None) => {
-            GenerateImageRequest::ImageToImage(ImageToImageData { data, input_image })
-        }
+        (Some(input_image), None) => GenerateImageRequest::ImageToImage(ImageToImageData {
+            data,
+            input_image,
+            strength: image.strength.unwrap_or(0.7),
+        }),
         (None, None) | (None, Some(_)) => GenerateImageRequest::TextToImage(data),
     };
 

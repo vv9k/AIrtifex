@@ -1,7 +1,7 @@
 use crate::components::{modal::*, status_message::*};
 use crate::web_util;
 use crate::{api, Page, PageStack};
-use airtifex_core::image::{ImageGenerateRequest, ImageInspect};
+use airtifex_core::image::{ImageGenerateRequest, ImageInspect, InputImage};
 
 use leptos::*;
 use leptos_router::*;
@@ -22,6 +22,7 @@ pub fn GenerateImage(
     let remove_image_id = create_rw_signal(cx, None::<String>);
 
     let input_image = create_rw_signal(cx, None::<web_sys::File>);
+    let strength = create_rw_signal(cx, 0.7);
     let mask = create_rw_signal(cx, None::<web_sys::File>);
 
     let width = create_rw_signal(cx, None::<i64>);
@@ -81,7 +82,7 @@ pub fn GenerateImage(
 
     let new_image_action = create_action(cx, move |_| async move {
         if let Some(api) = authorized_api.get() {
-            let input_image = if let Some(f) = input_image.get() {
+            let data = if let Some(f) = input_image.get() {
                 match web_util::read_file(f).await {
                     Ok(data) => Some(data),
                     Err(e) => {
@@ -113,10 +114,14 @@ pub fn GenerateImage(
             } else {
                 None
             };
+            let input_image = data.map(|d| InputImage {
+                data: d,
+                mask,
+                strength: Some(strength.get()),
+            });
             let request = ImageGenerateRequest {
                 prompt: prompt.get(),
                 input_image,
-                mask,
                 model: selected_model.get(),
                 width: width.get(),
                 height: height.get(),
@@ -175,6 +180,7 @@ pub fn GenerateImage(
                  <GenerateImageForm
                      authorized_api status_message prompt width height n_steps seed num_samples
                      selected_model dispatch_new_image_action guidance_scale input_image mask
+                     strength
                  />
                  <div class="card bg-darker m-3">
                     <StatusMessage message=status_message />
@@ -202,6 +208,7 @@ fn GenerateImageForm<F>(
     selected_model: RwSignal<String>,
     input_image: RwSignal<Option<web_sys::File>>,
     mask: RwSignal<Option<web_sys::File>>,
+    strength: RwSignal<f64>,
     dispatch_new_image_action: F,
 ) -> impl IntoView
 where
@@ -314,6 +321,27 @@ where
                             class="form-control"
                             on:change = move |ev| {
                                 input_image.update(|v| *v = web_util::extract_file_from_html_input(ev));
+                            }
+                            />
+                        </div>
+                        }.into_view(cx)
+                      } else {
+                        view!{ cx, <></> }.into_view(cx)
+                      }}
+                      {move || if input_image.get().is_some() {
+                        view!{ cx,
+                        <div class="input-group mb-3">
+                            <label class="form-label">"Replacement strength: "{strength}</label>
+                            <input
+                            type="range"
+                            class = "form-range"
+                            min = "0"
+                            max = "1"
+                            step = "0.01"
+                            value = {move || strength.get()}
+                            on:change = move |ev| {
+                                let val = event_target_value(&ev);
+                                strength.update(|v|*v = val.parse().ok().unwrap_or(0.7));
                             }
                             />
                         </div>

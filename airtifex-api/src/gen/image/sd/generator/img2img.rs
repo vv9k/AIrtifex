@@ -27,7 +27,11 @@ impl ImageToImageGenerator {
         tx_results: Sender<SaveImageFsResult>,
         save_dir: impl AsRef<Path>,
     ) -> Result<Self> {
-        let ImageToImageData { data, input_image } = request;
+        let ImageToImageData {
+            data,
+            input_image,
+            strength,
+        } = request;
         let base_generator = BaseImageGenerator::new(
             data,
             config,
@@ -42,7 +46,6 @@ impl ImageToImageGenerator {
         let init_image = init_image.to(vae_device);
         let init_latent_dist = base_generator.vae.encode(&init_image);
 
-        let strength = 0.7; // TODO
         let t_start = base_generator.request.n_steps
             - (base_generator.request.n_steps as f64 * strength) as usize;
 

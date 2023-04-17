@@ -268,3 +268,23 @@ td.fitwidth {
   background-color: var(--airtifex) !important;
   border-color: var(--airtifex) !important;
 }
+
+input[type="range"]::-moz-range-progress {
+  background-color: var(--airtifex-light) !important;
+}
+
+input[type="range"]::-ms-fill-lower {
+  background-color: var(--airtifex-light) !important;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  background: var(--airtifex-blue) !important;
+}
+
+input[type='range']::-moz-range-thumb {
+  background: var(--airtifex-blue) !important;
+}
+
+input[type='range']::-ms-thumb {
+  background: var(--airtifex-blue) !important;
+}
