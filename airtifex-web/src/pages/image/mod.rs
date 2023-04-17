@@ -39,7 +39,7 @@ pub fn GenerateImage(
         move || current_list_page.get(),
         move |_current_list_page| async move {
             match authorized_api.get() {
-                Some(api) => match api.images().await {
+                Some(api) => match api.image_list().await {
                     Ok(images) => images,
                     Err(e) => {
                         let e = e.to_string();
@@ -130,7 +130,7 @@ pub fn GenerateImage(
                 num_samples: num_samples.get(),
                 guidance_scale: guidance_scale.get(),
             };
-            match api.text_to_image(request).await {
+            match api.image_generate(request).await {
                 Ok(response) => {
                     status_message.update(|m| {
                         *m = Message::Success(format!(

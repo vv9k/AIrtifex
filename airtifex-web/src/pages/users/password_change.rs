@@ -31,7 +31,7 @@ pub fn UserPasswordChange(
             };
             async move {
                 if let Some(api) = authorized_api.get() {
-                    let response = api.change_password(&username, request).await;
+                    let response = api.user_change_password(&username, request).await;
 
                     match response {
                         Ok(_) => {

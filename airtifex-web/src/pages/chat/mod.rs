@@ -35,7 +35,7 @@ pub fn Chat(
         move || current_list_page.get(),
         move |_current_list_page| async move {
             match authorized_api.get() {
-                Some(api) => match api.chats().await {
+                Some(api) => match api.chat_list().await {
                     Ok(chats) => chats,
                     Err(e) => {
                         let e = e.to_string();
@@ -56,7 +56,7 @@ pub fn Chat(
     let remove_chat_action = create_action(cx, move |_| async move {
         if let Some(api) = authorized_api.get() {
             if let (Some(title), Some(id)) = (remove_chat_title.get(), remove_chat_id.get()) {
-                if let Err(e) = api.remove_chat(&id).await {
+                if let Err(e) = api.chat_remove(&id).await {
                     let e = e.to_string();
                     crate::pages::goto_login_if_expired(cx, &e, authorized_api);
                     status_message.update(|m| {
@@ -93,7 +93,7 @@ pub fn Chat(
                     temp: temp.get(),
                 },
             };
-            match api.start_new_chat(request).await {
+            match api.chat_start_new(request).await {
                 Ok(response) => {
                     let navigate = use_navigate(cx);
                     navigate(&format!("/chat/{}", response.chat_id), Default::default())

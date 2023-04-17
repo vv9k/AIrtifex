@@ -150,7 +150,7 @@ pub fn ChatView(
                 responses.update(|rsp| {
                     rsp.push((Entry::User, request.prompt.clone()));
                 });
-                let resp = api.get_chat_response(request, &id).await;
+                let resp = api.chat_get_response(request, &id).await;
                 read_inference_stream(
                     cx,
                     resp,

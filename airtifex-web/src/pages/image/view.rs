@@ -29,7 +29,7 @@ pub fn ImageView(
         move || dummy_images_signal.get(),
         move |_| async move {
             match (authorized_api.get(), image_id.get()) {
-                (Some(api), Some(id)) => match api.image_metadata(&id).await {
+                (Some(api), Some(id)) => match api.image_info(&id).await {
                     Ok(meta) => Some(meta),
                     Err(e) => {
                         let e = e.to_string();

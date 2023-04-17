@@ -73,7 +73,7 @@ pub fn UserEdit(
             };
             async move {
                 if let Some(api) = authorized_api.get() {
-                    let response = api.edit_user(&user, request).await;
+                    let response = api.user_edit(&user, request).await;
 
                     match response {
                         Ok(_) => {

@@ -2,8 +2,8 @@ use crate::api;
 use crate::components::{list_page_control::*, modal::*, status_message::*, users::list_entry::*};
 use crate::{pages::goto_login_if_expired, Page, PageStack};
 
-use leptos::*;
 use airtifex_core::user::ListQuery;
+use leptos::*;
 
 pub mod add;
 pub mod edit;
@@ -33,7 +33,7 @@ pub fn Users(
                 order_by: None,
             };
             match authorized_api.get() {
-                Some(api) => match api.users(query).await {
+                Some(api) => match api.user_list(query).await {
                     Ok(users) => users,
                     Err(e) => {
                         let e = e.to_string();
@@ -58,7 +58,7 @@ pub fn Users(
         let username = username.clone();
         async move {
             if let Some(api) = authorized_api.get() {
-                let response = api.remove_user(&username).await;
+                let response = api.user_remove(&username).await;
 
                 match response {
                     Ok(_) => {

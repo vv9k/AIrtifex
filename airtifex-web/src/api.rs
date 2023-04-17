@@ -73,23 +73,23 @@ impl AuthorizedApi {
         let url = format!("{}/users/{}", self.url, username);
         self.send_json(Request::get(&url)).await
     }
-    pub async fn users(&self, query: user::ListQuery) -> Result<Vec<ListUserEntry>> {
+    pub async fn user_list(&self, query: user::ListQuery) -> Result<Vec<ListUserEntry>> {
         let url = append_query(format!("{}/users", self.url), query.as_query());
         self.send_json(Request::get(&url)).await
     }
-    pub async fn add_user(&self, request: UserRegisterRequest) -> Result<String> {
+    pub async fn user_add(&self, request: UserRegisterRequest) -> Result<String> {
         let url = format!("{}/users", self.url);
         self.send_json(Request::post(&url).json(&request)?).await
     }
-    pub async fn edit_user(&self, username: &str, request: UserEditRequest) -> Result<()> {
+    pub async fn user_edit(&self, username: &str, request: UserEditRequest) -> Result<()> {
         let url = format!("{}/users/{}", self.url, username);
         self.send_json(Request::post(&url).json(&request)?).await
     }
-    pub async fn remove_user(&self, username: &str) -> Result<()> {
+    pub async fn user_remove(&self, username: &str) -> Result<()> {
         let url = format!("{}/users/{}", self.url, username);
         self.send_json(Request::delete(&url)).await
     }
-    pub async fn change_password(
+    pub async fn user_change_password(
         &self,
         username: &str,
         request: PasswordChangeRequest,
@@ -97,7 +97,7 @@ impl AuthorizedApi {
         let url = format!("{}/users/{}/password", self.url, username);
         self.send_json(Request::post(&url).json(&request)?).await
     }
-    pub async fn get_chat_response(
+    pub async fn chat_get_response(
         &self,
         request: ChatResponseRequest,
         id: &str,
@@ -109,7 +109,7 @@ impl AuthorizedApi {
         let url = format!("{}/llm/inference", self.url);
         self.send(Request::post(&url).json(&request)?).await
     }
-    pub async fn start_new_chat(&self, request: ChatStartRequest) -> Result<ChatStartResponse> {
+    pub async fn chat_start_new(&self, request: ChatStartRequest) -> Result<ChatStartResponse> {
         let url = format!("{}/llm/chat", self.url);
         self.send_json(Request::post(&url).json(&request)?).await
     }
@@ -121,15 +121,15 @@ impl AuthorizedApi {
         let url = format!("{}/llm/chat/{id}", self.url);
         self.send_json(Request::get(&url)).await
     }
-    pub async fn remove_chat(&self, id: &str) -> Result<()> {
+    pub async fn chat_remove(&self, id: &str) -> Result<()> {
         let url = format!("{}/llm/chat/{id}", self.url);
         self.send_json(Request::delete(&url)).await
     }
-    pub async fn chats(&self) -> Result<Vec<ChatListEntry>> {
+    pub async fn chat_list(&self) -> Result<Vec<ChatListEntry>> {
         let url = format!("{}/llm/chat", self.url);
         self.send_json(Request::get(&url)).await
     }
-    pub async fn images(&self) -> Result<Vec<ImageInspect>> {
+    pub async fn image_list(&self) -> Result<Vec<ImageInspect>> {
         let url = format!("{}/image", self.url);
         self.send_json(Request::get(&url)).await
     }
@@ -137,7 +137,7 @@ impl AuthorizedApi {
         let url = format!("{}/image/{id}", self.url);
         self.send_json(Request::delete(&url)).await
     }
-    pub async fn image_metadata(&self, id: &str) -> Result<ImageInspect> {
+    pub async fn image_info(&self, id: &str) -> Result<ImageInspect> {
         let url = format!("{}/image/{id}", self.url);
         self.send_json(Request::get(&url)).await
     }
@@ -145,11 +145,11 @@ impl AuthorizedApi {
         let url = format!("{}/image/{id}/samples", self.url);
         self.send_json(Request::get(&url)).await
     }
-    pub async fn text_to_image(
+    pub async fn image_generate(
         &self,
         request: ImageGenerateRequest,
     ) -> Result<TextToImageResponse> {
-        let url = format!("{}/image/from-text", self.url);
+        let url = format!("{}/image/generate", self.url);
         self.send_json(Request::post(&url).json(&request)?).await
     }
     pub async fn large_language_models(&self) -> Result<Vec<LlmListEntry>> {

@@ -37,7 +37,7 @@ pub fn UserAdd(
             };
             async move {
                 if let Some(api) = authorized_api.get() {
-                    let response = api.add_user(request).await;
+                    let response = api.user_add(request).await;
 
                     match response {
                         Ok(id) => {

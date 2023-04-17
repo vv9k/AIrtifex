@@ -24,7 +24,7 @@ use rand::Rng;
 
 pub fn router() -> Router<SharedAppState> {
     Router::new()
-        .route("/from-text", routing::post(text_to_image))
+        .route("/generate", routing::post(generate_image))
         .route("/", routing::get(list_images))
         .route("/models", routing::get(list_models))
         .route(
@@ -35,7 +35,7 @@ pub fn router() -> Router<SharedAppState> {
         .route("/:id/samples/:n", routing::get(get_image_entry))
 }
 
-async fn text_to_image(
+async fn generate_image(
     claims: Claims,
     State(state): State<SharedAppState>,
     Json(request): Json<ImageGenerateRequest>,
