@@ -142,7 +142,7 @@ pub fn GenerateImage(
                 }
                 Err(e) => {
                     status_message.update(|m| {
-                        *m = Message::Error(format!("failed to start a new chat - {e}"));
+                        *m = Message::Error(format!("failed to register image - {e}"));
                     });
                 }
             }

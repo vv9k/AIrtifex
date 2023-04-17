@@ -145,10 +145,6 @@ pub fn ImageView(
     view! { cx,
       {move || {
         page_stack.update(|p| p.push(Page::GeneratedImageView));
-        let engine = base64::engine::GeneralPurpose::new(
-            &base64::alphabet::STANDARD,
-            base64::engine::general_purpose::PAD,
-        );
 
 
         view!{cx,
@@ -159,11 +155,54 @@ pub fn ImageView(
                  <p class="text-airtifex-light font-monospace py-2">{prompt}</p>
              </div>
              {details}
+             {move || {
+                if let Some(Some(metadata)) = metadata.read(cx) {
+                    if let Some(input_image) = metadata.input_image {
+                        let engine = base64::engine::GeneralPurpose::new(
+                            &base64::alphabet::STANDARD,
+                            base64::engine::general_purpose::PAD,
+                        );
+                        let encoded = engine.encode(&input_image);
+                        let src = format!("data:image/png;base64,{encoded}");
+                        let size = size.get();
+
+                        let mask = if let Some(mask) = metadata.mask {
+                            let encoded = engine.encode(&mask);
+                            let src = format!("data:image/png;base64,{encoded}");
+
+                            view!{cx,
+                                <div class="d-flex flex-column">
+                                    <h2>"Mask:"</h2>
+                                    <img class="p-2" src=src width=size.0 height=size.1></img>
+                                </div>
+                            }.into_view(cx)
+                        } else {
+                            view! {cx, <></> }.into_view(cx)
+                        };
+
+                        return view!{cx,
+                            <div class="mx-auto p-3">
+                                <div class="d-flex flex-column">
+                                    <h2>"Input Image:"</h2>
+                                    <img class="p-2" src=src width=size.0 height=size.1></img>
+                                </div>
+                                {mask}
+                            </div>
+                        }.into_view(cx);
+                    }
+                }
+                view! {cx, <></> }.into_view(cx)
+             }}
              <div class="mx-auto p-3">
+                <h2>"Generated images:"</h2>
              {move || {
                 let size = size.get();
                 if let Some(Some(images)) = images.read(cx) {
                      images.into_iter().map(|i| {
+                        let engine = base64::engine::GeneralPurpose::new(
+                            &base64::alphabet::STANDARD,
+                            base64::engine::general_purpose::PAD,
+                        );
                         let encoded = engine.encode(&i.data);
                         let src = format!("data:image/png;base64,{encoded}");
                         view!{cx, <img class="p-2" src=src width=size.0 height=size.1></img>}.into_view(cx)
