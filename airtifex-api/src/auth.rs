@@ -87,7 +87,7 @@ impl FromRequestParts<SharedAppState> for Claims {
             .ok();
 
         let token = if let Some(cookie_token) = cookies.and_then(|c| c.get("Bearer")) {
-            log::debug!("got auth token from cookie");
+            log::trace!("got auth token from cookie");
             cookie_token.value().to_owned()
         } else {
             let TypedHeader(Authorization(bearer)) =
@@ -98,12 +98,9 @@ impl FromRequestParts<SharedAppState> for Claims {
                         return Err(AuthError::InvalidHeader);
                     }
                 };
-            log::debug!("got auth token from header");
+            log::trace!("got auth token from header");
             bearer.token().to_owned()
         };
-        // Extract the token from the authorization header
-        log::debug!("got bearer {}", token);
-        // Decode the user data
         let token_data =
             match decode::<Claims>(&token, &KEYS.decoding, &Validation::new(Algorithm::HS512)) {
                 Ok(bearer) => bearer,
@@ -112,7 +109,6 @@ impl FromRequestParts<SharedAppState> for Claims {
                     return Err(AuthError::InvalidToken(e));
                 }
             };
-        log::debug!("got claims {token_data:?}");
 
         Ok(token_data.claims)
     }

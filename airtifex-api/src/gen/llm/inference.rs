@@ -286,18 +286,19 @@ struct RunningInferenceSession {
 
 impl RunningInferenceSession {
     fn feed_prompt(&mut self, model: &Model) -> Result<(), crate::Error> {
-        log::debug!(
+        log::trace!(
             "[{}] Feeding prompt `{}`",
             self.id,
             self.state.processed_prompt
         );
+        let id = self.id.clone();
         self.session
             .feed_prompt(
                 model,
                 &self.params,
                 &self.state.processed_prompt,
                 move |b| {
-                    log::trace!("[prompt] {}", String::from_utf8_lossy(b));
+                    log::trace!("[{}] prompt part: {}", id, String::from_utf8_lossy(b));
                     Ok::<(), InferenceError>(())
                 },
             )
@@ -307,7 +308,7 @@ impl RunningInferenceSession {
     fn save_results(&mut self, tx_results: &Sender<SaveDataRequest>) {
         self.state.is_finished = true;
         if let Some(chat) = &self.request.chat_data {
-            log::debug!("saving chat data");
+            log::trace!("saving chat data {}", &chat.conversation_id);
             let output = self.state.answer.clone();
             if !output.is_empty() {
                 if let Err(e) = tx_results.try_send(SaveDataRequest {
@@ -315,7 +316,10 @@ impl RunningInferenceSession {
                     input: self.request.prompt.clone(),
                     output,
                 }) {
-                    log::error!("failed to save chat entries - {e}");
+                    log::error!(
+                        "failed to save chat entries for {} - {e}",
+                        chat.conversation_id
+                    );
                 }
             }
         }
@@ -327,7 +331,7 @@ impl RunningInferenceSession {
         rng: &mut ThreadRng,
         tx_results: &Sender<SaveDataRequest>,
     ) -> Result<(), crate::Error> {
-        log::debug!("inferering next valid utf-8 token");
+        log::trace!("[{}] infering next valid utf-8 token", self.id);
         let mut buf = llama_rs::TokenUtf8Buffer::new();
 
         loop {
@@ -348,7 +352,7 @@ impl RunningInferenceSession {
             if let Some(valid_token) = buf.push(token) {
                 self.state.answer.push_str(&valid_token);
                 self.state.processed_tokens += 1;
-                log::debug!("Sending token {} to receiver.", valid_token);
+                log::trace!("[{}] Sending token {} to receiver.", self.id, valid_token);
                 match self.request.tx_tokens.send(Ok(valid_token)) {
                     Ok(_) => {
                         break;

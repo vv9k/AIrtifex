@@ -62,7 +62,7 @@ impl AuthorizedApi {
             .send()
             .await
             .map_err(Error::from);
-        log::info!("got response {response:?}");
+        // log::info!("got response {response:?}");
         response
     }
     pub async fn me(&self) -> Result<AuthenticatedUser> {
@@ -184,6 +184,6 @@ where
     T: DeserializeOwned,
 {
     let json = response.json::<ApiResponse>().await?;
-    log::info!("got json {json:?}");
+    // log::info!("got json {json:?}");
     json.into_result(|e| Error::ApiError(e))
 }
