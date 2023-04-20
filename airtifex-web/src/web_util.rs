@@ -53,3 +53,29 @@ pub fn sleep_promise(ms: i32) -> js_sys::Promise {
 pub fn sleep(ms: i32) -> wasm_bindgen_futures::JsFuture {
     wasm_bindgen_futures::JsFuture::from(sleep_promise(ms))
 }
+
+/// Encodes image so that it can be used in an <img src=> tag
+pub fn encode_image_base64(image: &[u8]) -> String {
+    use base64::engine::Engine;
+    let engine = base64::engine::GeneralPurpose::new(
+        &base64::alphabet::STANDARD,
+        base64::engine::general_purpose::PAD,
+    );
+    let encoded = engine.encode(&image);
+    format!("data:image/png;base64,{encoded}")
+}
+
+#[allow(dead_code)]
+pub fn get_window_size() -> Result<(u32, u32), JsValue> {
+    let window = web_sys::window().ok_or("No window")?;
+    let width = window
+        .inner_width()?
+        .as_f64()
+        .ok_or("Failed to get width")? as u32;
+    let height = window
+        .inner_height()?
+        .as_f64()
+        .ok_or("Failed to get height")? as u32;
+
+    Ok((width, height))
+}

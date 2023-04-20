@@ -1,9 +1,10 @@
 use crate::id::Uuid;
 use crate::models::{chat_entry::ChatEntry, Error, Result};
 use crate::DbPool;
-use airtifex_core::llm::ChatSettings;
+use airtifex_core::llm::{ChatSettings, UserChatCounters};
 
 use serde::{Deserialize, Serialize};
+use sqlx::Row;
 use thiserror::Error as ErrorType;
 
 #[derive(Debug, ErrorType)]
@@ -16,6 +17,8 @@ pub enum ChatError {
     DeleteError(sqlx::Error),
     #[error("failed to list chat sessions - {0}")]
     ListChatsError(sqlx::Error),
+    #[error("failed to aquire chat counters - {0}")]
+    CountersError(sqlx::Error),
     #[error("failed to update a chat - {0}")]
     UpdateError(sqlx::Error),
 }
@@ -166,6 +169,24 @@ impl Chat {
         .await
         .map(|_| ())
         .map_err(ChatError::UpdateError)
+        .map_err(Error::from)
+    }
+
+    pub async fn counters(db: &DbPool, username: &str) -> Result<UserChatCounters> {
+        sqlx::query(
+            r#"
+                    SELECT COUNT(*) as chat_count
+                    FROM chats
+                    WHERE username = $1
+                "#,
+        )
+        .bind(username)
+        .fetch_one(db)
+        .await
+        .map(|x| UserChatCounters {
+            chat_count: x.try_get("chat_count").unwrap_or(0) as usize,
+        })
+        .map_err(ChatError::ListChatsError)
         .map_err(Error::from)
     }
 }

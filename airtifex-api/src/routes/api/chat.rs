@@ -25,6 +25,7 @@ pub fn router() -> Router<SharedAppState> {
         .route("/models", routing::get(list_models))
         .route("/inference", routing::post(oneshot_inference))
         .route("/chat", routing::post(start_chat).get(list))
+        .route("/chat/counters", routing::get(counters))
         .route(
             "/chat/:id",
             routing::get(get_chat).delete(delete_chat).post(inference),
@@ -292,4 +293,11 @@ async fn oneshot_inference(
         StreamBody::new(rx_tokens.into_stream()),
     )
         .into_response()
+}
+
+async fn counters(claims: Claims, State(state): State<SharedAppState>) -> Response {
+    let db = &state.db;
+    with_user_guard!(claims, db);
+
+    handle_db_result_as_json(Chat::counters(&db, &claims.sub).await.map_err(Error::from))
 }

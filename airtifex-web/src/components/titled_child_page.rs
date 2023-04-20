@@ -1,16 +1,18 @@
 use crate::components::go_back_button::*;
+use crate::pages::PageStack;
 
 use leptos::*;
 
 #[component]
-pub fn TitledChildPage<'a>(
+pub fn TitledChildPage(
     cx: Scope,
     title: Signal<String>,
-    parent_href: &'a str,
+    page_stack: ReadSignal<PageStack>,
 ) -> impl IntoView {
+    let last = page_stack.get().parent().path();
     view! { cx,
          <div class="d-flex flex-column justify-content-start">
-             <GoBackButton href=parent_href></GoBackButton>
+             <GoBackButton href=last></GoBackButton>
              <h1 class="display-5 p-1 pt-2 text-center">{title}</h1>
          </div>
     }

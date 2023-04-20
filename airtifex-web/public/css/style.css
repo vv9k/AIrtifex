@@ -288,3 +288,7 @@ input[type='range']::-moz-range-thumb {
 input[type='range']::-ms-thumb {
   background: var(--airtifex-blue) !important;
 }
+
+.w-90 {
+  width: 90% !important;
+}

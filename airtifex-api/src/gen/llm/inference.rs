@@ -342,7 +342,7 @@ impl RunningInferenceSession {
             ) {
                 Ok(token) => token,
                 Err(InferenceError::EndOfText) => {
-                    log::debug!("end of inference");
+                    log::debug!("[{}] end of inference", self.id);
                     self.save_results(tx_results);
                     break;
                 }

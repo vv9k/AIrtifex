@@ -113,3 +113,8 @@ fn default_play_back_tokens() -> bool {
 }
 
 pub type ChatStreamResult = Result<String, String>;
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct UserChatCounters {
+    pub chat_count: usize,
+}

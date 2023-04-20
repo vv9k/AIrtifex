@@ -1,4 +1,5 @@
 use airtifex_core::image::{ImageModelListEntry, TextToImageResponse};
+use airtifex_core::llm::UserChatCounters;
 use airtifex_core::{api_response::ApiResponse, auth::Credentials};
 use airtifex_core::{
     image::{ImageGenerateRequest, ImageInspect, ImageSampleInspect},
@@ -127,6 +128,10 @@ impl AuthorizedApi {
     }
     pub async fn chat_list(&self) -> Result<Vec<ChatListEntry>> {
         let url = format!("{}/llm/chat", self.url);
+        self.send_json(Request::get(&url)).await
+    }
+    pub async fn user_chat_counters(&self) -> Result<UserChatCounters> {
+        let url = format!("{}/llm/chat/counters", self.url);
         self.send_json(Request::get(&url)).await
     }
     pub async fn image_list(&self) -> Result<Vec<ImageInspect>> {

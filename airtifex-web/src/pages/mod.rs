@@ -8,6 +8,7 @@ pub mod users;
 pub use self::{chat::*, home::*, image::*, login::*, prompt::*, users::*};
 
 use leptos::*;
+use leptos_router::{use_navigate, NavigationError};
 
 #[derive(Debug, Clone, Copy, Default, PartialEq)]
 pub enum Page {
@@ -101,6 +102,12 @@ impl Page {
     }
 }
 
+impl AsRef<str> for Page {
+    fn as_ref(&self) -> &str {
+        self.path()
+    }
+}
+
 #[derive(Clone, Copy, Debug)]
 pub struct PageStack {
     stack: [Page; 2],
@@ -136,4 +143,9 @@ pub fn goto_login_if_expired(
         let navigate = use_navigate(cx);
         navigate(Page::Login.path(), Default::default()).expect("login page");
     }
+}
+
+pub fn goto_page(cx: Scope, page: impl AsRef<str>) -> Result<(), NavigationError> {
+    let navigate = use_navigate(cx);
+    navigate(page.as_ref(), Default::default())
 }

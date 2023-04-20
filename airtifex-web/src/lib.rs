@@ -109,7 +109,7 @@ pub fn App(cx: Scope) -> impl IntoView {
                       subtitle.update(|sub| *sub = Some("Home".into()));
                       view! { cx,
                         <NavBar page_stack user_info on_logout />
-                        <Home user_info page_stack global_message />
+                        <Home authorized_api user_info page_stack global_message />
                       }
                   }
                 />
@@ -303,7 +303,7 @@ pub fn App(cx: Scope) -> impl IntoView {
                         global_message.update(|m| *m = Message::Error("Oh my 404! The page you're looking for doesn't exist so I brought you back home ;)".into()));
                         view! { cx,
                         <NavBar page_stack user_info on_logout />
-                        <Home user_info page_stack global_message/>
+                        <Home authorized_api user_info page_stack global_message/>
                     }
                     }
                 />

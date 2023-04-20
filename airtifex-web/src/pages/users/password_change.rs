@@ -75,7 +75,7 @@ pub fn UserPasswordChange(
 
         view!{cx,
            <main class="bg-dark text-white d-flex flex-column p-1 pt-3" >
-             <TitledChildPage title=title parent_href=page_stack.get().parent().path()></TitledChildPage>
+             <TitledChildPage title=title page_stack={page_stack.read_only()}></TitledChildPage>
              <div class="d-flex justify-content-center flex-column h-100">
                <div class="container-fluid col-9 col-lg-4">
                  <div class="card bg-darker p-5">

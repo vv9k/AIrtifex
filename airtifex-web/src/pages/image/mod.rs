@@ -184,7 +184,7 @@ pub fn GenerateImage(
                  />
                  <div class="card bg-darker m-3">
                     <StatusMessage message=status_message />
-                    <ImageListEntries images remove_image_id />
+                    <ImageListEntries images remove_image_id current_list_page />
                  </div>
            </main>
            {remove_confirm_modal}
@@ -524,12 +524,22 @@ fn ImageListEntries(
     cx: Scope,
     images: Resource<u32, Vec<ImageInspect>>,
     remove_image_id: RwSignal<Option<String>>,
+    current_list_page: RwSignal<u32>,
 ) -> impl IntoView {
     view! { cx, { move || {
         if let Some(images) = images.read(cx) {
             if !images.is_empty() {
                 return view! { cx,
                 <div class="card-body d-flex flex-column px-5 pb-5">
+                  <button
+                      class="btn btn-outline-lighter rounded mt-3 w-25 mx-auto"
+                      on:click=move |_| {
+                        current_list_page.update(|v| *v = 0);
+                      }
+                  >
+                  <img class="me-2" src="/icons/refresh-cw.svg" />
+                  "Refresh"
+                  </button>
                   <table class="table table-hover table-striped table-responsive text-white">
                     <thead>
                     <tr>

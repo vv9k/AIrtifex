@@ -226,7 +226,7 @@ pub fn ChatView(
 
         view!{cx,
            <main class="bg-dark text-white d-flex flex-column p-1 pt-3" >
-             <TitledChildPage title={title} parent_href=Page::Chat.path()></TitledChildPage>
+             <TitledChildPage title={title} page_stack={page_stack.read_only()}></TitledChildPage>
              <div class="text-center w-100">
                  <p class="text-airtifex-light font-monospace">{model}</p>
              </div>

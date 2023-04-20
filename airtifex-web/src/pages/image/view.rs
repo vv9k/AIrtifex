@@ -1,7 +1,6 @@
 use crate::components::{status_message::*, titled_child_page::*};
-use crate::{api, Page, PageStack};
+use crate::{api, web_util, Page, PageStack};
 
-use base64::engine::Engine;
 use leptos::*;
 use leptos_router::*;
 
@@ -149,7 +148,7 @@ pub fn ImageView(
 
         view!{cx,
            <main class="bg-dark text-white d-flex flex-column p-1 pt-3 overflow-auto" >
-             <TitledChildPage title={image_id} parent_href=Page::GenerateImage.path()></TitledChildPage>
+             <TitledChildPage title={image_id} page_stack={page_stack.read_only()}></TitledChildPage>
              <div class="text-center w-100">
                  <p class="text-airtifex-yellow font-monospace py-1">{model}</p>
                  <p class="text-airtifex-light font-monospace py-2">{prompt}</p>
@@ -158,17 +157,11 @@ pub fn ImageView(
              {move || {
                 if let Some(Some(metadata)) = metadata.read(cx) {
                     if let Some(input_image) = metadata.input_image {
-                        let engine = base64::engine::GeneralPurpose::new(
-                            &base64::alphabet::STANDARD,
-                            base64::engine::general_purpose::PAD,
-                        );
-                        let encoded = engine.encode(&input_image);
-                        let src = format!("data:image/png;base64,{encoded}");
+                        let src= web_util::encode_image_base64(&input_image);
                         let size = size.get();
 
                         let mask = if let Some(mask) = metadata.mask {
-                            let encoded = engine.encode(&mask);
-                            let src = format!("data:image/png;base64,{encoded}");
+                            let src= web_util::encode_image_base64(&mask);
 
                             view!{cx,
                                 <div class="d-flex flex-column">
@@ -199,12 +192,7 @@ pub fn ImageView(
                 let size = size.get();
                 if let Some(Some(images)) = images.read(cx) {
                      images.into_iter().map(|i| {
-                        let engine = base64::engine::GeneralPurpose::new(
-                            &base64::alphabet::STANDARD,
-                            base64::engine::general_purpose::PAD,
-                        );
-                        let encoded = engine.encode(&i.data);
-                        let src = format!("data:image/png;base64,{encoded}");
+                        let src= web_util::encode_image_base64(&i.data);
                         view!{cx, <img class="p-2" src=src width=size.0 height=size.1></img>}.into_view(cx)
                     }).collect::<Vec<_>>()
                 } else {
