@@ -212,7 +212,7 @@ where
     view! { cx,
         <>
         <div class="card bg-darker m-3">
-                  <div class="card-body w-50 mx-auto pb-3 pt-5">
+                  <div class="card-body col-6 col-sm-9 mx-auto pb-3 pt-5">
                     <form
                       on:submit=|ev|ev.prevent_default()
                       class="row text-start"
@@ -399,7 +399,7 @@ where
                     }}
 
                       <button
-                         class="btn btn-outline-lighter rounded mt-3 w-25 mx-auto"
+                         class="btn btn-outline-lighter rounded mt-3 col-lg-3 col-sm-6 mx-auto"
                          on:click=move |_| dispatch_new_chat_action()
                       >
                       <img class="me-2" src="/icons/message-circle.svg" />

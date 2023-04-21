@@ -262,7 +262,7 @@ where
     view! { cx,
         <>
         <div class="card bg-darker m-3">
-                  <div class="card-body w-50 mx-auto pb-3 pt-5">
+                  <div class="card-body col-6 col-sm-9 mx-auto pb-3 pt-5">
                     <form
                       on:submit=|ev|ev.prevent_default()
                       class="row text-start"
@@ -270,19 +270,22 @@ where
 
                       <div class="input-group mb-3">
                          <label class="input-group-text">"Prompt"</label>
-                         <input
+                         <textarea
                            class = "form-control"
+                           required
+                           rows="2"
+                           value=move || prompt.get()
                            placeholder = "..."
                            on:keyup = move |ev: ev::KeyboardEvent| {
-                             match &*ev.key() {
-                                 "Enter" => {
-                                    dispatch_new_image_action();
-                                 }
-                                 _=> {
-                                    let val = event_target_value(&ev);
-                                    prompt.update(|v|*v = val);
-                                 }
-                             }
+                                match (&*ev.key(), ev.shift_key()) {
+                                    ("Enter", false) => {
+                                        dispatch_new_image_action();
+                                    }
+                                    _=> {
+                                        let val = event_target_value(&ev);
+                                        prompt.update(|v|*v = val);
+                                    }
+                                }
                            }
                          />
                       </div>
@@ -505,7 +508,7 @@ where
                     }}
 
                       <button
-                         class="btn btn-outline-lighter rounded mt-3 w-25 mx-auto"
+                         class="btn btn-outline-lighter rounded mt-3 col-lg-3 col-sm-6 mx-auto"
                          on:click=move |_| dispatch_new_image_action()
                          prop:disabled=move || prompt.get().is_empty()
                       >

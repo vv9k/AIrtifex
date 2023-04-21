@@ -86,16 +86,16 @@ pub fn PromptView(
 
         view!{cx,
            <main class="bg-dark text-white d-flex flex-column p-1 overflow-auto" >
-                 <div class="d-flex pb-3">
+                 <div class="d-flex">
                      <h1 class="display-5 p-1">{Page::Prompt.title()}</h1>
                  </div>
                  <div class=flex>
-                     <div class="col-lg-6 col-sm-12 p-3">
+                     <div class="col-lg-6 col-sm-12 px-3 pb-3">
                       <div class="card bg-darker p-4 col-12 h-100 overflow-auto">
                         <pre>{response_view}</pre>
                       </div>
                      </div>
-                     <div class="col-lg-6 col-sm-12 p-3">
+                     <div class="col-lg-6 col-sm-12 px-3">
                       <Prompt
                           authorized_api selected_model status_message dispatch_inference_action
                           num_predict prompt n_batch top_k top_p repeat_penalty temp should_cancel
