@@ -37,7 +37,7 @@ pub fn RecentImages(cx: Scope, images: Resource<u32, Vec<ImageInspect>>) -> impl
                 <div class="card bg-darker p-3 col-12">
                     <h2>"Recent Images"</h2>
                     <div class="card-body d-flex flex-column px-5">
-                    <table style="color: rgba(0,0,0,0) !important;" class="table table-hover table-striped table-responsive text-white">
+                    <table style="color: rgba(0,0,0,0) !important;" class="table table-hover table-responsive text-white">
                         <thead>
                         <tr>
                         <th scope="col">""</th>

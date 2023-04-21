@@ -169,11 +169,11 @@ pub fn ImageModels(cx: Scope, models: Resource<u32, Vec<ImageModelListEntry>>) -
                 <div class="card bg-darker p-3">
                     <h2>"Image models"</h2>
                     <div class="card-body d-flex flex-column px-5">
-                    <table style="color: rgba(0,0,0,0) !important;" class="table table-hover table-striped table-responsive text-white">
+                    <table style="color: rgba(0,0,0,0) !important;" class="table table-hover table-responsive text-white">
                         <thead>
                         <tr>
-                        <th scope="col"></th>
-                        // <th class="col-7" scope="col"></th>
+                            <th scope="col"></th>
+                            // <th class="col-7" scope="col"></th>
                         </tr>
                         </thead>
                         <tbody class="text-start">
@@ -209,11 +209,12 @@ pub fn LlModels(cx: Scope, models: Resource<u32, Vec<LlmListEntry>>) -> impl Int
                 <div class="card bg-darker p-3">
                     <h2>"LLMs"</h2>
                     <div class="card-body d-flex flex-column px-5">
-                    <table style="color: rgba(0,0,0,0) !important;" class="table table-hover table-striped table-responsive text-white">
+                    <table style="color: rgba(0,0,0,0) !important;" class="table table-hover table-responsive text-white">
                         <thead>
                         <tr>
-                        <th scope="col"></th>
-                        // <th class="col-7" scope="col"></th>
+                            <th scope="col"></th>
+                            <th scope="col"></th>
+                            // <th class="col-7" scope="col"></th>
                         </tr>
                         </thead>
                         <tbody class="text-start">
@@ -222,7 +223,7 @@ pub fn LlModels(cx: Scope, models: Resource<u32, Vec<LlmListEntry>>) -> impl Int
                         models.into_iter().take(count).map(|model| {
                             view!{cx,
                                 <tr class="text-white no-border">
-                                    <td class="text-airtifex-light">{model.name}</td>
+                                    <td colspan="2" class="text-airtifex-light">{model.name}</td>
                                     // <td class="text-secondary text-center">{model.description}</td>
                                 </tr>
                             }.into_view(cx)

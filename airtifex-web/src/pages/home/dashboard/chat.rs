@@ -14,7 +14,7 @@ pub fn RecentChats(cx: Scope, chats: Resource<u32, Vec<ChatListEntry>>) -> impl 
                 <div class="card bg-darker p-3 col-12">
                     <h2>"Recent Chats"</h2>
                     <div class="card-body d-flex flex-column px-5">
-                    <table style="color: rgba(0,0,0,0) !important;" class="table table-hover table-striped table-responsive text-white">
+                    <table style="color: rgba(0,0,0,0) !important;" class="table table-hover table-responsive text-white">
                         <thead>
                         <tr>
                         <th class="col-8" scope="col">""</th>
@@ -90,11 +90,11 @@ pub fn ChatCounters(cx: Scope, counters: Resource<u32, UserChatCounters>) -> imp
             <div class="card bg-darker p-3">
                 <h2>"Counters:"</h2>
                 <div class="card-body d-flex flex-column px-5">
-                <table style="color: rgba(0,0,0,0) !important;" class="table table-hover table-striped table-responsive text-white">
+                <table style="color: rgba(0,0,0,0) !important;" class="table table-hover table-responsive text-white">
                     <thead>
                     <tr>
-                    <th scope="col"></th>
-                    <th scope="col"></th>
+                        <th scope="col"></th>
+                        <th scope="col"></th>
                     </tr>
                     </thead>
                     <tbody class="text-start">
