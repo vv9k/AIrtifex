@@ -12,7 +12,7 @@ pub fn RecentImages(cx: Scope, images: Resource<(), Vec<ImageInspect>>) -> impl 
             <button
                 class="btn btn-outline-lighter round mx-auto"
                 on:click={move |_| {
-                crate::pages::goto_page(cx, Page::GenerateImage).expect("images page");
+                crate::pages::goto(cx, Page::GenerateImage).expect("images page");
                 }}
             >
                 <img src="/icons/list.svg" class="me-2" />
@@ -71,7 +71,7 @@ fn RecentImageEntry(cx: Scope, image: ImageInspect) -> impl IntoView {
                 class="text-white no-border"
                 style="cursor: pointer;"
                 on:click={move |_| {
-                    crate::pages::goto_page(cx, &view_href).expect("image page");
+                    crate::pages::goto(cx, &view_href).expect("image page");
                 }}
               >
                   <td>{is_finished}</td>

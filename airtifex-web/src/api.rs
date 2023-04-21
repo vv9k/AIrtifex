@@ -1,5 +1,5 @@
 use airtifex_core::image::{ImageModelListEntry, TextToImageResponse};
-use airtifex_core::llm::UserChatCounters;
+use airtifex_core::llm::{PromptInspect, UserChatCounters};
 use airtifex_core::{api_response::ApiResponse, auth::Credentials};
 use airtifex_core::{
     image::{ImageGenerateRequest, ImageInspect, ImageSampleInspect},
@@ -109,6 +109,14 @@ impl AuthorizedApi {
     pub async fn oneshot_inference(&self, request: OneshotInferenceRequest) -> Result<Response> {
         let url = format!("{}/llm/inference", self.url);
         self.send(Request::post(&url).json(&request)?).await
+    }
+    pub async fn prompt_list(&self) -> Result<Vec<PromptInspect>> {
+        let url = format!("{}/llm/prompt", self.url);
+        self.send_json(Request::get(&url)).await
+    }
+    pub async fn prompt_inspect(&self, id: &str) -> Result<PromptInspect> {
+        let url = format!("{}/llm/prompt/{id}", self.url);
+        self.send_json(Request::get(&url)).await
     }
     pub async fn chat_start_new(&self, request: ChatStartRequest) -> Result<ChatStartResponse> {
         let url = format!("{}/llm/chat", self.url);

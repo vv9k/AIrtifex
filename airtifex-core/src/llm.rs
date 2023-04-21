@@ -57,7 +57,7 @@ pub struct ChatListEntry {
     pub title: String,
     pub start_date: chrono::DateTime<chrono::Utc>,
     pub model: String,
-    pub settings: ChatSettings,
+    pub settings: InferenceSettings,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -73,7 +73,7 @@ pub struct ChatStartRequest {
     pub title: Option<String>,
     pub model: Option<String>,
     #[serde(default)]
-    pub settings: ChatSettings,
+    pub settings: InferenceSettings,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -84,7 +84,7 @@ pub struct LlmListEntry {
 }
 
 #[derive(Default, Clone, Debug, Serialize, Deserialize)]
-pub struct ChatSettings {
+pub struct InferenceSettings {
     pub num_predict: Option<usize>,
     pub system_prompt: Option<String>,
     pub n_batch: Option<usize>,
@@ -117,4 +117,20 @@ pub type ChatStreamResult = Result<String, String>;
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct UserChatCounters {
     pub chat_count: usize,
+}
+
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+pub struct PromptInspect {
+    pub id: String,
+    pub username: String,
+    pub prompt: String,
+    pub response: String,
+    pub date: chrono::DateTime<chrono::Utc>,
+    pub model: String,
+    pub num_predict: Option<usize>,
+    pub n_batch: Option<usize>,
+    pub top_k: Option<usize>,
+    pub top_p: Option<f32>,
+    pub repeat_penalty: Option<f32>,
+    pub temp: Option<f32>,
 }

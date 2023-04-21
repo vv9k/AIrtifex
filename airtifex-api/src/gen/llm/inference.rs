@@ -1,8 +1,9 @@
 use crate::config::LlmConfig;
+use crate::gen::ModelName;
 use crate::id::Uuid;
-use crate::models::chat_entry::ChatEntry;
+use crate::models::{chat_entry::ChatEntry, prompt::Prompt};
 use crate::queue;
-use airtifex_core::llm::{ChatEntryType, ChatStreamResult};
+use airtifex_core::llm::{ChatEntryType, ChatStreamResult, InferenceSettings};
 
 use llama_rs::{
     InferenceError, InferenceParameters, InferenceSession, InferenceSessionParameters,
@@ -31,7 +32,6 @@ Write a response to the request in the '### Request:' section that appropriately
 
 #[derive(Debug)]
 pub struct ChatData {
-    pub user: String,
     pub conversation_id: Uuid,
     pub history: Vec<ChatEntry>,
 }
@@ -41,23 +41,26 @@ pub struct InferenceRequest {
     /// The channel to send the tokens to.
     pub tx_tokens: Sender<ChatStreamResult>,
 
+    pub user: String,
     pub chat_data: Option<ChatData>,
-    pub num_predict: Option<usize>,
     pub prompt: String,
-    pub system_prompt: Option<String>,
-    pub n_batch: Option<usize>,
-    pub top_k: Option<usize>,
-    pub top_p: Option<f32>,
-    pub repeat_penalty: Option<f32>,
-    pub temp: Option<f32>,
+    pub settings: InferenceSettings,
     pub play_back_tokens: bool,
 }
 
 #[derive(Debug)]
-pub struct SaveDataRequest {
-    pub conversation_id: Uuid,
-    pub input: String,
-    pub output: String,
+pub enum SaveDataRequest {
+    Chat {
+        conversation_id: Uuid,
+        input: String,
+        output: String,
+    },
+    Prompt {
+        input: String,
+        output: String,
+        username: String,
+        settings: InferenceSettings,
+    },
 }
 
 #[derive(Default)]
@@ -69,6 +72,7 @@ struct InferenceState {
 }
 
 pub fn initialize_model_and_handle_inferences(
+    model: ModelName,
     db: Arc<crate::DbPool>,
     config: LlmConfig,
     runtime: Arc<Runtime>,
@@ -80,23 +84,39 @@ pub fn initialize_model_and_handle_inferences(
         unbounded();
     std::thread::spawn(move || loop {
         if let Ok(save_data_request) = rx_results.recv() {
-            let user = ChatEntry::new_user(
-                save_data_request.conversation_id.clone(),
-                save_data_request.input,
-            );
-            let bot = ChatEntry::new_bot(
-                save_data_request.conversation_id.clone(),
-                save_data_request.output,
-            );
-            let db = db.clone();
-            let _ = runtime.spawn(async move {
-                if let Err(e) = user.create(&db).await {
-                    log::error!("failed to save user chat entry - {e}")
+            match save_data_request {
+                SaveDataRequest::Chat {
+                    conversation_id,
+                    input,
+                    output,
+                } => {
+                    let user = ChatEntry::new_user(conversation_id.clone(), input);
+                    let bot = ChatEntry::new_bot(conversation_id.clone(), output);
+                    let db = db.clone();
+                    let _ = runtime.spawn(async move {
+                        if let Err(e) = user.create(&db).await {
+                            log::error!("failed to save user chat entry - {e}")
+                        }
+                        if let Err(e) = bot.create(&db).await {
+                            log::error!("failed to save bot chat entry - {e}")
+                        }
+                    });
                 }
-                if let Err(e) = bot.create(&db).await {
-                    log::error!("failed to save bot chat entry - {e}")
+                SaveDataRequest::Prompt {
+                    input,
+                    output,
+                    username,
+                    settings,
+                } => {
+                    let db = db.clone();
+                    let prompt = Prompt::new(username, model.clone(), input, output, settings);
+                    let _ = runtime.spawn(async move {
+                        if let Err(e) = prompt.create(&db).await {
+                            log::error!("failed to save prompt - {e}")
+                        }
+                    });
                 }
-            });
+            }
         } else {
             log::error!("all channels closed");
             break;
@@ -132,7 +152,7 @@ pub fn initialize_model_and_handle_inferences(
             }
             for session in &mut running_sessions {
                 if session.state.processed_tokens
-                    <= session.request.num_predict.unwrap_or(usize::MAX)
+                    <= session.request.settings.num_predict.unwrap_or(usize::MAX)
                 {
                     if let Err(e) =
                         session.infer_next_token(&inference_session_manager, &mut rng, &tx_results)
@@ -232,11 +252,14 @@ impl InferenceSessionManager {
 
         let params = InferenceParameters {
             n_threads: self.config.num_threads,
-            n_batch: request.n_batch.unwrap_or(self.config.batch_size),
-            top_k: request.top_k.unwrap_or(self.config.top_k),
-            top_p: request.top_p.unwrap_or(self.config.top_p),
-            repeat_penalty: request.repeat_penalty.unwrap_or(self.config.repeat_penalty),
-            temperature: request.temp.unwrap_or(self.config.temperature),
+            n_batch: request.settings.n_batch.unwrap_or(self.config.batch_size),
+            top_k: request.settings.top_k.unwrap_or(self.config.top_k),
+            top_p: request.settings.top_p.unwrap_or(self.config.top_p),
+            repeat_penalty: request
+                .settings
+                .repeat_penalty
+                .unwrap_or(self.config.repeat_penalty),
+            temperature: request.settings.temp.unwrap_or(self.config.temperature),
             bias_tokens: TokenBias::default(),
             play_back_previous_tokens: request.play_back_tokens,
         };
@@ -254,6 +277,7 @@ impl InferenceSessionManager {
             });
             let user_prompt = format!("{USER_PREFIX}{}", request.prompt);
             request
+                .settings
                 .system_prompt
                 .as_deref()
                 .unwrap_or(CONVERSATION_PROMPT)
@@ -311,7 +335,7 @@ impl RunningInferenceSession {
             log::trace!("saving chat data {}", &chat.conversation_id);
             let output = self.state.answer.clone();
             if !output.is_empty() {
-                if let Err(e) = tx_results.try_send(SaveDataRequest {
+                if let Err(e) = tx_results.try_send(SaveDataRequest::Chat {
                     conversation_id: chat.conversation_id,
                     input: self.request.prompt.clone(),
                     output,
@@ -321,6 +345,24 @@ impl RunningInferenceSession {
                         chat.conversation_id
                     );
                 }
+            }
+        } else {
+            log::trace!("[{}] saving inference results", self.id);
+            if let Err(e) = tx_results.try_send(SaveDataRequest::Prompt {
+                input: self.request.prompt.clone(),
+                output: self.state.answer.clone(),
+                username: self.request.user.clone(),
+                settings: InferenceSettings {
+                    num_predict: self.request.settings.num_predict,
+                    system_prompt: self.request.settings.system_prompt.clone(),
+                    n_batch: Some(self.params.n_batch),
+                    top_k: Some(self.params.top_k),
+                    top_p: Some(self.params.top_p),
+                    repeat_penalty: Some(self.params.repeat_penalty),
+                    temp: Some(self.params.temperature),
+                },
+            }) {
+                log::error!("failed to save inference results - {e}");
             }
         }
     }

@@ -4,25 +4,74 @@ use airtifex_core::user::AuthenticatedUser;
 use leptos::*;
 use leptos_router::*;
 
+pub enum NavElement {
+    Main(Page),
+    Sub(Page, &'static [Page]),
+}
+
 #[component]
-pub fn NavItem(cx: Scope, page_stack: RwSignal<PageStack>, page: Page) -> impl IntoView {
-    view! { cx,
-        <li class="nav-item sb-item">
-          <Show
-            when = move || page_stack.get().current().root_page() == page
-            fallback = move |cx| view! { cx,
-               <a href=page.path() class="nav-link" aria-current="page">
-                   <img class="me-2" src=page.icon()/>
-                   <span class="fw-bold text-white">{page.title()}</span>
-               </a>
-            }
-          >
-             <a href=page.path() class="nav-link selected" aria-current="page">
-                 <img class="me-2" src=page.icon()/>
-                 <span class="fw-bold text-white">{page.title()}</span>
-             </a>
-          </Show>
-        </li>
+pub fn NavItem(
+    cx: Scope,
+    page_stack: RwSignal<PageStack>,
+    nav: &'static NavElement,
+) -> impl IntoView {
+
+    match nav {
+        NavElement::Main(page) => {
+            let classes = move || if page_stack.get().current().root_page() == *page {
+              "nav-link selected"
+            } else {
+              "nav-link"
+            };
+            view! { cx,
+                <li class="nav-item sb-item">
+                    <a href=page.path() class=classes aria-current="page">
+                        <img class="me-2" src=page.icon()/>
+                        <span class="fw-bold text-white">{page.nav_display()}</span>
+                    </a>
+                </li>
+            }.into_view(cx)
+        }
+        NavElement::Sub(root, sub) => {
+            let is_current =  move || page_stack.get().current().root_page() == *root;
+            let aria_expanded =  move || is_current().to_string();
+            let collapsed =  move || if is_current() { "collapse show" } else { "collapse" };
+            let parent_classes = move || if is_current() {
+              "btn btn-toggle text-start nav-link w-100 text-white fw-bold selected"
+            } else {
+              "btn btn-toggle text-start nav-link w-100 collapsed text-white fw-bold"
+            };
+            view! { cx,
+                <li class="nav-item sb-item">
+                  <button class=parent_classes data-bs-toggle="collapse" data-bs-target="#images-collapse" aria-expanded={aria_expanded}>
+                      <img src=root.icon()/>
+                      {root.nav_display()}
+                  </button>
+                  <div id="images-collapse" class=collapsed>
+                    <ul class="list-unstyled fw-normal pb-1">
+                      { move || {
+                          sub.into_iter().map(|p| {
+                            let classes = move || if page_stack.get().current() == *p {
+                              "ms-5 ps-2 nav-link selected"
+                            } else {
+                              "ms-5 ps-2 nav-link"
+                            };
+                            view!{ cx, 
+                              <li 
+                                class=classes
+                                style="cursor: pointer;"
+                                on:click=move |_| crate::pages::goto(cx, p.path()).expect("subpage")
+                              >
+                                <p class="text-white text-decoration-none fw-bold">"└ "{p.nav_display()}</p>
+                              </li>
+                            }.into_view(cx)
+                          }).collect::<Vec<_>>()
+                      }}
+                    </ul>
+                  </div>
+                </li>
+            }.into_view(cx)
+        }
     }
 }
 
@@ -40,7 +89,7 @@ where
          {move || match user_info.get() {
          Some(user) => {
              let nav_items = if user.is_admin() { Page::main_admin_pages() } else { Page::main_user_pages() };
-             let nav_items: Vec<_> = nav_items.into_iter().map(|&page| view!{cx, <NavItem page_stack page/>}.into_view(cx)).collect();
+             let nav_items: Vec<_> = nav_items.into_iter().map(|nav| view!{cx, <NavItem page_stack nav/>}.into_view(cx)).collect();
 
              view!{cx,
        <nav class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white bg-darker col-md-3 col-lg-2">
@@ -50,19 +99,6 @@ where
          <hr/>
          <ul class="nav nav-pills flex-column mb-auto">
          { nav_items }
-            // <li class="nav-item sb-item">
-            //   <button class="btn btn-toggle align-items-center collapsed text-white fw-bold" data-bs-toggle="collapse" data-bs-target="#images-collapse" aria-expanded="false">
-            //       <img src=""/>
-            //       "Stable Diffusion"
-            //   </button>
-            //   <div id="images-collapse" class="collapse">
-            //     <ul class="list-unstyled fw-normal pb-1">
-            //       <li class="ms-5 ps-2 nav-link">
-            //         <a href="" class="text-white text-decoration-none fw-bold">"└ Text to image"</a>
-            //       </li>
-            //     </ul>
-            //   </div>
-            // </li>
          </ul>
          <hr/>
          <div class="dropdown">

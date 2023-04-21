@@ -7,6 +7,8 @@ pub mod users;
 
 pub use self::{chat::*, home::*, image::*, login::*, prompt::*, users::*};
 
+use crate::components::navbar::NavElement;
+
 use leptos::*;
 use leptos_router::{use_navigate, NavigationError};
 
@@ -22,6 +24,9 @@ pub enum Page {
     Chat,
     ChatView,
     Prompt,
+    PromptGenerate,
+    PromptList,
+    PromptView,
     GenerateImage,
     GeneratedImageView,
     Login,
@@ -37,7 +42,10 @@ impl Page {
             | Self::UserProfile => Self::Users,
             Self::Chat | Self::ChatView => Self::Chat,
             Self::GenerateImage | Self::GeneratedImageView => Self::GenerateImage,
-            Self::Prompt | Self::Home | Self::Login => *self,
+            Self::Prompt | Self::PromptGenerate | Self::PromptList | Self::PromptView => {
+                Self::Prompt
+            }
+            Self::Home | Self::Login => *self,
         }
     }
     pub fn path(&self) -> &'static str {
@@ -50,7 +58,9 @@ impl Page {
             Self::UserProfile => "/users/profile",
             Self::Chat => "/chat",
             Self::ChatView => "/chat/:chat_id",
-            Self::Prompt => "/prompt",
+            Self::Prompt | Self::PromptGenerate => "/prompt",
+            Self::PromptList => "/prompt/history",
+            Self::PromptView => "/prompt/:prompt_id",
             Self::GenerateImage => "/gen/image",
             Self::GeneratedImageView => "/gen/image/:image_id",
             Self::Login => "/login",
@@ -66,7 +76,9 @@ impl Page {
             | Self::UserPasswordChange
             | Self::UserProfile => "/icons/users.svg",
             Self::Chat | Self::ChatView => "/icons/message-circle.svg",
-            Self::Prompt => "/icons/terminal.svg",
+            Self::Prompt | Self::PromptGenerate | Self::PromptList | Self::PromptView => {
+                "/icons/terminal.svg"
+            }
             Self::Login => "/icons/login.svg",
             Self::GenerateImage | Self::GeneratedImageView => "/icons/image.svg",
         }
@@ -82,22 +94,47 @@ impl Page {
             | Self::UserProfile => "Users",
             Self::Chat | Self::ChatView => "Chat",
             Self::Prompt => "Prompt",
+            Self::PromptGenerate => "Generate Prompt",
+            Self::PromptList => "Prompt History",
+            Self::PromptView => "Prompt",
             Self::Login => "Login",
             Self::GenerateImage | Self::GeneratedImageView => "Generate Image",
         }
     }
 
-    pub fn main_user_pages() -> &'static [Self] {
-        &[Self::Home, Self::Chat, Self::Prompt, Self::GenerateImage]
+    pub fn nav_display(&self) -> &'static str {
+        match self {
+            Self::Home => "Home",
+            Self::Users
+            | Self::UserAdd
+            | Self::UserEdit
+            | Self::UserPasswordChange
+            | Self::UserProfile => "Users",
+            Self::Chat | Self::ChatView => "Chat",
+            Self::Prompt | Self::PromptView => "Prompt",
+            Self::PromptGenerate => "generate",
+            Self::PromptList => "history",
+            Self::Login => "Login",
+            Self::GenerateImage | Self::GeneratedImageView => "Generate Image",
+        }
     }
 
-    pub fn main_admin_pages() -> &'static [Self] {
+    pub fn main_user_pages() -> &'static [NavElement] {
         &[
-            Self::Home,
-            Self::Users,
-            Self::Chat,
-            Self::Prompt,
-            Self::GenerateImage,
+            NavElement::Main(Self::Home),
+            NavElement::Main(Self::Chat),
+            NavElement::Sub(Self::Prompt, &[Self::PromptGenerate, Self::PromptList]),
+            NavElement::Main(Self::GenerateImage),
+        ]
+    }
+
+    pub fn main_admin_pages() -> &'static [NavElement] {
+        &[
+            NavElement::Main(Self::Home),
+            NavElement::Main(Self::Users),
+            NavElement::Main(Self::Chat),
+            NavElement::Sub(Self::Prompt, &[Self::PromptGenerate, Self::PromptList]),
+            NavElement::Main(Self::GenerateImage),
         ]
     }
 }
@@ -145,7 +182,7 @@ pub fn goto_login_if_expired(
     }
 }
 
-pub fn goto_page(cx: Scope, page: impl AsRef<str>) -> Result<(), NavigationError> {
+pub fn goto(cx: Scope, page: impl AsRef<str>) -> Result<(), NavigationError> {
     let navigate = use_navigate(cx);
     navigate(page.as_ref(), Default::default())
 }

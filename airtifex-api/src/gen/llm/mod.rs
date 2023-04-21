@@ -27,6 +27,7 @@ pub async fn initialize_models(
             llm.create(&db).await?;
         }
         let tx_inference_req = inference::initialize_model_and_handle_inferences(
+            model.clone(),
             db.clone(),
             llm_config.clone(),
             runtime.clone(),

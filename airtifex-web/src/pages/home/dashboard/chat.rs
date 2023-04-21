@@ -35,7 +35,7 @@ pub fn RecentChats(cx: Scope, chats: Resource<(), Vec<ChatListEntry>>) -> impl I
                                   class="text-white no-border"
                                   style="cursor: pointer;"
                                   on:click={move |_| {
-                                      crate::pages::goto_page(cx, Page::Chat).expect("chat page");
+                                      crate::pages::goto(cx, Page::Chat).expect("chat page");
                                   }}
                                 >
                                     <td 
@@ -70,7 +70,7 @@ fn RecentChatEntry(cx: Scope, chat: ChatListEntry) -> impl IntoView {
                 class="text-white no-border"
                 style="cursor: pointer;"
                 on:click={move |_| {
-                    crate::pages::goto_page(cx, &view_href).expect("chat page");
+                    crate::pages::goto(cx, &view_href).expect("chat page");
                 }}
               >
                   <td>

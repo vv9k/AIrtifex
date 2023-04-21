@@ -229,13 +229,45 @@ pub fn App(cx: Scope) -> impl IntoView {
     //####################################################################################################
 
                 <ProtectedRoute
-                  path=Page::Prompt.path()
+                  path=Page::PromptGenerate.path()
                   condition=move |_| {
                       user_info.get().is_some()
                   }
                   redirect_path=Page::Home.path()
                   view=move |cx| {
-                      subtitle.update(|sub| *sub = Some(Page::Prompt.title().into()));
+                      subtitle.update(|sub| *sub = Some(Page::PromptGenerate.title().into()));
+
+                      view! { cx,
+                        <NavBar page_stack user_info on_logout />
+                        <PromptGenerate authorized_api page_stack />
+                      }
+                  }
+                />
+
+                <ProtectedRoute
+                  path=Page::PromptList.path()
+                  condition=move |_| {
+                      user_info.get().is_some()
+                  }
+                  redirect_path=Page::Home.path()
+                  view=move |cx| {
+                      subtitle.update(|sub| *sub = Some(Page::PromptList.title().into()));
+
+                      view! { cx,
+                        <NavBar page_stack user_info on_logout />
+                        <PromptList authorized_api page_stack />
+                      }
+                  }
+                />
+
+                <ProtectedRoute
+                  path=Page::PromptView.path()
+                  condition=move |_| {
+                      user_info.get().is_some()
+                  }
+                  redirect_path=Page::Home.path()
+                  view=move |cx| {
+                      subtitle.update(|sub| *sub = Some(Page::PromptView.title().into()));
 
                       view! { cx,
                         <NavBar page_stack user_info on_logout />

@@ -5,11 +5,12 @@ use crate::models::{chat::Chat, chat_entry::ChatEntry, llm::LargeLanguageModel};
 use crate::routes::handle_db_result_as_json;
 use crate::Error;
 use crate::{SharedAppState, ToAxumResponse};
+use airtifex_core::llm::InferenceSettings;
 use airtifex_core::{
     api_response::ApiResponse,
     llm::{
         ChatEntryListEntry, ChatListEntry, ChatResponseRequest, ChatStartRequest,
-        ChatStartResponse, ChatStreamResult, LlmListEntry, OneshotInferenceRequest,
+        ChatStartResponse, ChatStreamResult, LlmListEntry,
     },
 };
 
@@ -23,7 +24,6 @@ use axum::{
 pub fn router() -> Router<SharedAppState> {
     Router::new()
         .route("/models", routing::get(list_models))
-        .route("/inference", routing::post(oneshot_inference))
         .route("/chat", routing::post(start_chat).get(list))
         .route("/chat/counters", routing::get(counters))
         .route(
@@ -63,19 +63,21 @@ async fn inference(
 
     let request = InferenceRequest {
         tx_tokens,
+        user: claims.sub,
         chat_data: Some(ChatData {
-            user: claims.sub,
             conversation_id: id,
             history,
         }),
-        num_predict: chat.num_predict.map(|k| k as usize),
-        system_prompt: chat.system_prompt,
         prompt: request.prompt,
-        n_batch: chat.n_batch.map(|k| k as usize),
-        top_k: chat.top_k.map(|k| k as usize),
-        top_p: chat.top_p,
-        repeat_penalty: chat.repeat_penalty,
-        temp: chat.temp,
+        settings: InferenceSettings {
+            num_predict: chat.num_predict.map(|k| k as usize),
+            system_prompt: chat.system_prompt,
+            n_batch: chat.n_batch.map(|k| k as usize),
+            top_k: chat.top_k.map(|k| k as usize),
+            top_p: chat.top_p,
+            repeat_penalty: chat.repeat_penalty,
+            temp: chat.temp,
+        },
         play_back_tokens: false,
     };
     log::info!("{request:?}");
@@ -147,7 +149,7 @@ async fn list(claims: Claims, state: State<SharedAppState>) -> Response {
                         username: chat.username,
                         start_date: chat.start_date,
                         model: chat.model,
-                        settings: airtifex_core::llm::ChatSettings {
+                        settings: airtifex_core::llm::InferenceSettings {
                             num_predict: chat.num_predict.map(|n| n as usize),
                             system_prompt: chat.system_prompt,
                             n_batch: chat.n_batch.map(|n| n as usize),
@@ -176,7 +178,7 @@ async fn get_chat(claims: Claims, state: State<SharedAppState>, Path(id): Path<U
                 username: chat.username,
                 start_date: chat.start_date,
                 model: chat.model,
-                settings: airtifex_core::llm::ChatSettings {
+                settings: airtifex_core::llm::InferenceSettings {
                     num_predict: chat.num_predict.map(|n| n as usize),
                     system_prompt: chat.system_prompt,
                     n_batch: chat.n_batch.map(|n| n as usize),
@@ -246,53 +248,6 @@ async fn delete_chat(
     with_user_guard!(claims, db);
 
     handle_db_result_as_json(Chat::delete(&db, &id).await.map_err(Error::from))
-}
-
-async fn oneshot_inference(
-    claims: Claims,
-    State(state): State<SharedAppState>,
-    Json(request): Json<OneshotInferenceRequest>,
-) -> Response {
-    let db = &state.db;
-    with_user_guard!(claims, db);
-
-    let (tx_tokens, rx_tokens): (
-        flume::Sender<ChatStreamResult>,
-        flume::Receiver<ChatStreamResult>,
-    ) = flume::unbounded();
-
-    let inference_request = InferenceRequest {
-        tx_tokens,
-        chat_data: None,
-        num_predict: request.num_predict,
-        system_prompt: None,
-        prompt: request.prompt,
-        n_batch: request.n_batch,
-        top_k: request.top_k,
-        top_p: request.top_p,
-        repeat_penalty: request.repeat_penalty,
-        temp: request.temp,
-        play_back_tokens: request.play_back_tokens,
-    };
-    log::info!("{inference_request:?}");
-
-    if let Some(model) = state.tx_inference_req.get(&request.model) {
-        if let Err(e) = model.send_async(inference_request).await {
-            return ApiResponse::failure(e).internal_server_error();
-        }
-    } else {
-        return ApiResponse::failure(format!("failed to find model {}", &request.model))
-            .internal_server_error();
-    }
-
-    (
-        [
-            (axum::http::header::CONTENT_TYPE, "text/event-stream"),
-            (axum::http::header::TRANSFER_ENCODING, "chunked"),
-        ],
-        StreamBody::new(rx_tokens.into_stream()),
-    )
-        .into_response()
 }
 
 async fn counters(claims: Claims, State(state): State<SharedAppState>) -> Response {

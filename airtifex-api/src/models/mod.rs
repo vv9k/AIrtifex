@@ -4,6 +4,7 @@ pub mod image;
 pub mod image_model;
 pub mod image_sample;
 pub mod llm;
+pub mod prompt;
 pub mod user;
 
 use thiserror::Error;
@@ -24,6 +25,8 @@ pub enum Error {
     ImageModelError(#[from] image_model::ImageModelError),
     #[error(transparent)]
     LlmError(#[from] llm::LlmError),
+    #[error(transparent)]
+    PromptError(#[from] prompt::PromptError),
     #[error(transparent)]
     ChatEntryError(#[from] chat_entry::ChatEntryError),
     #[error(transparent)]

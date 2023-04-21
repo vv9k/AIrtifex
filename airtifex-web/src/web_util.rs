@@ -111,3 +111,11 @@ impl WindowSize {
         Ok(size_r)
     }
 }
+
+pub fn display_limited_str(s: &str, limit: usize) -> String {
+    if s.len() > limit {
+        format!("{}...", &s[..limit])
+    } else {
+        s.to_string()
+    }
+}

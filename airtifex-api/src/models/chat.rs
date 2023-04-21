@@ -1,7 +1,7 @@
 use crate::id::Uuid;
 use crate::models::{chat_entry::ChatEntry, Error, Result};
 use crate::DbPool;
-use airtifex_core::llm::{ChatSettings, UserChatCounters};
+use airtifex_core::llm::{InferenceSettings, UserChatCounters};
 
 use serde::{Deserialize, Serialize};
 use sqlx::Row;
@@ -45,7 +45,7 @@ impl Chat {
         username: String,
         model: String,
         title: Option<String>,
-        settings: ChatSettings,
+        settings: InferenceSettings,
     ) -> Self {
         Self {
             id: Uuid::new_v4(),

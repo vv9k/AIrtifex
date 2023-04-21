@@ -1,6 +1,6 @@
 use crate::components::{modal::*, status_message::*};
 use crate::{api, Page, PageStack};
-use airtifex_core::llm::{ChatListEntry, ChatSettings, ChatStartRequest};
+use airtifex_core::llm::{ChatListEntry, ChatStartRequest, InferenceSettings};
 
 use leptos::*;
 use leptos_router::*;
@@ -83,7 +83,7 @@ pub fn Chat(
             let request = ChatStartRequest {
                 title,
                 model: Some(selected_model.get()),
-                settings: ChatSettings {
+                settings: InferenceSettings {
                     num_predict: num_predict.get(),
                     system_prompt: None,
                     n_batch: n_batch.get(),

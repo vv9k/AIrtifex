@@ -1,3 +1,9 @@
+pub mod history;
+pub mod view;
+
+pub use history::*;
+pub use view::*;
+
 use crate::components::status_message::*;
 use crate::inference::read_inference_stream;
 use crate::{api, web_util, Page, PageStack};
@@ -6,7 +12,7 @@ use airtifex_core::llm::OneshotInferenceRequest;
 use leptos::*;
 
 #[component]
-pub fn PromptView(
+pub fn PromptGenerate(
     cx: Scope,
     authorized_api: RwSignal<Option<api::AuthorizedApi>>,
     page_stack: RwSignal<PageStack>,
@@ -73,7 +79,7 @@ pub fn PromptView(
 
     view! { cx,
       {move || {
-        page_stack.update(|p| p.push(Page::Prompt));
+        page_stack.update(|p| p.push(Page::PromptGenerate));
 
         let flex = move || {
             if window_size.get().width < 992 {
