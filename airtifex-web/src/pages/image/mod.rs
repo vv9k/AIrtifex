@@ -507,6 +507,7 @@ where
                       <button
                          class="btn btn-outline-lighter rounded mt-3 w-25 mx-auto"
                          on:click=move |_| dispatch_new_image_action()
+                         prop:disabled=move || prompt.get().is_empty()
                       >
                       <img class="me-2" src="/icons/send.svg" />
                       "New image"
