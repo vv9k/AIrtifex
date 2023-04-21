@@ -4,7 +4,7 @@ use airtifex_core::image::ImageInspect;
 use leptos::*;
 
 #[component]
-pub fn RecentImages(cx: Scope, images: Resource<u32, Vec<ImageInspect>>) -> impl IntoView {
+pub fn RecentImages(cx: Scope, images: Resource<(), Vec<ImageInspect>>) -> impl IntoView {
     const DISPLAY_COUNT: usize = 5;
 
     view! { cx, { move || {
@@ -36,7 +36,7 @@ pub fn RecentImages(cx: Scope, images: Resource<u32, Vec<ImageInspect>>) -> impl
             return view! { cx,
                 <div class="card bg-darker p-3 col-12">
                     <h2>"Recent Images"</h2>
-                    <div class="card-body d-flex flex-column px-5">
+                    <div class="card-body d-flex flex-column">
                     <table style="color: rgba(0,0,0,0) !important;" class="table table-hover table-responsive text-white">
                         <thead>
                         <tr>

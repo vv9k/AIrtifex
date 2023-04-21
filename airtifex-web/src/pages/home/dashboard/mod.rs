@@ -6,6 +6,7 @@ use image::*;
 
 use crate::api::AuthorizedApi;
 use crate::components::status_message::*;
+use crate::web_util;
 
 use airtifex_core::{
     image::ImageModelListEntry,
@@ -19,13 +20,12 @@ pub fn Dashboard(
     authorized_api: RwSignal<Option<AuthorizedApi>>,
     global_message: RwSignal<Message>,
 ) -> impl IntoView {
-    let current_list_page = create_rw_signal(cx, 1u32);
-    let current_list_page2 = create_rw_signal(cx, 1u32);
+    let window_size = web_util::WindowSize::signal(cx).expect("window size");
 
     let chats = create_resource(
         cx,
-        move || current_list_page.get(),
-        move |_current_list_page| async move {
+        move || (),
+        move |_| async move {
             match authorized_api.get() {
                 Some(api) => match api.chat_list().await {
                     Ok(chats) => chats,
@@ -47,8 +47,8 @@ pub fn Dashboard(
 
     let images = create_resource(
         cx,
-        move || current_list_page2.get(),
-        move |_current_list_page| async move {
+        move || (),
+        move |_| async move {
             match authorized_api.get() {
                 Some(api) => match api.image_list().await {
                     Ok(images) => images,
@@ -70,8 +70,8 @@ pub fn Dashboard(
 
     let image_models = create_resource(
         cx,
-        move || current_list_page.get(),
-        move |_current_list_page| async move {
+        move || (),
+        move |_| async move {
             match authorized_api.get() {
                 Some(api) => match api.image_models().await {
                     Ok(models) => models,
@@ -91,8 +91,8 @@ pub fn Dashboard(
 
     let llms = create_resource(
         cx,
-        move || current_list_page.get(),
-        move |_current_list_page| async move {
+        move || (),
+        move |_| async move {
             match authorized_api.get() {
                 Some(api) => match api.large_language_models().await {
                     Ok(models) => models,
@@ -112,8 +112,8 @@ pub fn Dashboard(
 
     let chat_counters = create_resource(
         cx,
-        move || current_list_page.get(),
-        move |_current_list_page| async move {
+        move || (),
+        move |_| async move {
             match authorized_api.get() {
                 Some(api) => match api.user_chat_counters().await {
                     Ok(counters) => counters,
@@ -131,44 +131,80 @@ pub fn Dashboard(
         },
     );
 
+    let inner_view = move || {
+        if window_size.get().width < 992 {
+            view! { cx,
+                <div class="d-flex flex-row col-12 py-3">
+                    <div class="d-flex flex-row col-12">
+                        <RecentChats chats />
+                    </div>
+                </div>
+                <div class="d-flex flex-row col-12 pb-3">
+                    <div class="d-flex flex-row col-12">
+                        <div class="col-6 pe-2">
+                        <LlModels models=llms />
+                        </div>
+                        <div class="col-6 ps-2">
+                        <ChatCounters counters=chat_counters />
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex flex-row col-12 pb-3">
+                    <div class="d-flex flex-row justify-content-center col-12">
+                        <RecentImages images />
+                    </div>
+                </div>
+                <div class="d-flex flex-row col-12 pb-3">
+                    <div class="d-flex flex-row col-12">
+                        <ImageModels models=image_models />
+                    </div>
+                </div>
+            }
+            .into_view(cx)
+        } else {
+            view! { cx,
+                <div class="d-flex flex-row col-12 pb-3">
+                    <div class="d-flex flex-row justify-content-center col-6 pe-2">
+                        <RecentChats chats />
+                    </div>
+                    <div class="d-flex flex-row justify-content-center col-6 ps-2">
+                        <RecentImages images />
+                    </div>
+                </div>
+                <div class="d-flex flex-row col-12">
+                    <div class="d-flex flex-row col-6 pe-2">
+                        <div class="col-6 pe-2">
+                        <LlModels models=llms />
+                        </div>
+                        <div class="col-6 ps-2">
+                        <ChatCounters counters=chat_counters />
+                        </div>
+                    </div>
+                    <div class="d-flex flex-row col-6 ps-2">
+                        <ImageModels models=image_models />
+                    </div>
+                </div>
+            }
+            .into_view(cx)
+        }
+    };
+
     view! { cx,
         <>
-        <div class="d-flex flex-column justify-content-center mx-3">
-            <div class="d-flex flex-row col-12 pb-3">
-                <div class="d-flex flex-row justify-content-center col-6 pe-2">
-                    <RecentChats chats />
-                </div>
-                <div class="d-flex flex-row justify-content-center col-6 ps-2">
-                    <RecentImages images />
-                </div>
-            </div>
-            <div class="d-flex flex-row col-12">
-                <div class="d-flex flex-row mb-3 col-6 pe-2">
-                    <div class="col-6 pe-2">
-                    <LlModels models=llms />
-                    </div>
-                    <div class="col-6 ps-2">
-                    <ChatCounters counters=chat_counters />
-                    </div>
-                </div>
-                <div class="d-flex flex-row mb-3 col-6 ps-2">
-                    <ImageModels models=image_models />
-                </div>
-            </div>
-        </div>
+            {inner_view}
         </>
     }
 }
 
 #[component]
-pub fn ImageModels(cx: Scope, models: Resource<u32, Vec<ImageModelListEntry>>) -> impl IntoView {
+pub fn ImageModels(cx: Scope, models: Resource<(), Vec<ImageModelListEntry>>) -> impl IntoView {
     view! { cx, { move || {
         if let Some(models) = models.read(cx) {
             if !models.is_empty() {
                 return view! { cx,
                 <div class="card bg-darker p-3">
                     <h2>"Image models"</h2>
-                    <div class="card-body d-flex flex-column px-5">
+                    <div class="card-body d-flex flex-column">
                     <table style="color: rgba(0,0,0,0) !important;" class="table table-hover table-responsive text-white">
                         <thead>
                         <tr>
@@ -176,7 +212,7 @@ pub fn ImageModels(cx: Scope, models: Resource<u32, Vec<ImageModelListEntry>>) -
                             // <th class="col-7" scope="col"></th>
                         </tr>
                         </thead>
-                        <tbody class="text-start">
+                        <tbody class="text-center">
                     {
                         let count = 5;
                         models.into_iter().take(count).map(|model| {
@@ -201,29 +237,28 @@ pub fn ImageModels(cx: Scope, models: Resource<u32, Vec<ImageModelListEntry>>) -
 }
 
 #[component]
-pub fn LlModels(cx: Scope, models: Resource<u32, Vec<LlmListEntry>>) -> impl IntoView {
+pub fn LlModels(cx: Scope, models: Resource<(), Vec<LlmListEntry>>) -> impl IntoView {
     view! { cx, { move || {
         if let Some(models) = models.read(cx) {
             if !models.is_empty() {
                 return view! { cx,
                 <div class="card bg-darker p-3">
                     <h2>"LLMs"</h2>
-                    <div class="card-body d-flex flex-column px-5">
+                    <div class="card-body d-flex flex-column">
                     <table style="color: rgba(0,0,0,0) !important;" class="table table-hover table-responsive text-white">
                         <thead>
                         <tr>
                             <th scope="col"></th>
-                            <th scope="col"></th>
                             // <th class="col-7" scope="col"></th>
                         </tr>
                         </thead>
-                        <tbody class="text-start">
+                        <tbody class="text-center">
                     {
                         let count = 5;
                         models.into_iter().take(count).map(|model| {
                             view!{cx,
                                 <tr class="text-white no-border">
-                                    <td colspan="2" class="text-airtifex-light">{model.name}</td>
+                                    <td class="text-airtifex-light">{model.name}</td>
                                     // <td class="text-secondary text-center">{model.description}</td>
                                 </tr>
                             }.into_view(cx)

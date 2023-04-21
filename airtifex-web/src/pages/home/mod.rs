@@ -20,16 +20,24 @@ pub fn Home(
     global_message: RwSignal<Message>,
 ) -> impl IntoView {
     page_stack.update(|p| p.push(Page::Home));
+    let window_size = crate::web_util::WindowSize::signal(cx).expect("window size");
 
     view! { cx,
       {move || {
        let inner_view = match user_info.get() {
-        Some(_info) => view!{ cx,
-           <div class="text-center d-flex flex-column justify-content-center w-100">
-               <StatusMessage message=global_message />
-               <Dashboard authorized_api global_message />
-           </div>
-        }.into_view(cx),
+        Some(_info) => {
+            let classes = move || if window_size.get().width < 992 {
+                "text-center d-flex flex-column mx-3 w-100"
+            } else {
+                "text-center d-flex flex-column justify-content-center mx-3 w-100"
+            };
+            view!{ cx,
+            <div class=classes>
+                <StatusMessage message=global_message />
+                <Dashboard authorized_api global_message />
+            </div>
+            }.into_view(cx)
+        },
         None => view!{ cx,
             <div class="container d-flex h-100 justify-content-center">
                 <div class="row align-items-center h-100">
@@ -50,7 +58,7 @@ pub fn Home(
        };
 
        view!{ cx,
-         <main class="bg-dark text-white" >
+         <main class="bg-dark text-white overflow-scroll" >
             { inner_view }
          </main>
        }.into_view(cx)

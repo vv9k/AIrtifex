@@ -6,14 +6,14 @@ use airtifex_core::{
 use leptos::*;
 
 #[component]
-pub fn RecentChats(cx: Scope, chats: Resource<u32, Vec<ChatListEntry>>) -> impl IntoView {
+pub fn RecentChats(cx: Scope, chats: Resource<(), Vec<ChatListEntry>>) -> impl IntoView {
     view! { cx, { move || {
         if let Some(chats) = chats.read(cx) {
             if !chats.is_empty() {
                 return view! { cx,
                 <div class="card bg-darker p-3 col-12">
                     <h2>"Recent Chats"</h2>
-                    <div class="card-body d-flex flex-column px-5">
+                    <div class="card-body d-flex flex-column">
                     <table style="color: rgba(0,0,0,0) !important;" class="table table-hover table-responsive text-white">
                         <thead>
                         <tr>
@@ -83,13 +83,13 @@ fn RecentChatEntry(cx: Scope, chat: ChatListEntry) -> impl IntoView {
 }
 
 #[component]
-pub fn ChatCounters(cx: Scope, counters: Resource<u32, UserChatCounters>) -> impl IntoView {
+pub fn ChatCounters(cx: Scope, counters: Resource<(), UserChatCounters>) -> impl IntoView {
     view! { cx, { move || {
         if let Some(counters) = counters.read(cx) {
             return view! { cx,
             <div class="card bg-darker p-3">
                 <h2>"Counters:"</h2>
-                <div class="card-body d-flex flex-column px-5">
+                <div class="card-body d-flex flex-column">
                 <table style="color: rgba(0,0,0,0) !important;" class="table table-hover table-responsive text-white">
                     <thead>
                     <tr>

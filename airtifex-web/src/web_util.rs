@@ -1,4 +1,6 @@
 use futures::channel::oneshot;
+use leptos::*;
+use serde::{Deserialize, Serialize};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys::{Event, FileReader, HtmlInputElement};
 
@@ -65,17 +67,47 @@ pub fn encode_image_base64(image: &[u8]) -> String {
     format!("data:image/png;base64,{encoded}")
 }
 
-#[allow(dead_code)]
-pub fn get_window_size() -> Result<(u32, u32), JsValue> {
-    let window = web_sys::window().ok_or("No window")?;
-    let width = window
-        .inner_width()?
-        .as_f64()
-        .ok_or("Failed to get width")? as u32;
-    let height = window
-        .inner_height()?
-        .as_f64()
-        .ok_or("Failed to get height")? as u32;
+#[derive(Clone, Copy, Default, Deserialize, Serialize, Debug)]
+pub struct WindowSize {
+    pub width: u32,
+    pub height: u32,
+}
 
-    Ok((width, height))
+impl WindowSize {
+    pub fn new() -> Result<Self, JsValue> {
+        let window = web_sys::window().ok_or("Failed to get window object")?;
+        let width = window
+            .inner_width()
+            .map(|w| w.as_f64())?
+            .ok_or("failed to get window inner width")? as u32;
+        let height = window
+            .inner_height()
+            .map(|h| h.as_f64())?
+            .ok_or("failed to get window inner height")? as u32;
+
+        Ok(Self { width, height })
+    }
+
+    pub fn signal(cx: Scope) -> Result<ReadSignal<WindowSize>, JsValue> {
+        let (size_r, size_w) = create_signal(cx, Self::new()?);
+        let mut should_write = true;
+
+        let closure = Closure::wrap(Box::new(move |_event: Event| {
+            if should_write {
+                if let None = size_w.try_update(|s| {
+                    let size = Self::new().expect("window size");
+                    s.width = size.width;
+                    s.height = size.height;
+                }) {
+                    should_write = false;
+                }
+            }
+        }) as Box<dyn FnMut(_)>);
+
+        let window = web_sys::window().ok_or("Failed to get window object")?;
+        window.add_event_listener_with_callback("resize", closure.as_ref().unchecked_ref())?;
+        closure.forget();
+
+        Ok(size_r)
+    }
 }
