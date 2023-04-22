@@ -28,7 +28,10 @@ pub fn Dashboard(
         move |_| async move {
             match authorized_api.get() {
                 Some(api) => match api.chat_list().await {
-                    Ok(chats) => chats,
+                    Ok(mut chats) => {
+                        chats.reverse();
+                        chats
+                    }
                     Err(e) => {
                         let e = e.to_string();
                         crate::pages::goto_login_if_expired(cx, &e, authorized_api);
@@ -51,7 +54,10 @@ pub fn Dashboard(
         move |_| async move {
             match authorized_api.get() {
                 Some(api) => match api.image_list().await {
-                    Ok(images) => images,
+                    Ok(mut images) => {
+                        images.reverse();
+                        images
+                    }
                     Err(e) => {
                         let e = e.to_string();
                         crate::pages::goto_login_if_expired(cx, &e, authorized_api);
