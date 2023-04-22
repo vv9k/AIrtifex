@@ -535,15 +535,15 @@ fn ImageListEntries(
             if !images.is_empty() {
                 return view! { cx,
                 <div class="card-body d-flex flex-column px-5 pb-5">
-                  <button
-                      class="btn btn-outline-lighter rounded mt-3 w-25 mx-auto"
-                      on:click=move |_| {
-                        current_list_page.update(|v| *v = 0);
-                      }
-                  >
-                  <img class="me-2" src="/icons/refresh-cw.svg" />
-                  "Refresh"
-                  </button>
+                //   <button
+                //       class="btn btn-outline-lighter rounded mt-3 w-25 mx-auto"
+                //       on:click=move |_| {
+                //         current_list_page.update(|v| *v = 0);
+                //       }
+                //   >
+                //   <img class="me-2" src="/icons/refresh-cw.svg" />
+                //   "Refresh"
+                //   </button>
                   <table class="table table-hover table-striped table-responsive text-white">
                     <thead>
                     <tr>
@@ -582,16 +582,24 @@ fn ImageListEntry(
     remove_image_id: RwSignal<Option<String>>,
 ) -> impl IntoView {
     let view_href = format!("{}/{}", Page::GenerateImage.path(), image.id);
+    let view_href2 = view_href.clone();
     let is_finished = if !image.processing {
         view! { cx, <span class="text-airtifex-green">"✓"</span>}
     } else {
         view! { cx, <span class="text-airtifex-yellow">"✗"</span>}
     };
     view! {cx, <tr
-                class="text-white border-lighter"
+                class="text-white no-border"
               >
-                  <td>{image.prompt}</td>
-                  <td>{image.model}</td>
+                  <td
+                    style="cursor: pointer;"
+                    on:click=move |_| {
+                        crate::pages::goto(cx, &view_href2).expect("image page");
+                    }
+                  >
+                    {image.prompt}
+                  </td>
+                  <td class="text-airtifex">{image.model}</td>
                   <td>{image.width}</td>
                   <td>{image.height}</td>
                   <td>{image.seed}</td>

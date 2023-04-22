@@ -11,7 +11,7 @@ pub fn UserListEntry(
     let pw_change_href = format!("/users/{}/password", &user.username);
     let edit_href = format!("/users/{}/edit", &user.username);
     view! {cx,
-      <tr class="text-white border-lighter">
+      <tr class="text-white no-border">
           <td>{ user.username.clone() }</td>
           <td>{ user.email }</td>
           <td>{ user.account_type.to_str() }</td>

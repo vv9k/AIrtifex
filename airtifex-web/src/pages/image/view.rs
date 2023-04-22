@@ -142,7 +142,7 @@ pub fn ImageView(
                             <tbody>
                                 <tr class="no-border">
                                     <td class="fitwidth text-white">"Created Date: "</td>
-                                    <td class="text-airtifex-yellow text-center">{metadata.create_date.format("%a, %d %b %Y %H:%M:%S").to_string()}</td>
+                                    <td class="text-secondary text-center">{metadata.create_date.format("%a, %d %b %Y %H:%M:%S").to_string()}</td>
                                 </tr>
                                 <tr class="no-border">
                                     <td class="fitwidth text-white">"N Steps: "</td>

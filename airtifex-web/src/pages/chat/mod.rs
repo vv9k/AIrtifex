@@ -459,14 +459,20 @@ fn ChatListEntry(
     remove_chat_title: RwSignal<Option<String>>,
 ) -> impl IntoView {
     let edit_href = format!("/chat/{}", chat.id);
+    let edit_href2 = edit_href.clone();
     view! {cx, <tr
-                class="text-white border-lighter"
+                class="text-white no-border"
               >
-                  <td>
+                  <td
+                    style="cursor: pointer;"
+                    on:click=move |_| {
+                        crate::pages::goto(cx, &edit_href2).expect("chat page");
+                    }
+                  >
                     {chat.title.clone()}
                   </td>
-                  <td>{chat.model}</td>
-                  <td>{chat.start_date.format("%a, %d %b %Y %H:%M:%S").to_string()}</td>
+                  <td class="text-airtifex">{chat.model}</td>
+                  <td class="text-secondary">{chat.start_date.format("%a, %d %b %Y %H:%M:%S").to_string()}</td>
                   <td>
                       <div class="btn-group" role="chat toolbar" aria-label="chat toolbar">
                           <button

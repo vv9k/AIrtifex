@@ -40,26 +40,30 @@ pub fn PromptList(
     view! {cx, {move || {
       page_stack.update(|p| p.push(Page::PromptList));
       view! { cx,
-        <div class="card-body d-flex flex-column px-5 pb-5">
-          <table class="table table-hover table-striped table-responsive text-white">
-            <thead>
-            <tr>
-              <th scope="col">"Prompt"</th>
-              <th scope="col">"Response"</th>
-              <th scope="col">"Model"</th>
-              <th scope="col">"Date"</th>
-              <th scope="col">""</th>
-            </tr>
-            </thead>
-            <tbody>
-            {
-              prompts.read(cx).unwrap_or_default().into_iter().map(|prompt| {
-                  view!{cx, <PromptListEntry prompt remove_prompt_id />}.into_view(cx)
-              }).collect::<Vec<_>>()
-            }
-            </tbody>
-          </table>
-        </div>
+        <main class="bg-dark text-white d-flex flex-column p-3 overflow-auto" >
+            <div class="card bg-darker">
+                <div class="card-body d-flex flex-column">
+                <table class="table table-hover table-striped table-responsive text-white">
+                    <thead>
+                    <tr>
+                    <th scope="col">"Prompt"</th>
+                    <th scope="col">"Response"</th>
+                    <th scope="col">"Model"</th>
+                    <th scope="col">"Date"</th>
+                    <th scope="col">""</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {
+                    prompts.read(cx).unwrap_or_default().into_iter().map(|prompt| {
+                        view!{cx, <PromptListEntry prompt remove_prompt_id />}.into_view(cx)
+                    }).collect::<Vec<_>>()
+                    }
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </main>
       }.into_view(cx)
     }}}
     .into_view(cx)
@@ -72,13 +76,19 @@ fn PromptListEntry(
     remove_prompt_id: RwSignal<Option<String>>,
 ) -> impl IntoView {
     let open_href = format!("/prompt/{}", prompt.id);
+    let open_href2 = open_href.clone();
     view! {cx, <tr
-                class="text-white border-lighter"
+                class="text-white no-border"
               >
-                  <td>{web_util::display_limited_str(&prompt.prompt, 50)}</td>
+                  <td
+                    style="cursor: pointer;"
+                    on:click=move |_| {
+                        crate::pages::goto(cx, &open_href2).expect("prompt page");
+                    }
+                  >{web_util::display_limited_str(&prompt.prompt, 50)}</td>
                   <td>{web_util::display_limited_str(&prompt.response, 50)}</td>
-                  <td>{prompt.model}</td>
-                  <td>{prompt.date.format("%a, %d %b %Y %H:%M:%S").to_string()}</td>
+                  <td class="text-airtifex">{prompt.model}</td>
+                  <td class="text-secondary">{prompt.date.format("%a, %d %b %Y %H:%M:%S").to_string()}</td>
                   <td>
                       <div class="btn-group" role="prompt toolbar" aria-label="prompt toolbar">
                           <button

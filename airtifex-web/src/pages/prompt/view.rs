@@ -87,7 +87,7 @@ pub fn PromptView(
                             <tbody>
                                 <tr class="no-border">
                                     <td class="fitwidth text-white">"Date: "</td>
-                                    <td class="text-airtifex-yellow text-center">{prompt.date.format("%a, %d %b %Y %H:%M:%S").to_string()}</td>
+                                    <td class="text-secondary text-center">{prompt.date.format("%a, %d %b %Y %H:%M:%S").to_string()}</td>
                                 </tr>
                                 <tr class="no-border">
                                     <td class="fitwidth text-white">"Repeat penalty: "</td>
