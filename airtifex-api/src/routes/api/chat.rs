@@ -82,7 +82,7 @@ async fn inference(
     };
     log::info!("{request:?}");
 
-    if let Some(model) = state.tx_inference_req.get(&chat.model) {
+    if let Some((_, model)) = state.tx_inference_req.get(&chat.model) {
         if let Err(e) = model.send_async(request).await {
             return ApiResponse::failure(e).internal_server_error();
         }
@@ -121,7 +121,25 @@ async fn start_chat(
             .unwrap_or_default()
     };
 
-    let chat = Chat::new(claims.sub, model, request.title, request.settings);
+    let mut chat = Chat::new(claims.sub, model.clone(), request.title, request.settings);
+
+    if let Some((config, _)) = state.tx_inference_req.get(&model) {
+        if chat.n_batch.is_none() {
+            chat.n_batch = Some(config.batch_size as i32);
+        }
+        if chat.top_k.is_none() {
+            chat.top_k = Some(config.top_k as i32);
+        }
+        if chat.top_p.is_none() {
+            chat.top_p = Some(config.top_p);
+        }
+        if chat.repeat_penalty.is_none() {
+            chat.repeat_penalty = Some(config.repeat_penalty);
+        }
+        if chat.temp.is_none() {
+            chat.temp = Some(config.temperature);
+        }
+    }
 
     handle_db_result_as_json(
         chat.create(db)

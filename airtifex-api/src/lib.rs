@@ -1,6 +1,7 @@
 #![feature(path_file_prefix)]
 #![feature(let_chains)]
 pub use airtifex_core::api_response::{ApiResponse, ApiVersion};
+use config::LlmConfig;
 pub use errors::Error;
 
 use axum::extract::FromRef;
@@ -38,7 +39,7 @@ pub struct InnerAppState {
     pub db: std::sync::Arc<crate::DbPool>,
     pub key: Key,
     pub config: config::Config,
-    pub tx_inference_req: HashMap<ModelName, Sender<InferenceRequest>>,
+    pub tx_inference_req: HashMap<ModelName, (LlmConfig, Sender<InferenceRequest>)>,
     pub tx_image_gen_req: HashMap<ModelName, Sender<GenerateImageRequest>>,
 }
 

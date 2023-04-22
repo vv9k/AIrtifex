@@ -59,7 +59,7 @@ async fn oneshot_inference(
     };
     log::info!("{inference_request:?}");
 
-    if let Some(model) = state.tx_inference_req.get(&request.model) {
+    if let Some((_, model)) = state.tx_inference_req.get(&request.model) {
         if let Err(e) = model.send_async(inference_request).await {
             return ApiResponse::failure(e).internal_server_error();
         }

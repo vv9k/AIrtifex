@@ -1,4 +1,4 @@
-use crate::config::Config;
+use crate::config::{Config, LlmConfig};
 use crate::gen::ModelName;
 use crate::models::llm::LargeLanguageModel;
 use crate::{DbPool, Result};
@@ -15,7 +15,7 @@ pub async fn initialize_models(
     db: Arc<DbPool>,
     config: &Config,
     runtime: Arc<Runtime>,
-) -> Result<HashMap<ModelName, flume::Sender<InferenceRequest>>> {
+) -> Result<HashMap<ModelName, (LlmConfig, flume::Sender<InferenceRequest>)>> {
     let mut txs = HashMap::new();
     for (model, llm_config) in config.llms.iter() {
         let exists = LargeLanguageModel::get_by_name(&db, &model).await.is_ok();
@@ -32,7 +32,7 @@ pub async fn initialize_models(
             llm_config.clone(),
             runtime.clone(),
         );
-        txs.insert(model.clone(), tx_inference_req);
+        txs.insert(model.clone(), (llm_config.clone(), tx_inference_req));
     }
     Ok(txs)
 }
