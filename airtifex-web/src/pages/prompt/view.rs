@@ -18,6 +18,7 @@ pub fn PromptView(
     let params = use_params::<PromptParams>(cx);
     let status_message = create_rw_signal(cx.clone(), Message::Empty);
     let window_size = web_util::WindowSize::signal(cx).expect("windows size");
+    let is_details_open = create_rw_signal(cx.clone(), false);
 
     let prompt_id = Signal::derive(cx, move || params.get().ok().and_then(|p| p.prompt_id));
 
@@ -60,29 +61,60 @@ pub fn PromptView(
         }
     });
 
-    let settings = move || {
+    let details = move || {
         if let Some(Some(prompt)) = prompt.read(cx) {
-            view!{ cx,
-            <table class="table table-hover table-striped table-responsive text-white">
-            <thead>
-            <tr>
-                <th scope="col" class="border-0 font-monospace">"Batch size: "<span class="text-airtifex-yellow">{prompt.n_batch}</span></th>
-                <th scope="col" class="border-0 font-monospace">"Top K: "<span class="text-airtifex-yellow">{prompt.top_k}</span></th>
-                <th scope="col" class="border-0 font-monospace">"Top P: "<span class="text-airtifex-yellow">{prompt.top_p}</span></th>
-                <th scope="col" class="border-0 font-monospace">"Repeat penalty: "<span class="text-airtifex-yellow">{prompt.repeat_penalty}</span></th>
-                <th scope="col" class="border-0 font-monospace">"Temperature: "<span class="text-airtifex-yellow">{prompt.temp}</span></th>
-            </tr>
-            </thead>
-            </table>
-            }.into_view(cx)
-        } else {
-            view! { cx, <></> }.into_view(cx)
+            if is_details_open.get() {
+                return view!{ cx,
+                <div class="card bg-darker">
+                    <div class="card-body d-flex flex-row">
+                        <table class="table table-hover table-responsive text-white mb-0">
+                            <tbody>
+                                <tr class="no-border">
+                                    <td class="fitwidth text-white">"Batch size: "</td>
+                                    <td class="text-airtifex-yellow text-center">{prompt.n_batch}</td>
+                                </tr>
+                                <tr class="no-border">
+                                    <td class="fitwidth text-white">"Top K: "</td>
+                                    <td class="text-airtifex-yellow text-center">{prompt.top_k}</td>
+                                </tr>
+                                <tr class="no-border">
+                                    <td class="fitwidth text-white">"Top P: "</td>
+                                    <td class="text-airtifex-yellow text-center">{prompt.top_k}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <table class="table table-hover table-responsive text-white">
+                            <tbody>
+                                <tr class="no-border">
+                                    <td class="fitwidth text-white">"Date: "</td>
+                                    <td class="text-airtifex-yellow text-center">{prompt.date.format("%a, %d %b %Y %H:%M:%S").to_string()}</td>
+                                </tr>
+                                <tr class="no-border">
+                                    <td class="fitwidth text-white">"Repeat penalty: "</td>
+                                    <td class="text-airtifex-yellow text-center">{prompt.repeat_penalty}</td>
+                                </tr>
+                                <tr class="no-border">
+                                    <td class="fitwidth text-white">"Temperature: "</td>
+                                    <td class="text-airtifex-yellow text-center">{prompt.temp}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                }.into_view(cx);
+            }
         }
+        view! { cx, <></> }.into_view(cx)
     };
 
     view! { cx,
       {move || {
         page_stack.update(|p| p.push(Page::PromptView));
+        let details_icon = if is_details_open.get() {
+            "/icons/minus-circle.svg"
+        } else {
+            "/icons/plus-circle.svg"
+        };
 
         view!{cx,
            <main class="bg-dark text-white d-flex flex-column p-3 h-100 overflow-scroll" >
@@ -90,7 +122,14 @@ pub fn PromptView(
              <div class="text-center w-100">
                  <p class="text-airtifex-light font-monospace">{model}</p>
              </div>
-             {settings}
+             <button
+                class="btn-btn-airtifex btn-outline rounded me-auto ms-2 mb-2"
+                on:click=move|_|is_details_open.update(|o| *o = !*o)
+             >
+              <img class="me-2" src=details_icon />
+              "Details"
+             </button>
+             {details}
              { move || {
                 if let Some(Some(prompt)) = prompt.read(cx) {
                     let (card_classes, classes) = if window_size.get().width < 992 {

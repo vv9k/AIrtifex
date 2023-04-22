@@ -116,20 +116,50 @@ pub fn ImageView(
              </button>
              { if is_details_open.get() {
                  view!{ cx,
-                 <table class="table table-hover table-striped table-responsive text-white">
-                   <thead>
-                    <tr>
-                     <th scope="col" class="border-0 font-monospace">"Finished: "{is_finished}</th>
-                     <th scope="col" class="border-0 font-monospace">"Width: "<span class="text-airtifex-yellow">{metadata.width}</span></th>
-                     <th scope="col" class="border-0 font-monospace">"Height: "<span class="text-airtifex-yellow">{metadata.height}</span></th>
-                     <th scope="col" class="border-0 font-monospace">"N Steps: "<span class="text-airtifex-yellow">{metadata.n_steps}</span></th>
-                     <th scope="col" class="border-0 font-monospace">"Seed: "<span class="text-airtifex-yellow">{metadata.seed}</span></th>
-                     <th scope="col" class="border-0 font-monospace">"N Samples: "<span class="text-airtifex-yellow">{metadata.num_samples}</span></th>
-                     <th scope="col" class="border-0 font-monospace">"Guidance Scale: "<span class="text-airtifex-yellow">{metadata.guidance_scale}</span></th>
-                     <th scope="col" class="border-0 font-monospace">"Created Date: "<span class="text-airtifex-yellow">{metadata.create_date.format("%a, %d %b %Y %H:%M:%S").to_string()}</span></th>
-                   </tr>
-                   </thead>
-                 </table>
+                 <div class="card bg-darker">
+                    <div class="card-body d-flex flex-row">
+                        <table class="table table-hover table-responsive text-white mb-0">
+                            <tbody>
+                                <tr class="no-border">
+                                    <td class="fitwidth text-white">"Finished: "</td>
+                                    <td class="text-airtifex-yellow text-center">{is_finished}</td>
+                                </tr>
+                                <tr class="no-border">
+                                    <td class="fitwidth text-white">"Width: "</td>
+                                    <td class="text-airtifex-yellow text-center">{metadata.width}</td>
+                                </tr>
+                                <tr class="no-border">
+                                    <td class="fitwidth text-white">"Height: "</td>
+                                    <td class="text-airtifex-yellow text-center">{metadata.height}</td>
+                                </tr>
+                                <tr class="no-border">
+                                    <td class="fitwidth text-white">"Guidance Scale: "</td>
+                                    <td class="text-airtifex-yellow text-center">{metadata.guidance_scale}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <table class="table table-hover table-responsive text-white">
+                            <tbody>
+                                <tr class="no-border">
+                                    <td class="fitwidth text-white">"Created Date: "</td>
+                                    <td class="text-airtifex-yellow text-center">{metadata.create_date.format("%a, %d %b %Y %H:%M:%S").to_string()}</td>
+                                </tr>
+                                <tr class="no-border">
+                                    <td class="fitwidth text-white">"N Steps: "</td>
+                                    <td class="text-airtifex-yellow text-center">{metadata.n_steps}</td>
+                                </tr>
+                                <tr class="no-border">
+                                    <td class="fitwidth text-white">"N Samples: "</td>
+                                    <td class="text-airtifex-yellow text-center">{metadata.num_samples}</td>
+                                </tr>
+                                <tr class="no-border">
+                                    <td class="fitwidth text-white">"Seed: "</td>
+                                    <td class="text-airtifex-yellow text-center">{metadata.seed}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                 </div>
                  }.into_view(cx)
              } else {
                 view! { cx, <></> }.into_view(cx)
@@ -147,7 +177,7 @@ pub fn ImageView(
 
 
         view!{cx,
-           <main class="bg-dark text-white d-flex flex-column p-1 pt-3 overflow-auto" >
+           <main class="bg-dark text-white d-flex flex-column p-3 overflow-auto" >
              <TitledChildPage title={image_id} page_stack={page_stack.read_only()}></TitledChildPage>
              <div class="text-center w-100">
                  <p class="text-airtifex-yellow font-monospace py-1">{model}</p>

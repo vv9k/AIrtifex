@@ -197,18 +197,42 @@ pub fn ChatView(
              </button>
              { if is_details_open.get() {
                  view!{ cx,
-                 <table class="table table-hover table-striped table-responsive text-white">
-                   <thead>
-                    <tr>
-                     <th scope="col" class="border-0 font-monospace">"Num predict: "<span class="text-airtifex-yellow">{chat.settings.num_predict}</span></th>
-                     <th scope="col" class="border-0 font-monospace">"Batch size: "<span class="text-airtifex-yellow">{chat.settings.n_batch}</span></th>
-                     <th scope="col" class="border-0 font-monospace">"Top K: "<span class="text-airtifex-yellow">{chat.settings.top_k}</span></th>
-                     <th scope="col" class="border-0 font-monospace">"Top P: "<span class="text-airtifex-yellow">{chat.settings.top_p}</span></th>
-                     <th scope="col" class="border-0 font-monospace">"Repeat penalty: "<span class="text-airtifex-yellow">{chat.settings.repeat_penalty}</span></th>
-                     <th scope="col" class="border-0 font-monospace">"Temperature: "<span class="text-airtifex-yellow">{chat.settings.temp}</span></th>
-                   </tr>
-                   </thead>
-                 </table>
+                 <div class="card bg-darker">
+                    <div class="card-body d-flex flex-row">
+                        <table class="table table-hover table-responsive text-white mb-0">
+                            <tbody>
+                                <tr class="no-border">
+                                    <td class="fitwidth text-white">"Top K: "</td>
+                                    <td class="text-airtifex-yellow text-center">{chat.settings.top_k}</td>
+                                </tr>
+                                <tr class="no-border">
+                                    <td class="fitwidth text-white">"Top P: "</td>
+                                    <td class="text-airtifex-yellow text-center">{chat.settings.top_p}</td>
+                                </tr>
+                                <tr class="no-border">
+                                    <td class="fitwidth text-white">"Temperature: "</td>
+                                    <td class="text-airtifex-yellow text-center">{chat.settings.temp}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <table class="table table-hover table-responsive text-white">
+                            <tbody>
+                                <tr class="no-border">
+                                    <td class="fitwidth text-white">"Start Date: "</td>
+                                    <td class="text-airtifex-yellow text-center">{chat.start_date.format("%a, %d %b %Y %H:%M:%S").to_string()}</td>
+                                </tr>
+                                <tr class="no-border">
+                                    <td class="fitwidth text-white">"Batch size: "</td>
+                                    <td class="text-airtifex-yellow text-center">{chat.settings.n_batch}</td>
+                                </tr>
+                                <tr class="no-border">
+                                    <td class="fitwidth text-white">"Repeat penalty: "</td>
+                                    <td class="text-airtifex-yellow text-center">{chat.settings.repeat_penalty}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                 </div>
                  }.into_view(cx)
              } else {
                 view! { cx, <></> }.into_view(cx)
