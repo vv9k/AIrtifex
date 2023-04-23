@@ -1,7 +1,11 @@
-use crate::config::StableDiffusionConfig;
-use crate::gen::image::sd::generator::{BaseImageGenerator, ImageGenerator};
-use crate::gen::image::{BaseImageData, SaveImageFsResult};
-use crate::Result;
+use crate::{
+    config::StableDiffusionConfig,
+    gen::image::{
+        sd::generator::{BaseImageGenerator, ImageGenerator},
+        BaseImageData, SaveImageFsResult,
+    },
+    Result,
+};
 
 use flume::Sender;
 use std::path::Path;

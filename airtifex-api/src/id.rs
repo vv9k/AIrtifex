@@ -1,6 +1,8 @@
 use serde::{de, Deserialize, Serialize};
-use std::str::FromStr;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::{
+    str::FromStr,
+    time::{SystemTime, UNIX_EPOCH},
+};
 use thiserror::Error;
 use uuid::v1::{Context as ClockContext, Timestamp};
 

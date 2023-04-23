@@ -1,10 +1,11 @@
-use crate::config::{Config, LlmConfig};
-use crate::gen::ModelName;
-use crate::models::llm::LargeLanguageModel;
-use crate::{DbPool, Result};
+use crate::{
+    config::{Config, LlmConfig},
+    gen::ModelName,
+    models::llm::LargeLanguageModel,
+    DbPool, Result,
+};
 
-use std::collections::HashMap;
-use std::sync::Arc;
+use std::{collections::HashMap, sync::Arc};
 use tokio::runtime::Runtime;
 
 pub mod inference;

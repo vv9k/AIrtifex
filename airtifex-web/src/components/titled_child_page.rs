@@ -1,5 +1,4 @@
-use crate::components::go_back_button::*;
-use crate::pages::PageStack;
+use crate::{components::go_back_button::*, pages::PageStack};
 
 use leptos::*;
 

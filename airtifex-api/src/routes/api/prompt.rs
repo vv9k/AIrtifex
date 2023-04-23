@@ -1,14 +1,10 @@
-use crate::auth::Claims;
-use crate::gen::llm::InferenceRequest;
-use crate::id::Uuid;
-use crate::models::prompt::Prompt;
-use crate::routes::handle_db_result_as_json;
-use crate::Error;
-use crate::{SharedAppState, ToAxumResponse};
-use airtifex_core::llm::{InferenceSettings, PromptInspect};
+use crate::{
+    auth::Claims, gen::llm::InferenceRequest, id::Uuid, models::prompt::Prompt,
+    routes::handle_db_result_as_json, Error, SharedAppState, ToAxumResponse,
+};
 use airtifex_core::{
     api_response::ApiResponse,
-    llm::{ChatStreamResult, OneshotInferenceRequest},
+    llm::{ChatStreamResult, InferenceSettings, OneshotInferenceRequest, PromptInspect},
 };
 
 use axum::{

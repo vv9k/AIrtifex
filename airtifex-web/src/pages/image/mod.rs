@@ -1,5 +1,8 @@
-use crate::components::{modal::*, status_message::*};
-use crate::{api, pages, web_util, Page, PageStack};
+use crate::{
+    api,
+    components::{modal::*, status_message::*},
+    pages, web_util, Page, PageStack,
+};
 use airtifex_core::image::{ImageGenerateRequest, ImageInspect, InputImage};
 
 use leptos::*;

@@ -1,4 +1,4 @@
-use crate::{Page, pages, PageStack};
+use crate::{pages, Page, PageStack};
 use airtifex_core::user::AuthenticatedUser;
 
 use leptos::*;
@@ -15,13 +15,14 @@ pub fn NavItem(
     page_stack: RwSignal<PageStack>,
     nav: &'static NavElement,
 ) -> impl IntoView {
-
     match nav {
         NavElement::Main(page) => {
-            let classes = move || if page_stack.get().current().root_page() == *page {
-              "nav-link selected"
-            } else {
-              "nav-link"
+            let classes = move || {
+                if page_stack.get().current().root_page() == *page {
+                    "nav-link selected"
+                } else {
+                    "nav-link"
+                }
             };
             view! { cx,
                 <li class="nav-item sb-item">
@@ -30,16 +31,25 @@ pub fn NavItem(
                         <span class="fw-bold text-white">{page.nav_display()}</span>
                     </a>
                 </li>
-            }.into_view(cx)
+            }
+            .into_view(cx)
         }
         NavElement::Sub(root, sub) => {
-            let is_current =  move || page_stack.get().current().root_page() == *root;
-            let aria_expanded =  move || is_current().to_string();
-            let collapsed =  move || if is_current() { "collapse show" } else { "collapse" };
-            let parent_classes = move || if is_current() {
-              "btn btn-toggle text-start nav-link w-100 text-white fw-bold selected"
-            } else {
-              "btn btn-toggle text-start nav-link w-100 collapsed text-white fw-bold"
+            let is_current = move || page_stack.get().current().root_page() == *root;
+            let aria_expanded = move || is_current().to_string();
+            let collapsed = move || {
+                if is_current() {
+                    "collapse show"
+                } else {
+                    "collapse"
+                }
+            };
+            let parent_classes = move || {
+                if is_current() {
+                    "btn btn-toggle text-start nav-link w-100 text-white fw-bold selected"
+                } else {
+                    "btn btn-toggle text-start nav-link w-100 collapsed text-white fw-bold"
+                }
             };
             view! { cx,
                 <li class="nav-item sb-item">

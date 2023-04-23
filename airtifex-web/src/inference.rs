@@ -1,5 +1,4 @@
-use crate::components::status_message::Message;
-use crate::{api, pages};
+use crate::{api, components::status_message::Message, pages};
 
 use futures::StreamExt;
 use leptos::*;

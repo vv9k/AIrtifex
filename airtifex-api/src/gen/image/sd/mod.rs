@@ -2,14 +2,15 @@ mod generator;
 
 pub use generator::GenImageError;
 
-use crate::config::StableDiffusionConfig;
-use crate::gen::image::{GenerateImageRequest, SaveImageFsResult};
-use crate::models::image::Image;
-use crate::models::image_sample::ImageSample;
-use crate::queue;
-use generator::img2img::ImageToImageGenerator;
-use generator::inpaint::InpaintImageGenerator;
-use generator::txt2img::TextToImageGenerator;
+use crate::{
+    config::StableDiffusionConfig,
+    gen::image::{GenerateImageRequest, SaveImageFsResult},
+    models::{image::Image, image_sample::ImageSample},
+    queue,
+};
+use generator::{
+    img2img::ImageToImageGenerator, inpaint::InpaintImageGenerator, txt2img::TextToImageGenerator,
+};
 
 use flume::Sender;
 use std::sync::Arc;

@@ -1,7 +1,11 @@
-use crate::config::StableDiffusionConfig;
-use crate::gen::image::sd::generator::{BaseImageGenerator, GenImageError, ImageGenerator};
-use crate::gen::image::{InpaintData, SaveImageFsResult};
-use crate::Result;
+use crate::{
+    config::StableDiffusionConfig,
+    gen::image::{
+        sd::generator::{BaseImageGenerator, GenImageError, ImageGenerator},
+        InpaintData, SaveImageFsResult,
+    },
+    Result,
+};
 
 use diffusers::models::vae::DiagonalGaussianDistribution;
 use flume::Sender;

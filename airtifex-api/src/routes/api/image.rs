@@ -1,22 +1,21 @@
-use crate::auth::Claims;
-use crate::gen::image::{BaseImageData, GenerateImageRequest, ImageToImageData, InpaintData};
-use crate::id::Uuid;
-use crate::models::image::Image;
-use crate::models::image_model::ImageModel;
-use crate::models::image_sample::ImageSample;
-use crate::models::user::User;
-use crate::routes::handle_db_result_as_json;
-use crate::Error;
-use crate::{SharedAppState, ToAxumResponse};
-use airtifex_core::image::{ImageModelFeatures, ImageModelListEntry, ImageSampleInspect};
+use crate::{
+    auth::Claims,
+    gen::image::{BaseImageData, GenerateImageRequest, ImageToImageData, InpaintData},
+    id::Uuid,
+    models::{image::Image, image_model::ImageModel, image_sample::ImageSample, user::User},
+    routes::handle_db_result_as_json,
+    Error, SharedAppState, ToAxumResponse,
+};
 use airtifex_core::{
     api_response::ApiResponse,
-    image::{ImageGenerateRequest, ImageInspect, TextToImageResponse},
+    image::{
+        ImageGenerateRequest, ImageInspect, ImageModelFeatures, ImageModelListEntry,
+        ImageSampleInspect, TextToImageResponse,
+    },
 };
 
-use axum::extract::Path;
 use axum::{
-    extract::{Json, State},
+    extract::{Json, Path, State},
     response::Response,
     routing, Router,
 };

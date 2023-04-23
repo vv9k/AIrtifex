@@ -1,6 +1,8 @@
-use crate::id::Uuid;
-use crate::models::{Error, Result};
-use crate::DbPool;
+use crate::{
+    id::Uuid,
+    models::{Error, Result},
+    DbPool,
+};
 
 use serde::{Deserialize, Serialize};
 use thiserror::Error as ErrorType;

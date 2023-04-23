@@ -4,9 +4,12 @@ pub mod view;
 pub use history::*;
 pub use view::*;
 
-use crate::components::{loading::*, status_message::*};
-use crate::inference::read_inference_stream;
-use crate::{api, web_util, Page, PageStack};
+use crate::{
+    api,
+    components::{loading::*, status_message::*},
+    inference::read_inference_stream,
+    web_util, Page, PageStack,
+};
 use airtifex_core::llm::OneshotInferenceRequest;
 
 use leptos::*;

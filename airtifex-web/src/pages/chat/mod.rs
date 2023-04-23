@@ -1,5 +1,8 @@
-use crate::components::{modal::*, status_message::*};
-use crate::{api, pages, Page, PageStack};
+use crate::{
+    api,
+    components::{modal::*, status_message::*},
+    pages, Page, PageStack,
+};
 use airtifex_core::llm::{ChatListEntry, ChatStartRequest, InferenceSettings};
 
 use leptos::*;

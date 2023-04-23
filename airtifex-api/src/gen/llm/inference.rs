@@ -1,8 +1,10 @@
-use crate::config::LlmConfig;
-use crate::gen::ModelName;
-use crate::id::Uuid;
-use crate::models::{chat_entry::ChatEntry, prompt::Prompt};
-use crate::queue;
+use crate::{
+    config::LlmConfig,
+    gen::ModelName,
+    id::Uuid,
+    models::{chat_entry::ChatEntry, prompt::Prompt},
+    queue,
+};
 use airtifex_core::llm::{ChatEntryType, ChatStreamResult, InferenceSettings};
 
 use llama_rs::{

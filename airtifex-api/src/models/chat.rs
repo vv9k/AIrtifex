@@ -1,6 +1,8 @@
-use crate::id::Uuid;
-use crate::models::{chat_entry::ChatEntry, Error, Result};
-use crate::DbPool;
+use crate::{
+    id::Uuid,
+    models::{chat_entry::ChatEntry, Error, Result},
+    DbPool,
+};
 use airtifex_core::llm::{InferenceSettings, UserChatCounters};
 
 use serde::{Deserialize, Serialize};

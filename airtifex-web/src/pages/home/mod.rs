@@ -2,10 +2,7 @@ pub mod dashboard;
 
 pub use dashboard::*;
 
-use crate::api::AuthorizedApi;
-use crate::components::status_message::*;
-use crate::pages::PageStack;
-use crate::Page;
+use crate::{api::AuthorizedApi, components::status_message::*, pages::PageStack, Page};
 
 use airtifex_core::user::AuthenticatedUser;
 use leptos::*;

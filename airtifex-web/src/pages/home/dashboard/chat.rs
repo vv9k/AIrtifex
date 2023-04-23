@@ -1,8 +1,6 @@
-use crate::{pages,Page};
+use crate::{pages, Page};
 
-use airtifex_core::{
-    llm::{ChatListEntry, UserChatCounters},
-};
+use airtifex_core::llm::{ChatListEntry, UserChatCounters};
 use leptos::*;
 
 #[component]

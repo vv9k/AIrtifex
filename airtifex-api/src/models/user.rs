@@ -1,5 +1,7 @@
-use crate::id::Uuid;
-use crate::models::{Error, Result};
+use crate::{
+    id::Uuid,
+    models::{Error, Result},
+};
 use airtifex_core::{
     auth::{hash_pass, Credentials},
     user::{AccountType, ListOrder, UserRegisterRequest},

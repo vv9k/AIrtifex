@@ -1,6 +1,4 @@
-use crate::errors::Error;
-use crate::ApiResponse;
-use crate::SharedAppState;
+use crate::{errors::Error, ApiResponse, SharedAppState};
 use airtifex_core::user::AccountType;
 
 use axum::{

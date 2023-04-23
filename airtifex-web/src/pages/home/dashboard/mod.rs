@@ -4,10 +4,7 @@ mod image;
 use chat::*;
 use image::*;
 
-use crate::api::AuthorizedApi;
-use crate::components::status_message::*;
-use crate::pages;
-use crate::web_util;
+use crate::{api::AuthorizedApi, components::status_message::*, pages, web_util};
 use airtifex_core::{
     image::ImageModelListEntry,
     llm::{LlmListEntry, UserChatCounters},

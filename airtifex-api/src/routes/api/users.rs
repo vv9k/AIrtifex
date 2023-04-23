@@ -1,10 +1,12 @@
-use crate::auth::{generate_jwt, Claims, JsonWebToken};
-use crate::errors::Error;
-use crate::models::user::User;
-use crate::routes::handle_db_result_as_json;
-use crate::{SharedAppState, ToAxumResponse};
-use airtifex_core::api_response::ApiResponse;
+use crate::{
+    auth::{generate_jwt, Claims, JsonWebToken},
+    errors::Error,
+    models::user::User,
+    routes::handle_db_result_as_json,
+    SharedAppState, ToAxumResponse,
+};
 use airtifex_core::{
+    api_response::ApiResponse,
     auth::Credentials,
     user::{
         GetUserEntry, ListQuery, ListUserEntry, PasswordChangeRequest, UserEditRequest,

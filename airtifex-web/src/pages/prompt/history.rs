@@ -1,5 +1,4 @@
-use crate::components::status_message::*;
-use crate::{api, pages, web_util, Page, PageStack};
+use crate::{api, components::status_message::*, pages, web_util, Page, PageStack};
 use airtifex_core::llm::PromptInspect;
 
 use leptos::*;

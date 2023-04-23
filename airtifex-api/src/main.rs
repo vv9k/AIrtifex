@@ -1,21 +1,20 @@
-use airtifex_api::config::Config;
-use airtifex_api::gen;
-use airtifex_api::id::V1Context as ClockContext;
-use airtifex_api::models::user::User;
-use airtifex_api::routes::{api, r#static};
-use airtifex_api::{DbPool, Error, InnerAppState, Result, SharedAppState};
+use airtifex_api::{
+    config::Config,
+    gen,
+    id::V1Context as ClockContext,
+    models::user::User,
+    routes::{api, r#static},
+    DbPool, Error, InnerAppState, Result, SharedAppState,
+};
 use airtifex_core::user::AccountType;
 
-use axum::extract::DefaultBodyLimit;
-use axum::Router;
+use axum::{extract::DefaultBodyLimit, Router};
 use axum_extra::extract::cookie::Key;
 use clap::Parser;
-use std::sync::Arc;
-use std::time::Duration;
+use std::{sync::Arc, time::Duration};
 use tokio::runtime::Runtime;
 use tower_http::classify::ServerErrorsFailureClass;
-use tracing::Level;
-use tracing::Span;
+use tracing::{Level, Span};
 use tracing_subscriber::{field::MakeExt, layer::SubscriberExt, util::SubscriberInitExt};
 
 #[cfg(all(feature = "postgres", feature = "sqlite"))]

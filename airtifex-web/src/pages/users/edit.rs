@@ -1,7 +1,11 @@
-use crate::components::{
-    email_validation::*, status_message::*, titled_child_page::*, users::account_type_selector::*,
+use crate::{
+    api,
+    components::{
+        email_validation::*, status_message::*, titled_child_page::*,
+        users::account_type_selector::*,
+    },
+    pages, Page, PageStack,
 };
-use crate::{api, pages, Page, PageStack};
 use airtifex_core::user::{AccountType, UserEditRequest};
 
 use leptos::*;

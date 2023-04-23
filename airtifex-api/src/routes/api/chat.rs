@@ -1,16 +1,16 @@
-use crate::auth::Claims;
-use crate::gen::llm::{ChatData, InferenceRequest};
-use crate::id::Uuid;
-use crate::models::{chat::Chat, chat_entry::ChatEntry, llm::LargeLanguageModel};
-use crate::routes::handle_db_result_as_json;
-use crate::Error;
-use crate::{SharedAppState, ToAxumResponse};
-use airtifex_core::llm::InferenceSettings;
+use crate::{
+    auth::Claims,
+    gen::llm::{ChatData, InferenceRequest},
+    id::Uuid,
+    models::{chat::Chat, chat_entry::ChatEntry, llm::LargeLanguageModel},
+    routes::handle_db_result_as_json,
+    Error, SharedAppState, ToAxumResponse,
+};
 use airtifex_core::{
     api_response::ApiResponse,
     llm::{
         ChatEntryListEntry, ChatListEntry, ChatResponseRequest, ChatStartRequest,
-        ChatStartResponse, ChatStreamResult, LlmListEntry,
+        ChatStartResponse, ChatStreamResult, InferenceSettings, LlmListEntry,
     },
 };
 

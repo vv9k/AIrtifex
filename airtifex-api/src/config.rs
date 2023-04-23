@@ -2,9 +2,7 @@ use crate::{Error, Result};
 
 use airtifex_core::image::ImageModelFeatures;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use std::env;
-use std::path::PathBuf;
+use std::{collections::HashMap, env, path::PathBuf};
 
 #[derive(Deserialize, Serialize)]
 struct RawConfig {

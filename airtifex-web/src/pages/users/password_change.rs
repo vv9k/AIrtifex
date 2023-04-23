@@ -1,5 +1,8 @@
-use crate::components::{password_validation::*, status_message::*, titled_child_page::*};
-use crate::{api, pages, Page, PageStack};
+use crate::{
+    api,
+    components::{password_validation::*, status_message::*, titled_child_page::*},
+    pages, Page, PageStack,
+};
 use airtifex_core::user::PasswordChangeRequest;
 
 use leptos::*;

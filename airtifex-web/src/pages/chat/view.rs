@@ -1,6 +1,9 @@
-use crate::components::{loading::*, status_message::*, titled_child_page::*};
-use crate::inference::read_inference_stream;
-use crate::{api, pages, web_util, Page, PageStack};
+use crate::{
+    api,
+    components::{loading::*, status_message::*, titled_child_page::*},
+    inference::read_inference_stream,
+    pages, web_util, Page, PageStack,
+};
 use airtifex_core::llm::ChatResponseRequest;
 
 use leptos::*;

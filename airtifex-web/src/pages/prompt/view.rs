@@ -1,5 +1,8 @@
-use crate::components::{status_message::*, titled_child_page::*};
-use crate::{api, pages, web_util, Page, PageStack};
+use crate::{
+    api,
+    components::{status_message::*, titled_child_page::*},
+    pages, web_util, Page, PageStack,
+};
 
 use leptos::*;
 use leptos_router::*;

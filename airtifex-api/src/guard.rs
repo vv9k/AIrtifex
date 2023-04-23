@@ -1,9 +1,10 @@
-use crate::auth::Claims;
-use crate::models::user::{account_type_from_str, AuthenticationError, User};
-use crate::permissions::Acl;
-use crate::DbPool;
-use airtifex_core::api_response::ApiResponse;
-use airtifex_core::user::AuthenticatedUser;
+use crate::{
+    auth::Claims,
+    models::user::{account_type_from_str, AuthenticationError, User},
+    permissions::Acl,
+    DbPool,
+};
+use airtifex_core::{api_response::ApiResponse, user::AuthenticatedUser};
 
 use axum::{
     http::StatusCode,

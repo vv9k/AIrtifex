@@ -1,6 +1,9 @@
-use crate::api;
-use crate::components::{list_page_control::*, modal::*, status_message::*, users::list_entry::*};
-use crate::{pages::goto_login_if_expired, Page, PageStack};
+use crate::{
+    api,
+    components::{list_page_control::*, modal::*, status_message::*, users::list_entry::*},
+    pages::goto_login_if_expired,
+    Page, PageStack,
+};
 
 use airtifex_core::user::ListQuery;
 use leptos::*;
@@ -10,7 +13,10 @@ pub mod edit;
 pub mod password_change;
 pub mod profile;
 
-pub use {add::*, edit::*, password_change::*, profile::*};
+pub use add::*;
+pub use edit::*;
+pub use password_change::*;
+pub use profile::*;
 
 #[component]
 pub fn Users(

@@ -2,20 +2,22 @@ pub mod img2img;
 pub mod inpaint;
 pub mod txt2img;
 
-use crate::config::{StableDiffusionConfig, StableDiffusionVersion};
-use crate::gen::image::{BaseImageData, SaveImageFsResult};
-use crate::Result;
+use crate::{
+    config::{StableDiffusionConfig, StableDiffusionVersion},
+    gen::image::{BaseImageData, SaveImageFsResult},
+    Result,
+};
 
-use diffusers::models::unet_2d::UNet2DConditionModel;
-use diffusers::models::vae::AutoEncoderKL;
-use diffusers::pipelines::stable_diffusion;
-use diffusers::schedulers::ddim::DDIMScheduler;
-use diffusers::transformers::clip;
+use diffusers::{
+    models::{unet_2d::UNet2DConditionModel, vae::AutoEncoderKL},
+    pipelines::stable_diffusion,
+    schedulers::ddim::DDIMScheduler,
+    transformers::clip,
+};
 use flume::Sender;
 use log::Level;
 use std::path::{Path, PathBuf};
-use tch::Kind;
-use tch::{nn::Module, Device, Tensor};
+use tch::{nn::Module, Device, Kind, Tensor};
 
 pub const LATENTS_SCALE: f64 = 0.18215;
 

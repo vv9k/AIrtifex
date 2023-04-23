@@ -1,6 +1,8 @@
 use flume::{unbounded, Sender};
-use std::collections::VecDeque;
-use std::sync::{Arc, RwLock};
+use std::{
+    collections::VecDeque,
+    sync::{Arc, RwLock},
+};
 
 pub type Queue<T> = Arc<RwLock<VecDeque<T>>>;
 

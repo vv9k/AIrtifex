@@ -4,13 +4,10 @@ pub use airtifex_core::api_response::{ApiResponse, ApiVersion};
 use config::LlmConfig;
 pub use errors::Error;
 
-use axum::extract::FromRef;
-use axum::http::StatusCode;
-use axum::response::Response;
+use axum::{extract::FromRef, http::StatusCode, response::Response};
 use axum_extra::extract::cookie::Key;
 use flume::Sender;
-use std::collections::HashMap;
-use std::ops::Deref;
+use std::{collections::HashMap, ops::Deref};
 
 #[macro_use]
 mod guard;
