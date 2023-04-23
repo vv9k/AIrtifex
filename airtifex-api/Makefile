@@ -1,4 +1,4 @@
-.PHONY: default all all_release serve serve_release docker_build docker_build_release create_db clean build build_release
+.PHONY: default all all_release serve serve_release serve_pg serve_release_pg clean build build_release build_pg build_release_pg
 
 PROJECT := airtifex-api
 
@@ -16,27 +16,29 @@ serve:
 serve_release:
 	@cargo run --release -- serve
 
+serve_pg:
+	@cargo run --no-default-features --features postgres -- serve
+
+serve_release_pg:
+	@cargo run --no-default-features --features postgres --release -- serve
+
 flamegraph:
 	@cargo-flamegraph flamegraph
+
 build:
 	@cargo build
 
 build_release:
 	@cargo build --release
 
-docker_build:
-	@docker build -t $(PROJECT):latest -f Dockerfile ..
+build_pg:
+	@cargo build --no-default-features --features postgres
 
-docker_build_release:
-	@docker build -t $(PROJECT):latest --build-arg mode=release -f Dockerfile ..
-
-#create_db:
-#	@mkdir db
-#	@touch db/test.db
+build_release_pg:
+	@cargo build --no-default-features --features postgres --release
 
 test:
 	cargo t
 
 clean:
-#	@rm -rf db
 	@rm -rf target/*
