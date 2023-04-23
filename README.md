@@ -119,4 +119,4 @@ The web app will be accessible at http://localhost:8080 by default and is config
 
 
 ## License
-[GPLv3](https://github.com/vv9k/airtifex/blob/master/LICENSE)
+[GPLv3](https://github.com/vv9k/airtifex/blob/master/COPYING)
