@@ -38,6 +38,7 @@ pub struct ImageInspect {
     pub prompt: String,
     pub input_image: Option<Vec<u8>>,
     pub mask: Option<Vec<u8>>,
+    pub thumbnail: Option<Vec<u8>>,
     pub n_steps: i64,
     pub seed: i64,
     pub num_samples: i64,

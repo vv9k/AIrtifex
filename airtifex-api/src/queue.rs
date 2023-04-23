@@ -15,9 +15,7 @@ pub fn start_queue_thread<T: Send + Sync + 'static>(queue: Queue<T>) -> Sender<T
         loop {
             if !temp_queue.is_empty() {
                 if let Ok(mut queue) = queue.try_write() {
-                    while let Some(req) = temp_queue.pop_front() {
-                        queue.push_back(req);
-                    }
+                    queue.append(&mut temp_queue);
                 }
             }
             if let Ok(gen_image_request) = rx_request.try_recv() {

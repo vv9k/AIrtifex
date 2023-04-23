@@ -537,6 +537,7 @@ fn ImageListEntries(
                   <table class="table table-hover table-striped table-responsive text-white">
                     <thead>
                     <tr>
+                      <th scope="col">""</th>
                       <th class="col-3" scope="col">"Prompt"</th>
                       <th class="text-center" scope="col">"Model"</th>
                       <th class="text-center" scope="col">"Width"</th>
@@ -581,6 +582,16 @@ fn ImageListEntry(
     view! {cx, <tr
                 class="text-white no-border align-middle"
               >
+                  <td class="fitwidth">
+                  { move || {
+                    if let Some(thumbnail) = &image.thumbnail {
+                        let image = web_util::encode_image_base64(thumbnail);
+                        view! { cx, <img src=image />}.into_view(cx)
+                    } else {
+                        view! { cx, <></> }.into_view(cx)
+                    }
+                  }}
+                  </td>
                   <td
                     style="cursor: pointer;"
                     on:click=move |_| {

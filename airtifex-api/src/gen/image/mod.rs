@@ -61,6 +61,7 @@ pub struct SaveImageFsResult {
     pub n_sample: i32,
     pub is_last: bool,
     pub path: std::path::PathBuf,
+    pub thumbnail: std::path::PathBuf,
 }
 
 pub async fn initialize_models(

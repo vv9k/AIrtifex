@@ -29,6 +29,7 @@ pub struct Image {
     pub prompt: String,
     pub input_image: Option<Vec<u8>>,
     pub mask: Option<Vec<u8>>,
+    pub thumbnail: Option<Vec<u8>>,
     pub strength: Option<f64>,
     pub n_steps: i64,
     pub seed: i64,
@@ -47,6 +48,7 @@ impl Image {
         prompt: String,
         input_image: Option<Vec<u8>>,
         mask: Option<Vec<u8>>,
+        thumbnail: Option<Vec<u8>>,
         strength: Option<f64>,
         n_steps: i64,
         seed: i64,
@@ -62,6 +64,7 @@ impl Image {
             prompt,
             input_image,
             mask,
+            thumbnail,
             strength,
             n_steps,
             seed,
@@ -78,8 +81,8 @@ impl Image {
         sqlx::query(
             r#"
             INSERT INTO images
-                    (id, user_id, model, width, height, prompt, input_image, mask, strength, n_steps, seed, num_samples, guidance_scale, processing, create_date)
-            VALUES  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+                    (id, user_id, model, width, height, prompt, input_image, mask, thumbnail, strength, n_steps, seed, num_samples, guidance_scale, processing, create_date)
+            VALUES  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
             "#,
         )
         .bind(&self.id)
@@ -90,6 +93,7 @@ impl Image {
         .bind(&self.prompt)
         .bind(&self.input_image)
         .bind(&self.mask)
+        .bind(&self.thumbnail)
         .bind(&self.strength)
         .bind(&self.n_steps)
         .bind(&self.seed)
@@ -107,7 +111,7 @@ impl Image {
     pub async fn list(db: &DbPool) -> Result<Vec<Self>> {
         sqlx::query_as(
             r#"
-            SELECT id, user_id, model, width, height, prompt, input_image, mask, strength, n_steps, seed, num_samples, guidance_scale, processing, create_date
+            SELECT id, user_id, model, width, height, prompt, input_image, mask, thumbnail, strength, n_steps, seed, num_samples, guidance_scale, processing, create_date
             FROM images
             "#,
         )
@@ -120,7 +124,7 @@ impl Image {
     pub async fn get_by_id(db: &DbPool, id: &Uuid) -> Result<Self> {
         sqlx::query_as(
             r#"
-            SELECT id, user_id, model, width, height, prompt, input_image, mask, strength, n_steps, seed, num_samples, guidance_scale, processing, create_date
+            SELECT id, user_id, model, width, height, prompt, input_image, mask, thumbnail, strength, n_steps, seed, num_samples, guidance_scale, processing, create_date
             FROM images
             WHERE id = $1
             "#,
@@ -161,6 +165,23 @@ impl Image {
             "#,
         )
         .bind(processing)
+        .bind(id)
+        .execute(db)
+        .await
+        .map(|_| ())
+        .map_err(ImageError::UpdateError)
+        .map_err(Error::from)
+    }
+
+    pub async fn update_thumbnail(db: &DbPool, id: &Uuid, thumbnail: &[u8]) -> Result<()> {
+        sqlx::query(
+            r#"
+            UPDATE images
+            SET thumbnail = $1
+            WHERE id = $2
+            "#,
+        )
+        .bind(thumbnail)
         .bind(id)
         .execute(db)
         .await

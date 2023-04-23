@@ -175,6 +175,10 @@ impl BaseImageGenerator {
     pub fn save_image(&mut self, image: Tensor) {
         let idx = self.sample_idx() + 1;
         let path = self.save_dir.join(format!("{}-{idx}.png", self.request.id));
+        let thumbnail_path = self
+            .save_dir
+            .join(format!("{}-{idx}-tbn.png", self.request.id));
+        log::info!("saving image");
         if let Err(e) = tch::vision::image::save(&image, &path) {
             log::error!(
                 "[{}][{}/{}] failed to save image to file - {e}",
@@ -183,11 +187,35 @@ impl BaseImageGenerator {
                 self.request.num_samples
             );
         }
+        log::info!("generating image thumbnail");
+        let image_data = tch::vision::image::load(&path).unwrap();
+        match generate_thumbnail(&image_data, 64, 64) {
+            Ok(thumbnail) => {
+                log::info!("saving image thumbnail");
+                if let Err(e) = tch::vision::image::save(&thumbnail, &thumbnail_path) {
+                    log::error!(
+                        "[{}][{}/{}] failed to save thumbnail to file - {e}",
+                        self.request.id,
+                        idx,
+                        self.request.num_samples
+                    );
+                }
+            }
+            Err(e) => {
+                log::error!(
+                    "[{}][{}/{}] failed to generate thumbnail - {e}",
+                    self.request.id,
+                    idx,
+                    self.request.num_samples
+                );
+            }
+        }
         if let Err(e) = self.tx_results.try_send(SaveImageFsResult {
             id: self.request.id.clone(),
             n_sample: idx as i32,
             is_last: idx == self.request.num_samples,
             path,
+            thumbnail: thumbnail_path,
         }) {
             log::error!(
                 "[{}][{}/{}] failed to send save request - {e}",
@@ -225,4 +253,12 @@ impl BaseImageGenerator {
             self.request.num_samples,
         )
     }
+}
+
+fn generate_thumbnail(
+    image: &Tensor,
+    width: usize,
+    height: usize,
+) -> std::result::Result<Tensor, tch::TchError> {
+    tch::vision::image::resize(image, width as i64, height as i64)
 }

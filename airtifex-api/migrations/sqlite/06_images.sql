@@ -7,6 +7,7 @@ CREATE TABLE images (
      prompt         VARCHAR NOT NULL,
      input_image    BLOB,
      mask           BLOB,
+     thumbnail      BLOB,
      strength       REAL,
      n_steps        INTEGER NOT NULL,
      seed           INTEGER NOT NULL,
