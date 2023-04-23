@@ -105,6 +105,8 @@ pub fn initialize(
                     }
                 });
             }
+        } else {
+            std::thread::sleep(std::time::Duration::from_millis(100));
         }
     });
 
