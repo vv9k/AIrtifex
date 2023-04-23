@@ -42,6 +42,7 @@ pub struct InferenceRequest {
     pub tx_tokens: Sender<ChatStreamResult>,
 
     pub user: String,
+    pub save: bool,
     pub chat_data: Option<ChatData>,
     pub prompt: String,
     pub settings: InferenceSettings,
@@ -331,38 +332,40 @@ impl RunningInferenceSession {
 
     fn save_results(&mut self, tx_results: &Sender<SaveDataRequest>) {
         self.state.is_finished = true;
-        if let Some(chat) = &self.request.chat_data {
-            log::trace!("saving chat data {}", &chat.conversation_id);
-            let output = self.state.answer.clone();
-            if !output.is_empty() {
-                if let Err(e) = tx_results.try_send(SaveDataRequest::Chat {
-                    conversation_id: chat.conversation_id,
-                    input: self.request.prompt.clone(),
-                    output,
-                }) {
-                    log::error!(
-                        "failed to save chat entries for {} - {e}",
-                        chat.conversation_id
-                    );
+        if self.request.save {
+            if let Some(chat) = &self.request.chat_data {
+                log::trace!("saving chat data {}", &chat.conversation_id);
+                let output = self.state.answer.clone();
+                if !output.is_empty() {
+                    if let Err(e) = tx_results.try_send(SaveDataRequest::Chat {
+                        conversation_id: chat.conversation_id,
+                        input: self.request.prompt.clone(),
+                        output,
+                    }) {
+                        log::error!(
+                            "failed to save chat entries for {} - {e}",
+                            chat.conversation_id
+                        );
+                    }
                 }
-            }
-        } else {
-            log::trace!("[{}] saving inference results", self.id);
-            if let Err(e) = tx_results.try_send(SaveDataRequest::Prompt {
-                input: self.request.prompt.clone(),
-                output: self.state.answer.clone(),
-                username: self.request.user.clone(),
-                settings: InferenceSettings {
-                    num_predict: self.request.settings.num_predict,
-                    system_prompt: self.request.settings.system_prompt.clone(),
-                    n_batch: Some(self.params.n_batch),
-                    top_k: Some(self.params.top_k),
-                    top_p: Some(self.params.top_p),
-                    repeat_penalty: Some(self.params.repeat_penalty),
-                    temp: Some(self.params.temperature),
-                },
-            }) {
-                log::error!("failed to save inference results - {e}");
+            } else {
+                log::trace!("[{}] saving inference results", self.id);
+                if let Err(e) = tx_results.try_send(SaveDataRequest::Prompt {
+                    input: self.request.prompt.clone(),
+                    output: self.state.answer.clone(),
+                    username: self.request.user.clone(),
+                    settings: InferenceSettings {
+                        num_predict: self.request.settings.num_predict,
+                        system_prompt: self.request.settings.system_prompt.clone(),
+                        n_batch: Some(self.params.n_batch),
+                        top_k: Some(self.params.top_k),
+                        top_p: Some(self.params.top_p),
+                        repeat_penalty: Some(self.params.repeat_penalty),
+                        temp: Some(self.params.temperature),
+                    },
+                }) {
+                    log::error!("failed to save inference results - {e}");
+                }
             }
         }
     }

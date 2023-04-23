@@ -29,6 +29,7 @@ pub fn PromptGenerate(
     let repeat_penalty = create_rw_signal(cx, None::<f32>);
     let temp = create_rw_signal(cx, None::<f32>);
     let play_back_tokens = create_rw_signal(cx, true);
+    let save = create_rw_signal(cx, true);
     let response_view = create_rw_signal(cx, String::new());
 
     let is_inference_running = create_rw_signal(cx, false);
@@ -55,6 +56,7 @@ pub fn PromptGenerate(
                 repeat_penalty: repeat_penalty.get(),
                 temp: temp.get(),
                 play_back_tokens: play_back_tokens.get(),
+                save: save.get(),
             };
             let resp = api.oneshot_inference(request).await;
             read_inference_stream(
@@ -106,7 +108,7 @@ pub fn PromptGenerate(
                       <Prompt
                           authorized_api selected_model status_message dispatch_inference_action
                           num_predict prompt n_batch top_k top_p repeat_penalty temp should_cancel
-                          is_inference_running play_back_tokens
+                          is_inference_running play_back_tokens save
                       />
                      </div>
                  </div>
@@ -132,6 +134,7 @@ fn Prompt<F>(
     should_cancel: RwSignal<bool>,
     is_inference_running: RwSignal<bool>,
     play_back_tokens: RwSignal<bool>,
+    save: RwSignal<bool>,
     dispatch_inference_action: F,
 ) -> impl IntoView
 where
@@ -341,15 +344,28 @@ where
                           />
                       </div>
 
-                      <div class="form-check form-switch">
-                        <input
-                          class="form-check-input"
-                          type="checkbox" 
-                          id="playbackTokensSwitch"
-                          prop:checked={move || play_back_tokens.get()}
-                          on:input=move |_| play_back_tokens.update(|v| *v = !*v)
-                        />
-                        <label class="form-check-label" for="playbackTokensSwitch">"Play back tokens"</label>
+                      <div class="d-flex flex-row">
+                        <div class="form-check form-switch">
+                          <input
+                            class="form-check-input"
+                            type="checkbox" 
+                            id="playbackTokensSwitch"
+                            prop:checked={move || play_back_tokens.get()}
+                            on:input=move |_| play_back_tokens.update(|v| *v = !*v)
+                          />
+                          <label class="form-check-label" for="playbackTokensSwitch">"Play back tokens"</label>
+                        </div>
+
+                        <div class="form-check form-switch ms-3">
+                          <input
+                            class="form-check-input"
+                            type="checkbox" 
+                            id="saveSwitch"
+                            prop:checked={move || save.get()}
+                            on:input=move |_| save.update(|v| *v = !*v)
+                          />
+                          <label class="form-check-label" for="saveSwitch">"Save"</label>
+                        </div>
                       </div>
 
                   </div>

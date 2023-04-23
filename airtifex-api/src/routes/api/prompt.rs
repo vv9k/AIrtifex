@@ -43,6 +43,7 @@ async fn oneshot_inference(
 
     let inference_request = InferenceRequest {
         tx_tokens,
+        save: request.save,
         user: claims.sub,
         chat_data: None,
         prompt: request.prompt,

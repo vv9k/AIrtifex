@@ -64,6 +64,7 @@ async fn inference(
     let request = InferenceRequest {
         tx_tokens,
         user: claims.sub,
+        save: true,
         chat_data: Some(ChatData {
             conversation_id: id,
             history,

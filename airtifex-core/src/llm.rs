@@ -106,6 +106,7 @@ pub struct OneshotInferenceRequest {
     pub temp: Option<f32>,
     #[serde(default = "default_play_back_tokens")]
     pub play_back_tokens: bool,
+    pub save: bool,
 }
 
 fn default_play_back_tokens() -> bool {
