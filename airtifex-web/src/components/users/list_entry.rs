@@ -10,9 +10,15 @@ pub fn UserListEntry(
 ) -> impl IntoView {
     let pw_change_href = format!("/users/{}/password", &user.username);
     let edit_href = format!("/users/{}/edit", &user.username);
+    let edit_href2 = edit_href.clone();
     view! {cx,
-      <tr class="text-white no-border">
-          <td>{ user.username.clone() }</td>
+      <tr class="text-white no-border align-middle">
+          <td
+            style="cursor: pointer;"
+            on:click = move |_| {
+                crate::pages::goto(cx, &edit_href2).expect("user edit page");
+            }
+          >{ user.username.clone() }</td>
           <td>{ user.email }</td>
           <td>{ user.account_type.to_str() }</td>
           <td>{ user.registration_date.format("%a, %d %b %Y %H:%M:%S").to_string() }</td>

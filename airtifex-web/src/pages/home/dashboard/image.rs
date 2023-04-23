@@ -76,12 +76,7 @@ fn RecentImageEntry(cx: Scope, image: ImageInspect) -> impl IntoView {
               >
                   <td>{is_finished}</td>
                   <td class="text-start">{image.prompt}</td>
-                  <td class="text-airtifex text-center">{image.model}</td>
-                //   <td>{image.width}</td>
-                //   <td>{image.height}</td>
-                //   <td>{image.seed}</td>
-                //   <td>{image.n_steps}</td>
-                //   <td>{image.num_samples}</td>
+                  <td class="text-airtifex-light text-center">{image.model}</td>
               </tr>
     }
     .into_view(cx)

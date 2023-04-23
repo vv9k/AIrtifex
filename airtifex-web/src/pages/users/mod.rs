@@ -122,7 +122,7 @@ pub fn Users(
                             <div class="card-body">
                                 <table class="table table-hover table-striped table-responsive text-white">
                                   <thead>
-                                  <tr>
+                                  <tr class="align-middle">
                                     <th scope="col">"Username"</th>
                                     <th scope="col">"Email"</th>
                                     <th scope="col">"Account type"</th>

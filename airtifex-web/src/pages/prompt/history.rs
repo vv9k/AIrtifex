@@ -48,8 +48,8 @@ pub fn PromptList(
                     <tr>
                     <th scope="col">"Prompt"</th>
                     <th scope="col">"Response"</th>
-                    <th scope="col">"Model"</th>
-                    <th scope="col">"Date"</th>
+                    <th class="text-center" scope="col">"Model"</th>
+                    <th class="text-center" scope="col">"Date"</th>
                     <th scope="col">""</th>
                     </tr>
                     </thead>
@@ -77,19 +77,27 @@ fn PromptListEntry(
 ) -> impl IntoView {
     let open_href = format!("/prompt/{}", prompt.id);
     let open_href2 = open_href.clone();
+
+    let window_size = web_util::WindowSize::signal(cx).expect("window size");
+    let char_count = Signal::derive(cx, move || {
+        let size = window_size.get();
+        let count = ((size.width / 64) + 20).max(30) as usize;
+        count
+    });
+
     view! {cx, <tr
-                class="text-white no-border"
+                class="text-white no-border align-middle"
               >
                   <td
                     style="cursor: pointer;"
                     on:click=move |_| {
                         crate::pages::goto(cx, &open_href2).expect("prompt page");
                     }
-                  >{web_util::display_limited_str(&prompt.prompt, 50)}</td>
-                  <td>{web_util::display_limited_str(&prompt.response, 50)}</td>
-                  <td class="text-airtifex">{prompt.model}</td>
-                  <td class="text-secondary">{prompt.date.format("%a, %d %b %Y %H:%M:%S").to_string()}</td>
-                  <td>
+                  >{move || web_util::display_limited_str(&prompt.prompt, char_count.get())}</td>
+                  <td class="fst-italic">{move || web_util::display_limited_str(&prompt.response, char_count.get())}</td>
+                  <td align="center" class="text-airtifex-light">{prompt.model}</td>
+                  <td align="center" class="text-secondary">{prompt.date.format("%a, %d %b %Y %H:%M:%S").to_string()}</td>
+                  <td align="right">
                       <div class="btn-group" role="prompt toolbar" aria-label="prompt toolbar">
                           <button
                             class="btn btn-outline-lighter"

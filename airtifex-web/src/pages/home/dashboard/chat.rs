@@ -76,7 +76,7 @@ fn RecentChatEntry(cx: Scope, chat: ChatListEntry) -> impl IntoView {
                   <td>
                     {chat.title.clone()}
                   </td>
-                  <td class="text-airtifex text-center">{chat.model}</td>
+                  <td class="text-airtifex-light text-center">{chat.model}</td>
               </tr>
     }
     .into_view(cx)

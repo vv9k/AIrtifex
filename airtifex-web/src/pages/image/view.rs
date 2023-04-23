@@ -180,8 +180,8 @@ pub fn ImageView(
            <main class="bg-dark text-white d-flex flex-column p-3 overflow-auto" >
              <TitledChildPage title={image_id} page_stack={page_stack.read_only()}></TitledChildPage>
              <div class="text-center w-100">
-                 <p class="text-airtifex-yellow font-monospace py-1">{model}</p>
-                 <p class="text-airtifex-light font-monospace py-2">{prompt}</p>
+                 <p class="text-airtifex-light font-monospace py-1">{model}</p>
+                 <p class="text-airtifex-yellow font-monospace py-2">{prompt}</p>
              </div>
              {details}
              {move || {

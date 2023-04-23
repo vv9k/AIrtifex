@@ -429,8 +429,8 @@ fn ChatListEntries(
                     <thead>
                     <tr>
                       <th scope="col">"Previous conversations"</th>
-                      <th scope="col">"Model"</th>
-                      <th scope="col">"Start date"</th>
+                      <th class="text-center" scope="col">"Model"</th>
+                      <th class="text-center" scope="col">"Start date"</th>
                       <th scope="col"></th>
                     </tr>
                     </thead>
@@ -461,7 +461,7 @@ fn ChatListEntry(
     let edit_href = format!("/chat/{}", chat.id);
     let edit_href2 = edit_href.clone();
     view! {cx, <tr
-                class="text-white no-border"
+                class="text-white no-border align-middle"
               >
                   <td
                     style="cursor: pointer;"
@@ -471,9 +471,9 @@ fn ChatListEntry(
                   >
                     {chat.title.clone()}
                   </td>
-                  <td class="text-airtifex">{chat.model}</td>
-                  <td class="text-secondary">{chat.start_date.format("%a, %d %b %Y %H:%M:%S").to_string()}</td>
-                  <td>
+                  <td align="center" class="text-airtifex-light">{chat.model}</td>
+                  <td align="center" class="text-secondary">{chat.start_date.format("%a, %d %b %Y %H:%M:%S").to_string()}</td>
+                  <td align="right">
                       <div class="btn-group" role="chat toolbar" aria-label="chat toolbar">
                           <button
                             class="btn btn-outline-lighter"

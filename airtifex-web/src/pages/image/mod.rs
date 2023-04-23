@@ -184,7 +184,7 @@ pub fn GenerateImage(
                  />
                  <div class="card bg-darker m-3">
                     <StatusMessage message=status_message />
-                    <ImageListEntries images remove_image_id current_list_page />
+                    <ImageListEntries images remove_image_id />
                  </div>
            </main>
            {remove_confirm_modal}
@@ -528,33 +528,23 @@ fn ImageListEntries(
     cx: Scope,
     images: Resource<u32, Vec<ImageInspect>>,
     remove_image_id: RwSignal<Option<String>>,
-    current_list_page: RwSignal<u32>,
 ) -> impl IntoView {
     view! { cx, { move || {
         if let Some(images) = images.read(cx) {
             if !images.is_empty() {
                 return view! { cx,
                 <div class="card-body d-flex flex-column px-5 pb-5">
-                //   <button
-                //       class="btn btn-outline-lighter rounded mt-3 w-25 mx-auto"
-                //       on:click=move |_| {
-                //         current_list_page.update(|v| *v = 0);
-                //       }
-                //   >
-                //   <img class="me-2" src="/icons/refresh-cw.svg" />
-                //   "Refresh"
-                //   </button>
                   <table class="table table-hover table-striped table-responsive text-white">
                     <thead>
                     <tr>
                       <th class="col-3" scope="col">"Prompt"</th>
-                      <th scope="col">"Model"</th>
-                      <th scope="col">"Width"</th>
-                      <th scope="col">"Height"</th>
-                      <th scope="col">"Seed"</th>
-                      <th scope="col">"N Steps"</th>
-                      <th scope="col">"N Samples"</th>
-                      <th scope="col">"Finished"</th>
+                      <th class="text-center" scope="col">"Model"</th>
+                      <th class="text-center" scope="col">"Width"</th>
+                      <th class="text-center" scope="col">"Height"</th>
+                      <th class="text-center" scope="col">"Seed"</th>
+                      <th class="text-center" scope="col">"N Steps"</th>
+                      <th class="text-center" scope="col">"N Samples"</th>
+                      <th class="text-center" scope="col">"Finished"</th>
                       <th scope="col"></th>
                     </tr>
                     </thead>
@@ -589,7 +579,7 @@ fn ImageListEntry(
         view! { cx, <span class="text-airtifex-yellow">"✗"</span>}
     };
     view! {cx, <tr
-                class="text-white no-border"
+                class="text-white no-border align-middle"
               >
                   <td
                     style="cursor: pointer;"
@@ -599,14 +589,14 @@ fn ImageListEntry(
                   >
                     {image.prompt}
                   </td>
-                  <td class="text-airtifex">{image.model}</td>
-                  <td>{image.width}</td>
-                  <td>{image.height}</td>
-                  <td>{image.seed}</td>
-                  <td>{image.n_steps}</td>
-                  <td>{image.num_samples}</td>
-                  <td>{is_finished}</td>
-                  <td>
+                  <td align="center" class="text-airtifex-light">{image.model}</td>
+                  <td align="center">{image.width}</td>
+                  <td align="center">{image.height}</td>
+                  <td align="center">{image.seed}</td>
+                  <td align="center">{image.n_steps}</td>
+                  <td align="center">{image.num_samples}</td>
+                  <td align="center">{is_finished}</td>
+                  <td align="right">
                       <div class="btn-group" role="chat toolbar" aria-label="chat toolbar">
                           <button
                             class="btn btn-outline-lighter"
