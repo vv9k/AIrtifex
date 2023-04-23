@@ -4,7 +4,7 @@ pub mod view;
 pub use history::*;
 pub use view::*;
 
-use crate::components::status_message::*;
+use crate::components::{loading::*, status_message::*};
 use crate::inference::read_inference_stream;
 use crate::{api, web_util, Page, PageStack};
 use airtifex_core::llm::OneshotInferenceRequest;
@@ -99,6 +99,7 @@ pub fn PromptGenerate(
                      <div class="col-lg-6 col-sm-12 px-3 pb-3">
                       <div class="card bg-darker p-4 col-12 h-100 overflow-auto">
                         <pre>{response_view}</pre>
+                        <Dots is_loading=is_inference_running.read_only() />
                       </div>
                      </div>
                      <div class="col-lg-6 col-sm-12 px-3">

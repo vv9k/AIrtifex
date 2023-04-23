@@ -1,4 +1,4 @@
-use crate::components::{status_message::*, titled_child_page::*};
+use crate::components::{loading::*, status_message::*, titled_child_page::*};
 use crate::inference::read_inference_stream;
 use crate::{api, web_util, Page, PageStack};
 use airtifex_core::llm::ChatResponseRequest;
@@ -146,7 +146,11 @@ pub fn ChatView(
                     let _ = web_util::sleep(100).await;
                 }
                 is_inference_running.update(|r| *r = true);
-                status_message.update(|s| *s = Message::Success("Generating...".into()));
+                status_message.update(|s| *s = Message::Empty);
+                last_response.update(|(e, rsp)| {
+                    *e = Entry::Chat;
+                    rsp.clear();
+                });
                 responses.update(|rsp| {
                     rsp.push((Entry::User, request.prompt.clone()));
                 });
@@ -268,6 +272,7 @@ pub fn ChatView(
                                view!{cx, <p><strong class=class>{prefix}</strong><pre class="fs-6 ms-3">{rsp}</pre></p>
                                }}.into_view(cx)).collect::<Vec<_>>()
                        }}
+                       <Dots is_loading=is_inference_running.read_only() />
                        <p style="height: 12rem"></p>
                    </div>
                  </div>
@@ -276,7 +281,7 @@ pub fn ChatView(
                          on:submit=|ev|ev.prevent_default()
                          class="row text-start"
                        >
-                           <div class="input-group mb-3">
+                           <div class="input-group">
                                <textarea
                                  class = "form-control"
                                  required
@@ -317,7 +322,7 @@ pub fn ChatView(
                         </button>
                         </div>
                        </form>
-                       <div class="mt-4">
+                       <div class="my-3">
                        <StatusMessage message=status_message></StatusMessage>
                        </div>
                  </div>

@@ -20,7 +20,6 @@ pub async fn read_inference_stream(
                 let body = wasm_streams::ReadableStream::from_raw(body);
                 let mut reader = body.into_stream();
 
-                status_message.update(|m| *m = Message::Success("Generating...".into()));
                 response_view.update(|rsp| *rsp = "".into());
 
                 loop {
@@ -47,7 +46,6 @@ pub async fn read_inference_stream(
                         None => break,
                     }
                 }
-                status_message.update(|m| *m = Message::Success("done".into()));
             } else {
                 status_message.update(|m| {
                     *m = Message::Error("response body empty".into());
