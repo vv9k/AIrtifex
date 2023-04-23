@@ -1,4 +1,4 @@
-use crate::Page;
+use crate::{pages,Page};
 
 use airtifex_core::{
     llm::{ChatListEntry, UserChatCounters},
@@ -34,7 +34,7 @@ pub fn RecentChats(cx: Scope, chats: Resource<(), Vec<ChatListEntry>>) -> impl I
                                 class="text-white no-border"
                                 style="cursor: pointer;"
                                 on:click={move |_| {
-                                    crate::pages::goto(cx, Page::Chat).expect("chat page");
+                                    pages::goto(cx, Page::Chat).expect("chat page");
                                 }}
                             >
                                 <td 
@@ -68,7 +68,7 @@ fn RecentChatEntry(cx: Scope, chat: ChatListEntry) -> impl IntoView {
                 class="text-white no-border"
                 style="cursor: pointer;"
                 on:click={move |_| {
-                    crate::pages::goto(cx, &view_href).expect("chat page");
+                    pages::goto(cx, &view_href).expect("chat page");
                 }}
               >
                   <td>

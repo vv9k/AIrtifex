@@ -2,11 +2,10 @@ use crate::components::{
     email_validation::*, password_validation::*, status_message::*, titled_child_page::*,
     users::account_type_selector::*,
 };
-use crate::{api, Page, PageStack};
+use crate::{api, pages, Page, PageStack};
 use airtifex_core::user::{AccountType, UserRegisterRequest};
 
 use leptos::*;
-use leptos_router::*;
 
 #[component]
 pub fn UserAdd(
@@ -41,8 +40,7 @@ pub fn UserAdd(
 
                     match response {
                         Ok(id) => {
-                            let navigate = use_navigate(cx);
-                            navigate(Page::Users.path(), Default::default()).expect("Users route");
+                            pages::goto(cx, Page::Users.path()).expect("users page");
                             users_message.update(|m| {
                                 *m = Message::Success(format!(
                                     "successfully created user {user}, id: {id}"

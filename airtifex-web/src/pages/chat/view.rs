@@ -1,6 +1,6 @@
 use crate::components::{loading::*, status_message::*, titled_child_page::*};
 use crate::inference::read_inference_stream;
-use crate::{api, web_util, Page, PageStack};
+use crate::{api, pages, web_util, Page, PageStack};
 use airtifex_core::llm::ChatResponseRequest;
 
 use leptos::*;
@@ -50,7 +50,7 @@ pub fn ChatView(
                     Ok(chat) => Some(chat),
                     Err(e) => {
                         let e = e.to_string();
-                        crate::pages::goto_login_if_expired(cx, &e, authorized_api);
+                        pages::goto_login_if_expired(cx, &e, authorized_api);
                         status_message.update(|msg| *msg = Message::Error(e));
                         None
                     }
@@ -87,7 +87,7 @@ pub fn ChatView(
                     }
                     Err(e) => {
                         let e = e.to_string();
-                        crate::pages::goto_login_if_expired(cx, &e, authorized_api);
+                        pages::goto_login_if_expired(cx, &e, authorized_api);
                         status_message.update(|msg| *msg = Message::Error(e));
                         vec![]
                     }

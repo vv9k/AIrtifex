@@ -6,12 +6,13 @@ use image::*;
 
 use crate::api::AuthorizedApi;
 use crate::components::status_message::*;
+use crate::pages;
 use crate::web_util;
-
 use airtifex_core::{
     image::ImageModelListEntry,
     llm::{LlmListEntry, UserChatCounters},
 };
+
 use leptos::*;
 
 #[component]
@@ -34,7 +35,7 @@ pub fn Dashboard(
                     }
                     Err(e) => {
                         let e = e.to_string();
-                        crate::pages::goto_login_if_expired(cx, &e, authorized_api);
+                        pages::goto_login_if_expired(cx, &e, authorized_api);
                         global_message.update(|msg| *msg = Message::Error(e));
                         vec![]
                     }
@@ -60,7 +61,7 @@ pub fn Dashboard(
                     }
                     Err(e) => {
                         let e = e.to_string();
-                        crate::pages::goto_login_if_expired(cx, &e, authorized_api);
+                        pages::goto_login_if_expired(cx, &e, authorized_api);
                         global_message.update(|msg| *msg = Message::Error(e));
                         vec![]
                     }

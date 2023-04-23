@@ -1,9 +1,8 @@
 use crate::components::{modal::*, status_message::*};
-use crate::{api, Page, PageStack};
+use crate::{api, pages, Page, PageStack};
 use airtifex_core::llm::{ChatListEntry, ChatStartRequest, InferenceSettings};
 
 use leptos::*;
-use leptos_router::*;
 
 pub mod view;
 pub use view::*;
@@ -39,7 +38,7 @@ pub fn Chat(
                     Ok(chats) => chats,
                     Err(e) => {
                         let e = e.to_string();
-                        crate::pages::goto_login_if_expired(cx, &e, authorized_api);
+                        pages::goto_login_if_expired(cx, &e, authorized_api);
                         status_message.update(|msg| *msg = Message::Error(e));
                         vec![]
                     }
@@ -58,7 +57,7 @@ pub fn Chat(
             if let (Some(title), Some(id)) = (remove_chat_title.get(), remove_chat_id.get()) {
                 if let Err(e) = api.chat_remove(&id).await {
                     let e = e.to_string();
-                    crate::pages::goto_login_if_expired(cx, &e, authorized_api);
+                    pages::goto_login_if_expired(cx, &e, authorized_api);
                     status_message.update(|m| {
                         *m = Message::Error(format!("failed to remove chat - {e}"));
                     });
@@ -95,9 +94,7 @@ pub fn Chat(
             };
             match api.chat_start_new(request).await {
                 Ok(response) => {
-                    let navigate = use_navigate(cx);
-                    navigate(&format!("/chat/{}", response.chat_id), Default::default())
-                        .expect("chat page");
+                    pages::goto(cx, format!("/chat/{}", response.chat_id)).expect("chat page");
                 }
                 Err(e) => {
                     status_message.update(|m| {
@@ -466,7 +463,7 @@ fn ChatListEntry(
                   <td
                     style="cursor: pointer;"
                     on:click=move |_| {
-                        crate::pages::goto(cx, &edit_href2).expect("chat page");
+                        pages::goto(cx, &edit_href2).expect("chat page");
                     }
                   >
                     {chat.title.clone()}
@@ -489,10 +486,7 @@ fn ChatListEntry(
                           </button>
                           <button
                             class="btn btn-outline-lighter"
-                            on:click=move |_| {
-                                let navigate = use_navigate(cx);
-                                navigate(&edit_href, Default::default()).expect("chat page");
-                            }
+                            on:click=move |_| pages::goto(cx, &edit_href).expect("chat page")
                           >
                               <img src="/icons/edit.svg" class="me-2" />
                               "Open"

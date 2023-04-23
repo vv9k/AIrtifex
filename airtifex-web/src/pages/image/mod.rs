@@ -1,10 +1,8 @@
 use crate::components::{modal::*, status_message::*};
-use crate::web_util;
-use crate::{api, Page, PageStack};
+use crate::{api, pages, web_util, Page, PageStack};
 use airtifex_core::image::{ImageGenerateRequest, ImageInspect, InputImage};
 
 use leptos::*;
-use leptos_router::*;
 
 pub mod view;
 
@@ -43,7 +41,7 @@ pub fn GenerateImage(
                     Ok(images) => images,
                     Err(e) => {
                         let e = e.to_string();
-                        crate::pages::goto_login_if_expired(cx, &e, authorized_api);
+                        pages::goto_login_if_expired(cx, &e, authorized_api);
                         status_message.update(|msg| *msg = Message::Error(e));
                         vec![]
                     }
@@ -62,7 +60,7 @@ pub fn GenerateImage(
             if let Some(id) = remove_image_id.get() {
                 if let Err(e) = api.image_delete(&id).await {
                     let e = e.to_string();
-                    crate::pages::goto_login_if_expired(cx, &e, authorized_api);
+                    pages::goto_login_if_expired(cx, &e, authorized_api);
                     status_message.update(|m| {
                         *m = Message::Error(format!("failed to remove image - {e}"));
                     });
@@ -595,7 +593,7 @@ fn ImageListEntry(
                   <td
                     style="cursor: pointer;"
                     on:click=move |_| {
-                        crate::pages::goto(cx, &view_href2).expect("image page");
+                        pages::goto(cx, &view_href2).expect("image page");
                     }
                   >
                     {image.prompt}
@@ -623,8 +621,7 @@ fn ImageListEntry(
                           <button
                             class="btn btn-outline-lighter"
                             on:click=move |_| {
-                                let navigate = use_navigate(cx);
-                                navigate(&view_href, Default::default()).expect("image page");
+                                pages::goto(cx, &view_href).expect("image page");
                             }
                           >
                               <img src="/icons/edit.svg" class="me-2" />

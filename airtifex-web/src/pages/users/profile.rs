@@ -1,8 +1,7 @@
-use crate::{Page, PageStack};
+use crate::{pages, Page, PageStack};
 use airtifex_core::user::AuthenticatedUser;
 
 use leptos::*;
-use leptos_router::*;
 
 #[component]
 pub fn UserProfile(
@@ -63,8 +62,7 @@ pub fn UserProfile(
                 }.into_view(cx)
             }
             None => {
-                let navigate = use_navigate(cx);
-                navigate(Page::Home.path(), Default::default()).expect("Home page");
+                pages::goto(cx, Page::Home.path()).expect("Home page");
                 view!{cx, <></>}.into_view(cx)
             }
         }

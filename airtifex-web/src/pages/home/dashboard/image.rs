@@ -1,4 +1,4 @@
-use crate::Page;
+use crate::{pages, Page};
 
 use airtifex_core::image::ImageInspect;
 use leptos::*;
@@ -12,7 +12,7 @@ pub fn RecentImages(cx: Scope, images: Resource<(), Vec<ImageInspect>>) -> impl 
             <button
                 class="btn btn-outline-lighter round mx-auto"
                 on:click={move |_| {
-                crate::pages::goto(cx, Page::GenerateImage).expect("images page");
+                pages::goto(cx, Page::GenerateImage).expect("images page");
                 }}
             >
                 <img src="/icons/list.svg" class="me-2" />
@@ -71,7 +71,7 @@ fn RecentImageEntry(cx: Scope, image: ImageInspect) -> impl IntoView {
                 class="text-white no-border"
                 style="cursor: pointer;"
                 on:click={move |_| {
-                    crate::pages::goto(cx, &view_href).expect("image page");
+                    pages::goto(cx, &view_href).expect("image page");
                 }}
               >
                   <td>{is_finished}</td>

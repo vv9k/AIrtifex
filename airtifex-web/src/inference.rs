@@ -1,5 +1,5 @@
-use crate::api;
 use crate::components::status_message::Message;
+use crate::{api, pages};
 
 use futures::StreamExt;
 use leptos::*;
@@ -54,7 +54,7 @@ pub async fn read_inference_stream(
         }
         Err(err) => {
             let e = err.to_string();
-            crate::pages::goto_login_if_expired(cx, &e, authorized_api);
+            pages::goto_login_if_expired(cx, &e, authorized_api);
             status_message.update(|m| {
                 *m = Message::Error(format!("failed to generate an answer - {e}"));
             })

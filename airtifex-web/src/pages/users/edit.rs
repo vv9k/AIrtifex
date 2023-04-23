@@ -1,7 +1,7 @@
 use crate::components::{
     email_validation::*, status_message::*, titled_child_page::*, users::account_type_selector::*,
 };
-use crate::{api, Page, PageStack};
+use crate::{api, pages, Page, PageStack};
 use airtifex_core::user::{AccountType, UserEditRequest};
 
 use leptos::*;
@@ -47,7 +47,7 @@ pub fn UserEdit(
                     }
                     Err(e) => {
                         let e = e.to_string();
-                        crate::pages::goto_login_if_expired(cx, &e, authorized_api);
+                        pages::goto_login_if_expired(cx, &e, authorized_api);
                         users_message.update(|msg| *msg = Message::Error(e));
                         None
                     }

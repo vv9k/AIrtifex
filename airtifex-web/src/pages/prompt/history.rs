@@ -1,9 +1,8 @@
 use crate::components::status_message::*;
-use crate::{api, web_util, Page, PageStack};
+use crate::{api, pages, web_util, Page, PageStack};
 use airtifex_core::llm::PromptInspect;
 
 use leptos::*;
-use leptos_router::*;
 
 #[component]
 pub fn PromptList(
@@ -23,7 +22,7 @@ pub fn PromptList(
                     Ok(prompts) => prompts,
                     Err(e) => {
                         let e = e.to_string();
-                        crate::pages::goto_login_if_expired(cx, &e, authorized_api);
+                        pages::goto_login_if_expired(cx, &e, authorized_api);
                         status_message.update(|msg| *msg = Message::Error(e));
                         vec![]
                     }
@@ -91,7 +90,7 @@ fn PromptListEntry(
                   <td
                     style="cursor: pointer;"
                     on:click=move |_| {
-                        crate::pages::goto(cx, &open_href2).expect("prompt page");
+                        pages::goto(cx, &open_href2).expect("prompt page");
                     }
                   >{move || web_util::display_limited_str(&prompt.prompt, char_count.get())}</td>
                   <td class="fst-italic">{move || web_util::display_limited_str(&prompt.response, char_count.get())}</td>
@@ -113,8 +112,7 @@ fn PromptListEntry(
                           <button
                             class="btn btn-outline-lighter"
                             on:click=move |_| {
-                                let navigate = use_navigate(cx);
-                                navigate(&open_href, Default::default()).expect("prompt page");
+                                pages::goto(cx, &open_href).expect("prompt page");
                             }
                           >
                               <img src="/icons/edit.svg" class="me-2" />

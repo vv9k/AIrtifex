@@ -1,5 +1,5 @@
 use crate::components::{status_message::*, titled_child_page::*};
-use crate::{api, web_util, Page, PageStack};
+use crate::{api, pages, web_util, Page, PageStack};
 
 use leptos::*;
 use leptos_router::*;
@@ -32,7 +32,7 @@ pub fn ImageView(
                     Ok(meta) => Some(meta),
                     Err(e) => {
                         let e = e.to_string();
-                        crate::pages::goto_login_if_expired(cx, &e, authorized_api);
+                        pages::goto_login_if_expired(cx, &e, authorized_api);
                         status_message.update(|msg| *msg = Message::Error(e));
                         None
                     }
@@ -55,7 +55,7 @@ pub fn ImageView(
                     Ok(images) => Some(images),
                     Err(e) => {
                         let e = e.to_string();
-                        crate::pages::goto_login_if_expired(cx, &e, authorized_api);
+                        pages::goto_login_if_expired(cx, &e, authorized_api);
                         status_message.update(|msg| *msg = Message::Error(e));
                         None
                     }

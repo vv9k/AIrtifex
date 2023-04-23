@@ -1,3 +1,4 @@
+use crate::pages;
 use airtifex_core::user::ListUserEntry;
 
 use leptos::*;
@@ -15,9 +16,7 @@ pub fn UserListEntry(
       <tr class="text-white no-border align-middle">
           <td
             style="cursor: pointer;"
-            on:click = move |_| {
-                crate::pages::goto(cx, &edit_href2).expect("user edit page");
-            }
+            on:click = move |_| pages::goto(cx, &edit_href2).expect("user edit page")
           >{ user.username.clone() }</td>
           <td>{ user.email }</td>
           <td>{ user.account_type.to_str() }</td>

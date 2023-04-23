@@ -321,8 +321,7 @@ pub fn App(cx: Scope) -> impl IntoView {
                           on_success = move |api| {
                               log::info!("Successfully logged in");
                               authorized_api.update(|v| *v = Some(api));
-                              let navigate = use_navigate(cx);
-                              navigate(Page::Home.path(), Default::default()).expect("Home route");
+                              pages::goto(cx, Page::Home.path()).expect("home page");
                               fetch_user_info.dispatch(());
                           } />
                       }

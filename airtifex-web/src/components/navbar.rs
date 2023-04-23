@@ -1,4 +1,4 @@
-use crate::{Page, PageStack};
+use crate::{Page, pages, PageStack};
 use airtifex_core::user::AuthenticatedUser;
 
 use leptos::*;
@@ -60,7 +60,7 @@ pub fn NavItem(
                               <li 
                                 class=classes
                                 style="cursor: pointer;"
-                                on:click=move |_| crate::pages::goto(cx, p.path()).expect("subpage")
+                                on:click=move |_| pages::goto(cx, p.path()).expect("subpage")
                               >
                                 <p class="text-white text-decoration-none fw-bold">"└ "{p.nav_display()}</p>
                               </li>

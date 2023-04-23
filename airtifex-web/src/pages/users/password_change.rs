@@ -1,5 +1,5 @@
 use crate::components::{password_validation::*, status_message::*, titled_child_page::*};
-use crate::{api, Page, PageStack};
+use crate::{api, pages, Page, PageStack};
 use airtifex_core::user::PasswordChangeRequest;
 
 use leptos::*;
@@ -35,8 +35,7 @@ pub fn UserPasswordChange(
 
                     match response {
                         Ok(_) => {
-                            let navigate = use_navigate(cx);
-                            navigate(Page::Users.path(), Default::default()).expect("Users page");
+                            pages::goto(cx, Page::Users.path()).expect("users page");
                             users_message.update(|m| {
                                 *m = Message::Success(format!(
                                     "Successfully changed password of {username}"
