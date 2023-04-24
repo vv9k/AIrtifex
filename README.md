@@ -11,6 +11,7 @@ Self-hosted, generative AI server and a web app. The API provides the necessary 
 
 - [Prerequisites](#prerequisites)
 - [Setup](#setup)
+- [Getting the weights](#getting-the-weights)
 - [API Configuration](#api-configuration)
 - [Building and Running the Project](#building-and-running-the-project)
   - [API With SQLite](#api-with-sqlite)
@@ -34,6 +35,17 @@ To work with this project, you will need the following tools installed:
 git clone https://github.com/vv9k/airtifex.git
 cd airtifex
 ```
+
+## Getting the weights
+
+This repository doesn't contain any models/weights, you'll need to get them yourself before running the server. Currently, only LLaMa based models are supported like
+Alpaca, Vicuna etc.
+
+For image generation Stable Diffusion models can be used. Below are links to download pretrained weights:
+ * https://huggingface.co/lmz/rust-stable-diffusion-v2-1
+ * https://huggingface.co/lmz/rust-stable-diffusion-v1-5
+
+After the models are downloaded, we can specify their location in the configuration.
 
 ## API Configuration
 
