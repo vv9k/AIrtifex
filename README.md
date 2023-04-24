@@ -82,6 +82,8 @@ stable_diffusion:
 
 ## Building and Running the Project
 
+Default username and password to API are both `admin`.
+
 ### API with Sqlite
 
 To build and run the project using SQLite as the database, follow these steps:
@@ -128,6 +130,7 @@ make serve_release
 ```
 
 The web app will be accessible at http://localhost:8080 by default and is configured to connect to the API server at localhost:6901. To configure it change the values in the `Trunk.toml` file.
+
 
 
 ## License
