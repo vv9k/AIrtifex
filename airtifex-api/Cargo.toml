@@ -33,7 +33,7 @@ futures-util = "0.3.27"
 clap = { version = "4.1.11", features = ["derive"] }
 bitflags = "2.0.2"
 uuid = { version = "0.8", features = ["serde", "v4", "v1"]}
-llama-rs = { path = "../../llama-rs/llama-rs" }
+llama-rs = { git = "https://github.com/rustformers/llama-rs" }
 flume = "0.10.14"
 num_cpus = "1.15.0"
 tempfile = "3"

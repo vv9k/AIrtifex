@@ -1211,13 +1211,24 @@ dependencies = [
 [[package]]
 name = "ggml"
 version = "0.1.0"
+source = "git+https://github.com/rustformers/llama-rs#1b20306da5356dc8eba598e0887aad04240413c6"
 dependencies = [
  "ggml-sys",
 ]
 
 [[package]]
+name = "ggml-loader"
+version = "0.1.0"
+source = "git+https://github.com/rustformers/llama-rs#1b20306da5356dc8eba598e0887aad04240413c6"
+dependencies = [
+ "ggml",
+ "thiserror",
+]
+
+[[package]]
 name = "ggml-sys"
 version = "0.1.0"
+source = "git+https://github.com/rustformers/llama-rs#1b20306da5356dc8eba598e0887aad04240413c6"
 dependencies = [
  "cc",
 ]
@@ -1908,9 +1919,12 @@ checksum = "d59d8c75012853d2e872fb56bc8a2e53718e2cafe1a4c823143141c6d90c322f"
 [[package]]
 name = "llama-rs"
 version = "0.1.0"
+source = "git+https://github.com/rustformers/llama-rs#1b20306da5356dc8eba598e0887aad04240413c6"
 dependencies = [
  "bytemuck",
  "ggml",
+ "ggml-loader",
+ "memmap2",
  "partial_sort",
  "rand",
  "serde",
@@ -1975,6 +1989,15 @@ name = "memchr"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
+
+[[package]]
+name = "memmap2"
+version = "0.5.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "83faa42c0a078c393f6b29d5db232d8be22776a891f8f56e5284faee4a20b327"
+dependencies = [
+ "libc",
+]
 
 [[package]]
 name = "mime"
