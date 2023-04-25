@@ -573,7 +573,7 @@ fn ImageListEntry(
     image: ImageInspect,
     remove_image_id: RwSignal<Option<String>>,
 ) -> impl IntoView {
-    let view_href = format!("{}/{}", Page::GenerateImage.path(), image.id);
+    let view_href = format!("{}/{}", Page::GenerateImage.raw_path(), image.id);
     let view_href2 = view_href.clone();
     let is_finished = if !image.processing {
         view! { cx, <span class="text-airtifex-green">"✓"</span>}

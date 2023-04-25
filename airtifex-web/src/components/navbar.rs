@@ -12,7 +12,7 @@ pub enum NavElement {
 #[component]
 pub fn NavItem(
     cx: Scope,
-    page_stack: RwSignal<PageStack>,
+    page_stack: ReadSignal<PageStack>,
     nav: &'static NavElement,
 ) -> impl IntoView {
     match nav {
@@ -26,7 +26,7 @@ pub fn NavItem(
             };
             view! { cx,
                 <li class="nav-item sb-item">
-                    <a href=page.path() class=classes aria-current="page">
+                    <a href=page.raw_path() class=classes aria-current="page">
                         <img class="me-2" src=page.icon()/>
                         <span class="fw-bold text-white">{page.nav_display()}</span>
                     </a>
@@ -61,7 +61,7 @@ pub fn NavItem(
                     <ul class="list-unstyled fw-normal pb-1">
                       { move || {
                           sub.into_iter().map(|p| {
-                            let classes = move || if page_stack.get().current() == *p {
+                            let classes = move || if page_stack.get().current() == p {
                               "ms-5 ps-2 nav-link selected"
                             } else {
                               "ms-5 ps-2 nav-link"
@@ -70,7 +70,7 @@ pub fn NavItem(
                               <li 
                                 class=classes
                                 style="cursor: pointer;"
-                                on:click=move |_| pages::goto(cx, p.path()).expect("subpage")
+                                on:click=move |_| pages::goto(cx, p.raw_path()).expect("subpage")
                               >
                                 <p class="text-white text-decoration-none fw-bold">"└ "{p.nav_display()}</p>
                               </li>
@@ -88,7 +88,7 @@ pub fn NavItem(
 #[component]
 pub fn NavBar<F>(
     cx: Scope,
-    page_stack: RwSignal<PageStack>,
+    page_stack: ReadSignal<PageStack>,
     user_info: RwSignal<Option<AuthenticatedUser>>,
     on_logout: F,
 ) -> impl IntoView
@@ -116,7 +116,7 @@ where
                <strong>{&user.username}</strong>
            </a>
            <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
-             <li><A class="dropdown-item" href=Page::UserProfile.path()>"Profile"</A></li>
+             <li><A class="dropdown-item" href=Page::UserProfile.raw_path()>"Profile"</A></li>
              <li><hr class="dropdown-divider"/></li>
              <li>
                <A

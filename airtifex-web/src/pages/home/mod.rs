@@ -2,7 +2,7 @@ pub mod dashboard;
 
 pub use dashboard::*;
 
-use crate::{api::AuthorizedApi, components::status_message::*, pages::PageStack, Page};
+use crate::{api::AuthorizedApi, components::status_message::*, Page};
 
 use airtifex_core::user::AuthenticatedUser;
 use leptos::*;
@@ -13,10 +13,8 @@ pub fn Home(
     cx: Scope,
     authorized_api: RwSignal<Option<AuthorizedApi>>,
     user_info: RwSignal<Option<AuthenticatedUser>>,
-    page_stack: RwSignal<PageStack>,
     global_message: RwSignal<Message>,
 ) -> impl IntoView {
-    page_stack.update(|p| p.push(Page::Home));
     let window_size = crate::web_util::WindowSize::signal(cx).expect("window size");
 
     view! { cx,
@@ -43,7 +41,7 @@ pub fn Home(
                             <div class="col-md-8 mx-auto align-items-center d-flex flex-column">
                                 <h1 class="display-5 text-center font-monospace">"Welcome to "<span class="fw-bold"><span class="text-airtifex">"AI"</span>"rtifex"</span></h1>
                                 <p class="pt-5 pb-3">"You are not logged in."</p>
-                                <A href=Page::Login.path() class="btn btn-airtifex">
+                                <A href=Page::Login.raw_path() class="btn btn-airtifex">
                                     "Go to login page"
                                 </A>
                             </div>

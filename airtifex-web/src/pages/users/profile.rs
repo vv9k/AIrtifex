@@ -62,7 +62,7 @@ pub fn UserProfile(
                 }.into_view(cx)
             }
             None => {
-                pages::goto(cx, Page::Home.path()).expect("Home page");
+                pages::goto(cx, Page::Home.raw_path()).expect("Home page");
                 view!{cx, <></>}.into_view(cx)
             }
         }

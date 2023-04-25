@@ -61,7 +61,7 @@ pub fn RecentImages(cx: Scope, images: Resource<(), Vec<ImageInspect>>) -> impl 
 
 #[component]
 fn RecentImageEntry(cx: Scope, image: ImageInspect) -> impl IntoView {
-    let view_href = format!("{}/{}", Page::GenerateImage.path(), image.id);
+    let view_href = format!("{}/{}", Page::GenerateImage.raw_path(), image.id);
     let is_finished = if !image.processing {
         view! { cx, <span class="text-airtifex-green">"✓"</span>}
     } else {

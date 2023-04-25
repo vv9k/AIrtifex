@@ -253,11 +253,11 @@ pub fn ChatView(
 
     view! { cx,
       {move || {
-        page_stack.update(|p| p.push(Page::ChatView));
+        page_stack.update(|p| p.push(Page::ChatView(chat_id.get().unwrap_or_default())));
 
         view!{cx,
            <main class="bg-dark text-white d-flex flex-column p-1 pt-3" >
-             <TitledChildPage title={title} page_stack={page_stack.read_only()}></TitledChildPage>
+             <TitledChildPage title={title}></TitledChildPage>
              <div class="text-center w-100">
                  <p class="text-airtifex-light font-monospace">{model}</p>
              </div>

@@ -2,7 +2,7 @@ use crate::{
     api,
     components::{list_page_control::*, modal::*, status_message::*, users::list_entry::*},
     pages::goto_login_if_expired,
-    Page, PageStack,
+    Page,
 };
 
 use airtifex_core::user::ListQuery;
@@ -22,7 +22,6 @@ pub use profile::*;
 pub fn Users(
     cx: Scope,
     authorized_api: RwSignal<Option<api::AuthorizedApi>>,
-    page_stack: RwSignal<PageStack>,
     users_message: RwSignal<Message>,
 ) -> impl IntoView {
     let current_list_page = create_rw_signal::<u32>(cx, 1);
@@ -102,7 +101,6 @@ pub fn Users(
 
     view! { cx,
       {move || {
-            page_stack.update(|p| p.push(Page::Users));
             view!{ cx,
                <main class="bg-dark text-white d-flex flex-column p-1 pt-3" >
                  <div class="d-flex pb-3">

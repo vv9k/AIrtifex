@@ -43,7 +43,7 @@ pub fn UserAdd(
 
                     match response {
                         Ok(id) => {
-                            pages::goto(cx, Page::Users.path()).expect("users page");
+                            pages::goto(cx, Page::Users.raw_path()).expect("users page");
                             users_message.update(|m| {
                                 *m = Message::Success(format!(
                                     "successfully created user {user}, id: {id}"
@@ -79,7 +79,7 @@ pub fn UserAdd(
 
         view!{cx,
            <main class="bg-dark text-white d-flex flex-column p-1 pt-3" >
-             <TitledChildPage title=title page_stack={page_stack.read_only()}></TitledChildPage>
+             <TitledChildPage title=title></TitledChildPage>
 
              <div class="d-flex justify-content-center flex-column h-100">
                <div class="container-fluid col-9 col-lg-4">

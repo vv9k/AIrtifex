@@ -112,7 +112,7 @@ pub fn PromptView(
 
     view! { cx,
       {move || {
-        page_stack.update(|p| p.push(Page::PromptView));
+        page_stack.update(|p| p.push(Page::PromptView(prompt_id.get().unwrap_or_default())));
         let details_icon = if is_details_open.get() {
             "/icons/minus-circle.svg"
         } else {
@@ -121,7 +121,7 @@ pub fn PromptView(
 
         view!{cx,
            <main class="bg-dark text-white d-flex flex-column p-3 h-100 overflow-scroll" >
-             <TitledChildPage title=title page_stack={page_stack.read_only()}></TitledChildPage>
+             <TitledChildPage title=title></TitledChildPage>
              <div class="text-center w-100">
                  <p class="text-airtifex-light font-monospace">{model}</p>
              </div>

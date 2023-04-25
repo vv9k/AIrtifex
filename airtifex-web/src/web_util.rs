@@ -1,5 +1,6 @@
 use futures::channel::oneshot;
 use leptos::*;
+use leptos_router::*;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::{prelude::Closure, JsCast, JsValue};
 use web_sys::{Event, FileReader, HtmlInputElement};
@@ -118,4 +119,9 @@ pub fn display_limited_str(s: &str, limit: usize) -> String {
     } else {
         s.to_string()
     }
+}
+
+pub fn get_resolved_path(cx: Scope) -> String {
+    let location = use_location(cx);
+    location.pathname.get()
 }

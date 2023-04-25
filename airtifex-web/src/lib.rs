@@ -25,7 +25,7 @@ pub fn App(cx: Scope) -> impl IntoView {
     let authorized_api = create_rw_signal(cx, None::<api::AuthorizedApi>);
     let user_info = create_rw_signal(cx, None::<AuthenticatedUser>);
     let logged_in = Signal::derive(cx, move || user_info.get().is_some());
-    let page_stack = create_rw_signal(cx, PageStack::new([Page::Home, Page::Home]));
+    let page_stack = create_rw_signal(cx, PageStack::load());
 
     let global_message = create_rw_signal(cx, Message::Empty);
     let users_message = create_rw_signal(cx, Message::Empty);
@@ -104,216 +104,214 @@ pub fn App(cx: Scope) -> impl IntoView {
             <main>
               <Routes>
                 <Route
-                  path=Page::Home.path()
+                  path=Page::Home.raw_path()
                   view=move |cx| {
+                      page_stack.update(|v| v.push(Page::Home));
                       subtitle.update(|sub| *sub = Some("Home".into()));
-                      view! { cx,
-                        <NavBar page_stack user_info on_logout />
-                        <Home authorized_api user_info page_stack global_message />
-                      }
-                  }
-                />
-
-    //####################################################################################################
-
-                <ProtectedRoute
-                  path=Page::Users.path()
-                  condition=move |_| {
-                      user_info.get().map(|user| user.is_admin()).unwrap_or_default()
-                  }
-                  redirect_path=Page::Home.path()
-                  view=move |cx| {
-                      subtitle.update(|sub| *sub = Some("Users".into()));
-                      view! { cx,
-                        <NavBar page_stack user_info on_logout />
-                        <Users authorized_api page_stack users_message />
-                      }
-                  }
-                />
-                <ProtectedRoute
-                  path=Page::UserAdd.path()
-                  condition=move |_| {
-                      user_info.get().map(|user| user.is_admin()).unwrap_or_default()
-                  }
-                  redirect_path=Page::Home.path()
-                  view=move |cx| {
-                      subtitle.update(|sub| *sub = Some("Add user".into()));
-                      view! { cx,
-                        <NavBar page_stack user_info on_logout />
-                        <UserAdd authorized_api page_stack users_message />
-                      }
-                  }
-                />
-                <ProtectedRoute
-                  path=Page::UserPasswordChange.path()
-                  condition=move |_| {
-                      user_info.get().map(|user| user.is_admin()).unwrap_or_default()
-                  }
-                  redirect_path=Page::Home.path()
-                  view=move |cx| {
-                      subtitle.update(|sub| *sub = Some("Change password".into()));
-                      view! { cx,
-                        <NavBar page_stack user_info on_logout />
-                        <UserPasswordChange authorized_api page_stack users_message />
-                      }
-                  }
-                />
-                <ProtectedRoute
-                  path=Page::UserProfile.path()
-                  condition=move |_| {
-                      user_info.get().is_some()
-                  }
-                  redirect_path=Page::Home.path()
-                  view=move |cx| {
-                      subtitle.update(|sub| *sub = Some("Profile".into()));
 
                       view! { cx,
-                        <NavBar page_stack user_info on_logout />
-                        <UserProfile page_stack user_info=user_info.read_only() />
-                      }
-                  }
-                />
-                <ProtectedRoute
-                  path=Page::UserEdit.path()
-                  condition=move |_| {
-                      let params = use_params::<EditParams>(cx);
-                      let username = params.get().ok().and_then(|p| p.username).unwrap_or_default();
-                      user_info.get().map(|user| {
-                          user.is_admin() || user.username == username
-                      }).unwrap_or_default()
-                  }
-                  redirect_path=Page::Home.path()
-                  view=move |cx| {
-                      subtitle.update(|sub| *sub = Some("Edit user".into()));
-
-                      view! { cx,
-                        <NavBar page_stack user_info on_logout />
-                        <UserEdit authorized_api page_stack users_message />
-                      }
-                  }
-                />
-
-    //####################################################################################################
-
-                <ProtectedRoute
-                  path=Page::Chat.path()
-                  condition=move |_| {
-                      user_info.get().is_some()
-                  }
-                  redirect_path=Page::Home.path()
-                  view=move |cx| {
-                      subtitle.update(|sub| *sub = Some("Chat".into()));
-
-                      view! { cx,
-                        <NavBar page_stack user_info on_logout />
-                        <Chat authorized_api page_stack />
-                      }
-                  }
-                />
-                <ProtectedRoute
-                  path=Page::ChatView.path()
-                  condition=move |_| {
-                      user_info.get().is_some()
-                  }
-                  redirect_path=Page::Home.path()
-                  view=move |cx| {
-                      subtitle.update(|sub| *sub = Some("Chat".into()));
-
-                      view! { cx,
-                        <NavBar page_stack user_info on_logout />
-                        <ChatView authorized_api page_stack />
-                      }
-                  }
-                />
-
-    //####################################################################################################
-
-                <ProtectedRoute
-                  path=Page::PromptGenerate.path()
-                  condition=move |_| {
-                      user_info.get().is_some()
-                  }
-                  redirect_path=Page::Home.path()
-                  view=move |cx| {
-                      subtitle.update(|sub| *sub = Some(Page::PromptGenerate.title().into()));
-
-                      view! { cx,
-                        <NavBar page_stack user_info on_logout />
-                        <PromptGenerate authorized_api page_stack />
-                      }
-                  }
-                />
-
-                <ProtectedRoute
-                  path=Page::PromptList.path()
-                  condition=move |_| {
-                      user_info.get().is_some()
-                  }
-                  redirect_path=Page::Home.path()
-                  view=move |cx| {
-                      subtitle.update(|sub| *sub = Some(Page::PromptList.title().into()));
-
-                      view! { cx,
-                        <NavBar page_stack user_info on_logout />
-                        <PromptList authorized_api page_stack />
-                      }
-                  }
-                />
-
-                <ProtectedRoute
-                  path=Page::PromptView.path()
-                  condition=move |_| {
-                      user_info.get().is_some()
-                  }
-                  redirect_path=Page::Home.path()
-                  view=move |cx| {
-                      subtitle.update(|sub| *sub = Some(Page::PromptView.title().into()));
-
-                      view! { cx,
-                        <NavBar page_stack user_info on_logout />
-                        <PromptView authorized_api page_stack />
-                      }
-                  }
-                />
-
-    //####################################################################################################
-
-                <ProtectedRoute
-                  path=Page::GenerateImage.path()
-                  condition=move |_| {
-                      user_info.get().is_some()
-                  }
-                  redirect_path=Page::Home.path()
-                  view=move |cx| {
-                      subtitle.update(|sub| *sub = Some(Page::GenerateImage.title().into()));
-
-                      view! { cx,
-                        <NavBar page_stack user_info on_logout />
-                        <GenerateImage authorized_api page_stack />
-                      }
-                  }
-                />
-                <ProtectedRoute
-                  path=Page::GeneratedImageView.path()
-                  condition=move |_| {
-                      user_info.get().is_some()
-                  }
-                  redirect_path=Page::Home.path()
-                  view=move |cx| {
-                      subtitle.update(|sub| *sub = Some(Page::GeneratedImageView.title().into()));
-
-                      view! { cx,
-                        <NavBar page_stack user_info on_logout />
-                        <ImageView authorized_api page_stack />
-                      }
+                        <NavBar page_stack=page_stack.read_only() user_info on_logout />
+                        <Home authorized_api user_info global_message />
+                      }.into_view(cx)
                   }
                 />
 
     //####################################################################################################
 
                 <Route
-                  path=Page::Login.path()
+                  path=Page::Users.raw_path()
                   view=move |cx| {
+                      page_stack.update(|v| v.push(Page::Users));
+                      if !user_info.get().map(|user| user.is_admin()).unwrap_or_default() {
+                        return redirect_home(cx).into_view(cx);
+                      }
+                      subtitle.update(|sub| *sub = Some("Users".into()));
+                      view! { cx,
+                        <NavBar page_stack=page_stack.read_only() user_info on_logout />
+                        <Users authorized_api users_message />
+                      }.into_view(cx)
+                  }
+                />
+                <Route
+                  path=Page::UserAdd.raw_path()
+                  view=move |cx| {
+                      if !user_info.get().map(|user| user.is_admin()).unwrap_or_default() {
+                        return redirect_home(cx).into_view(cx);
+                      }
+                      subtitle.update(|sub| *sub = Some("Add user".into()));
+                      view! { cx,
+                        <NavBar page_stack=page_stack.read_only() user_info on_logout />
+                        <UserAdd authorized_api page_stack users_message />
+                      }.into_view(cx)
+                  }
+                />
+                <Route
+                  path=Page::UserPasswordChange("".into()).raw_path()
+                  view=move |cx| {
+                      if !user_info.get().map(|user| user.is_admin()).unwrap_or_default() {
+                        return redirect_home(cx).into_view(cx);
+                      }
+                      subtitle.update(|sub| *sub = Some("Change password".into()));
+                      view! { cx,
+                        <NavBar page_stack=page_stack.read_only() user_info on_logout />
+                        <UserPasswordChange authorized_api page_stack users_message />
+                      }.into_view(cx)
+                  }
+                />
+                <Route
+                  path=Page::UserProfile.raw_path()
+                  view=move |cx| {
+                      if user_info.get().is_none() {
+                        return redirect_home(cx).into_view(cx);
+                      }
+                      subtitle.update(|sub| *sub = Some("Profile".into()));
+
+                      view! { cx,
+                        <NavBar page_stack=page_stack.read_only() user_info on_logout />
+                        <UserProfile page_stack user_info=user_info.read_only() />
+                      }.into_view(cx)
+                  }
+                />
+                <Route
+                  path=Page::UserEdit("".into()).raw_path()
+                  view=move |cx| {
+                      let params = use_params::<EditParams>(cx);
+                      let username = params.get().ok().and_then(|p| p.username).unwrap_or_default();
+                      if !user_info.get().map(|user| {
+                          user.is_admin() || user.username == username
+                      }).unwrap_or_default() {
+                        return redirect_home(cx).into_view(cx);
+                      }
+                      subtitle.update(|sub| *sub = Some("Edit user".into()));
+
+                      view! { cx,
+                        <NavBar page_stack=page_stack.read_only() user_info on_logout />
+                        <UserEdit authorized_api page_stack users_message />
+                      }.into_view(cx)
+                  }
+                />
+
+    //####################################################################################################
+
+                <Route
+                  path=Page::Chat.raw_path()
+                  view=move |cx| {
+                      if user_info.get().is_none() {
+                        return redirect_home(cx).into_view(cx);
+                      }
+                      subtitle.update(|sub| *sub = Some("Chat".into()));
+
+                      view! { cx,
+                        <NavBar page_stack=page_stack.read_only() user_info on_logout />
+                        <Chat authorized_api page_stack />
+                      }.into_view(cx)
+                  }
+                />
+                <Route
+                  path=Page::ChatView("".into()).raw_path()
+                  view=move |cx| {
+                      if user_info.get().is_none() {
+                        return redirect_home(cx).into_view(cx);
+                      }
+                      subtitle.update(|sub| *sub = Some("Chat".into()));
+
+                      view! { cx,
+                        <NavBar page_stack=page_stack.read_only() user_info on_logout />
+                        <ChatView authorized_api page_stack />
+                      }.into_view(cx)
+                  }
+                />
+
+    //####################################################################################################
+
+                <Route
+                  path=Page::PromptGenerate.raw_path()
+                  view=move |cx| {
+                      if user_info.get().is_none() {
+                        return redirect_home(cx).into_view(cx);
+                      }
+                      subtitle.update(|sub| *sub = Some(Page::PromptGenerate.title().into()));
+
+                      view! { cx,
+                        <NavBar page_stack=page_stack.read_only() user_info on_logout />
+                        <PromptGenerate authorized_api page_stack />
+                      }.into_view(cx)
+                  }
+                />
+
+                <Route
+                  path=Page::PromptList.raw_path()
+                  view=move |cx| {
+                      if user_info.get().is_none() {
+                        return redirect_home(cx).into_view(cx);
+                      }
+                      subtitle.update(|sub| *sub = Some(Page::PromptList.title().into()));
+
+                      view! { cx,
+                        <NavBar page_stack=page_stack.read_only() user_info on_logout />
+                        <PromptList authorized_api page_stack />
+                      }.into_view(cx)
+                  }
+                />
+
+                <Route
+                  path=Page::PromptView("".into()).raw_path()
+                  view=move |cx| {
+                      if user_info.get().is_none() {
+                        return redirect_home(cx).into_view(cx);
+                      }
+                      subtitle.update(|sub| *sub = Some(Page::PromptView("".into()).title().into()));
+
+                      view! { cx,
+                        <NavBar page_stack=page_stack.read_only() user_info on_logout />
+                        <PromptView authorized_api page_stack />
+                      }.into_view(cx)
+                  }
+                />
+
+    //####################################################################################################
+
+                <Route
+                  path=Page::GenerateImage.raw_path()
+                  view=move |cx| {
+                      if user_info.get().is_none() {
+                        return redirect_home(cx).into_view(cx);
+                      }
+                      subtitle.update(|sub| *sub = Some(Page::GenerateImage.title().into()));
+
+
+                      view! { cx,
+                        <NavBar page_stack=page_stack.read_only() user_info on_logout />
+                        <GenerateImage authorized_api page_stack />
+                      }.into_view(cx)
+                  }
+                />
+                <Route
+                  path=Page::GeneratedImageView("".into()).raw_path()
+                  view=move |cx| {
+                      if user_info.get().is_none() {
+                        return redirect_home(cx).into_view(cx);
+                      }
+                      subtitle.update(|sub| *sub = Some(Page::GeneratedImageView("".into()).title().into()));
+
+                      view! { cx,
+                        <NavBar page_stack=page_stack.read_only() user_info on_logout />
+                        <ImageView authorized_api page_stack />
+                      }.into_view(cx)
+                  }
+                />
+
+    //####################################################################################################
+
+                <Route
+                  path=Page::Login.raw_path()
+                  view=move |cx| {
+                      if let Ok(redirect) = LocalStorage::get::<String>("redirect") {
+                        if user_info.get().is_some() {
+                            LocalStorage::delete("redirect");
+                            return view!{cx, <Redirect path=redirect />}.into_view(cx);
+                        }
+                      }
                       subtitle.update(|sub| *sub = Some("Login".into()));
                       view! { cx,
                         <Login
@@ -321,20 +319,21 @@ pub fn App(cx: Scope) -> impl IntoView {
                           on_success = move |api| {
                               log::info!("Successfully logged in");
                               authorized_api.update(|v| *v = Some(api));
-                              pages::goto(cx, Page::Home.path()).expect("home page");
+                              pages::goto(cx, Page::Home.raw_path()).expect("home page");
                               fetch_user_info.dispatch(());
                           } />
-                      }
+                      }.into_view(cx)
                   }
                 />
                 <Route
                     path="*"
                     view=move |cx| {
+                        page_stack.update(|v| v.push(Page::Home));
                         subtitle.update(|sub| *sub = Some("404".into()));
                         global_message.update(|m| *m = Message::Error("Oh my 404! The page you're looking for doesn't exist so I brought you back home ;)".into()));
                         view! { cx,
-                        <NavBar page_stack user_info on_logout />
-                        <Home authorized_api user_info page_stack global_message/>
+                        <NavBar page_stack=page_stack.read_only() user_info on_logout />
+                        <Home authorized_api user_info global_message />
                     }
                     }
                 />
@@ -342,4 +341,10 @@ pub fn App(cx: Scope) -> impl IntoView {
             </main>
           </Router>
         }
+}
+
+fn redirect_home(cx: Scope) -> impl IntoView {
+    let path = web_util::get_resolved_path(cx);
+    LocalStorage::set("redirect", path).expect("LocalStorage::set");
+    view! {cx, <Redirect path=Page::Login.raw_path()/>}
 }

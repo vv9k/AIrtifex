@@ -61,7 +61,7 @@ pub fn RecentChats(cx: Scope, chats: Resource<(), Vec<ChatListEntry>>) -> impl I
 
 #[component]
 fn RecentChatEntry(cx: Scope, chat: ChatListEntry) -> impl IntoView {
-    let view_href = format!("{}/{}", Page::Chat.path(), chat.id);
+    let view_href = format!("{}/{}", Page::Chat.raw_path(), chat.id);
     view! {cx, <tr
                 class="text-white no-border"
                 style="cursor: pointer;"
