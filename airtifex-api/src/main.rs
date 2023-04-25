@@ -11,7 +11,7 @@ use airtifex_core::user::AccountType;
 use axum::{extract::DefaultBodyLimit, Router};
 use axum_extra::extract::cookie::Key;
 use clap::Parser;
-use std::{sync::Arc, time::Duration};
+use std::{path::PathBuf, sync::Arc, time::Duration};
 use tokio::runtime::Runtime;
 use tower_http::classify::ServerErrorsFailureClass;
 use tracing::{Level, Span};
@@ -23,6 +23,9 @@ compile_error!("Feature postgres and sqlite are mutually exclusive and cannot be
 #[derive(Debug, Parser)]
 #[command(version = "0.1.0", about = "")]
 pub struct Opts {
+    #[arg(short, long)]
+    #[clap(default_value = "config.yaml")]
+    pub config: PathBuf,
     #[command(subcommand)]
     /// Subcommand to run
     pub command: Command,
@@ -49,9 +52,9 @@ async fn inner(runtime: Arc<Runtime>) -> Result<()> {
         )
         .init();
 
-    let config = Config::read("./config.yaml")?;
-
     let opts = Opts::parse();
+
+    let config = Config::read(&opts.config)?;
 
     match opts.command {
         Command::Serve => {
