@@ -24,22 +24,26 @@ llms:
 
 stable_diffusion:
   - version: v2.1
+    name: sd-v2.1
+    model_description: Stable Diffusion v2.1
     clip_weights_path: ./sd_models/clip_v2.1.ot
     vae_weights_path: ./sd_models/vae_v2.1.ot
     unet_weights_path: ./sd_models/unet_v2.1.ot
     vocab_file: ./sd_models/bpe_simple_vocab_16e6.txt
+  #- version: v1.5
+    #name: sd-v1.5
+    #model_description: Stable Diffusion v1.5
+    #clip_weights_path: ./sd_models/clip_v1.5.ot
+    #vae_weights_path: ./sd_models/vae_v1.5.ot
+    #unet_weights_path: ./sd_models/unet_v1.5.ot
+    #vocab_file: ./sd_models/bpe_simple_vocab_16e6.txt
 
-  - version: v1.5
-    clip_weights_path: ./sd_models/clip_v1.5.ot
-    vae_weights_path: ./sd_models/vae_v1.5.ot
-    unet_weights_path: ./sd_models/unet_v1.5.ot
-    vocab_file: ./sd_models/bpe_simple_vocab_16e6.txt
-
-  - version: v1.5
-    name: stable-diffusion-inpaint-v1.5
-    clip_weights_path: ./sd_models/clip_inpaint.ot
-    vae_weights_path: ./sd_models/vae_v1.5.ot
-    unet_weights_path: ./sd_models/unet_v1.5.ot
-    vocab_file: ./sd_models/bpe_simple_vocab_16e6.txt
-    feature_inpaint: true
+  # - version: v1.5
+  #   name: stable-diffusion-inpaint-v1.5
+  #   model_description: Stable Diffusion v1.5 with inpaint support
+  #   clip_weights_path: ./sd_models/clip_inpaint.ot
+  #   vae_weights_path: ./sd_models/vae_v1.5.ot
+  #   unet_weights_path: ./sd_models/unet_v1.5.ot
+  #   vocab_file: ./sd_models/bpe_simple_vocab_16e6.txt
+  #   feature_inpaint: true
 

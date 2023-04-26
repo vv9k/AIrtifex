@@ -23,6 +23,15 @@ web_release:
 api_flamegraph:
 	@cd $(PROJECT)-api && $(MAKE) flamegraph
 
+build_docker:
+	@docker build -t $(PROJECT) .
+
+run_docker: build_docker
+	@docker-compose up -d
+
+stop_docker:
+	@docker-compose down
+
 clean:
 	@rm -rf target \
  		   $(PROJECT)-api/target \

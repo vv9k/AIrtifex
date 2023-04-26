@@ -1,0 +1,13 @@
+target
+*/target
+.dockerignore
+Dockerfile
+docker-compose.yaml
+README.md
+airtifex-web/dist
+airtifex-web/target
+rustfmt.toml
+COPYING
+.git
+dist
+data

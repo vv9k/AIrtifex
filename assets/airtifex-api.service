@@ -1,0 +1,12 @@
+[Unit]
+Description=Generative AI server used for Text/Image generation
+After=network.target
+
+[Service]
+Type=simple
+User=airtifex
+Group=airtifex
+ExecStart=/usr/local/bin/airtifex-api -c /etc/airtifex/config.yaml serve
+
+[Install]
+WantedBy=multi-user.target

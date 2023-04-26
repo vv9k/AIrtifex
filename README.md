@@ -14,9 +14,12 @@ Self-hosted, generative AI server and a web app. The API provides the necessary 
 - [Getting the weights](#getting-the-weights)
 - [API Configuration](#api-configuration)
 - [Building and Running the Project](#building-and-running-the-project)
+  - [Running with Docker](#running-with-docker)
   - [API With SQLite](#api-with-sqlite)
   - [API With PostgreSQL](#api-with-postgresql)
   - [Web App](#web-app)
+  - [Systemd service](#systemd-service)
+  - [Nginx reverse proxy](#nginx-reverse-proxy)
 
 ## Prerequisites
 
@@ -72,17 +75,24 @@ stable_diffusion:
     vae_weights_path: ./sd_models/vae_v2.1.ot
     unet_weights_path: ./sd_models/unet_v2.1.ot
     vocab_file: ./sd_models/bpe_simple_vocab_16e6.txt
-  - version: v1.5
-    name: sd-v1.5
-    model_description: Stable Diffusion v1.5
-    clip_weights_path: ./sd_models/clip_v1.5.ot
-    unet_weights_path: ./sd_models/unet_v1.5.ot
-    vocab_file: ./sd_models/bpe_simple_vocab_16e6.txt
 ```
 
 ## Building and Running the Project
 
 Default username and password to API are both `admin`.
+
+### Running with Docker
+
+The simplest way to run this project is to run it using docker and docker-compose. To do so, run:
+```sh
+make run_docker
+```
+
+This will build the image and run the api and web app in a container behind nginx reverse proxy. The [docker-compose.yaml](https://github.com/vv9k/airtifex/blob/master/docker-compose.yaml) file contains example on how to run the app. It mounts the [data](https://github.com/vv9k/airtifex/blob/master/data) directory as a volume which contains the databse file as well as text/image models (you'll have to put the models there or change the source location of the volume before running).
+
+The app will be accessible at http://localhost:8091
+
+The API can also be accessed through the same port like http://localhost:8091/api/v1/llm/inference
 
 ### API with Sqlite
 
@@ -131,6 +141,15 @@ make serve_release
 
 The web app will be accessible at http://localhost:8080 by default and is configured to connect to the API server at localhost:6901. To configure it change the values in the `Trunk.toml` file.
 
+
+### Systemd Service
+
+Example systemd service for the api server can be found [here](https://github.com/vv9k/airtifex/blob/master/assets/airtifex-api.service)
+
+
+### Nginx reverse proxy
+
+Example configuration to run behind nginx reverse proxy can be found [here](https://github.com/vv9k/airtifex/blob/master/assets/nginx-vhost.conf)
 
 
 ## License

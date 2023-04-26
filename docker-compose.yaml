@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  airtifex:
+    image: airtifex
+    ports:
+      - "80:80/tcp"
+    volumes:
+      - "./data:/srv/airtifex"
