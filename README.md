@@ -29,6 +29,7 @@ To work with this project, you will need the following tools installed:
 - [Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html): latest version
 - [Trunk](https://trunkrs.dev/#install)
 - [Make](https://www.gnu.org/software/make/)
+- [LibTorch](https://github.com/LaurentMazare/tch-rs#getting-started)
 
 ## Setup
 
