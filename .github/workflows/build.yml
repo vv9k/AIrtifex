@@ -30,10 +30,8 @@ jobs:
           components: clippy,rustfmt
           rust-version: nightly
       - uses: actions/checkout@v3
-      - name: Check Clippy
-        run: cargo clippy --all-targets --all-features -- -Dclippy::all
-      - name: Check formatting
-        run: cargo fmt --check --all
+      - name: Lint
+        run: make lint
 
 
   test:

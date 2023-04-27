@@ -32,6 +32,11 @@ run_docker: build_docker
 stop_docker:
 	@docker-compose down
 
+lint:
+	cargo fmt --check --all
+	cargo clippy --all-targets --features postgres --no-default-features -- -Dclippy::all
+	cargo clippy --all-targets --features sqlite --no-default-features -- -Dclippy::all
+
 clean:
 	@rm -rf target \
  		   $(PROJECT)-api/target \
