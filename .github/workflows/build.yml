@@ -46,6 +46,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Test
-        run: cargo test --all-targets --all-features
+        run: make test
       - name: Build docker image
         run: make build_docker

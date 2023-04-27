@@ -32,6 +32,10 @@ run_docker: build_docker
 stop_docker:
 	@docker-compose down
 
+test:
+	cargo test --all-targets --features postgres --no-default-features
+	cargo test --all-targets --features sqlite --no-default-features
+
 lint:
 	cargo fmt --check --all
 	cargo clippy --all-targets --features postgres --no-default-features -- -Dclippy::all
