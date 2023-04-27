@@ -1,0 +1,54 @@
+name: build
+
+on:
+  workflow_dispatch:
+  push:
+    paths-ignore:
+      - "*.md"
+      - "COPYING"
+    branches:
+      - master
+  pull_request:
+    paths-ignore:
+      - "*.md"
+      - "COPYING"
+    branches:
+      - master
+
+jobs:
+  lint:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Set up Rust
+        uses: hecrj/setup-rust-action@v1
+        with:
+          components: clippy,rustfmt
+          rust-version: nightly
+      - uses: actions/checkout@v3
+      - name: Check Clippy
+        run: cargo clippy --all-targets --all-features -- -Dclippy::all
+      - name: Check formatting
+        run: cargo fmt --check
+
+
+  test:
+    needs: [lint]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Rust
+        uses: hecrj/setup-rust-action@v1
+        with:
+          rust-version: nightly
+          components: trunk,cargo-chef
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Test
+        run: cargo test --all-target --all-features
+      - name: Build docker image
+        run: make build_docker

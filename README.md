@@ -1,5 +1,8 @@
 # AIrtifex
 
+[![Build Status](https://github.com/vv9k/AIrtifex/workflows/main/badge.svg)](https://github.com/vv9k/AIrtifex/actions?query=workflow%3A%22main%22)
+
+
 Self-hosted, generative AI server and a web app. The API provides the necessary endpoints for interacting with the generative models, while the web app serves as a client-side rendered WASM application for user interaction. The entire project is written in Rust.
 
 
