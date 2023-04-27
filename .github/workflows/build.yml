@@ -33,7 +33,7 @@ jobs:
       - name: Check Clippy
         run: cargo clippy --all-targets --all-features -- -Dclippy::all
       - name: Check formatting
-        run: cargo fmt --check
+        run: cargo fmt --check --all
 
 
   test:
