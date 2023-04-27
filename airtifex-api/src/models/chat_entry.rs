@@ -60,11 +60,11 @@ impl ChatEntry {
             VALUES  ($1, $2, $3, $4, $5)
             "#,
         )
-        .bind(&self.entry_id)
-        .bind(&self.chat_id)
+        .bind(self.entry_id)
+        .bind(self.chat_id)
         .bind(self.entry_type)
         .bind(&self.content)
-        .bind(&self.entry_date)
+        .bind(self.entry_date)
         .execute(db)
         .await
         .map(|_| ())

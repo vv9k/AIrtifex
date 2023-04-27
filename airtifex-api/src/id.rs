@@ -33,7 +33,7 @@ impl Uuid {
         let secs = duration.as_secs();
         let subsec_nanos = duration.subsec_nanos();
 
-        let timestamp = Timestamp::from_unix(&context, secs, subsec_nanos);
+        let timestamp = Timestamp::from_unix(context, secs, subsec_nanos);
         Ok(Self::from_bytes(
             *uuid::Uuid::new_v1(timestamp, &buf[..6])?.as_bytes(),
         ))

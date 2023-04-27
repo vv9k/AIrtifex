@@ -68,7 +68,8 @@ pub fn Chat(
                     status_message.update(|m| {
                         *m = Message::Success(format!("successfully removed chat \"{title}\""));
                     });
-                    current_list_page.update(|p| *p = *p);
+                    current_list_page.update(|p| *p += 1);
+                    current_list_page.update(|p| *p -= 1);
                 }
             }
         } else {
@@ -167,7 +168,7 @@ fn NewChatForm<F>(
     dispatch_new_chat_action: F,
 ) -> impl IntoView
 where
-    F: FnOnce() -> () + Copy + 'static,
+    F: FnOnce() + Copy + 'static,
 {
     let current_list_page = create_rw_signal::<u32>(cx, 1);
 

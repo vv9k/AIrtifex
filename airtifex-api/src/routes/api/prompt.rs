@@ -80,7 +80,7 @@ async fn list(claims: Claims, State(state): State<SharedAppState>) -> Response {
     with_user_guard!(claims, db);
 
     handle_db_result_as_json(
-        Prompt::list_prompts_of_user(&db, &claims.sub)
+        Prompt::list_prompts_of_user(db, &claims.sub)
             .await
             .map(|p| {
                 p.into_iter()
@@ -113,7 +113,7 @@ async fn get_prompt(
     with_user_guard!(claims, db);
 
     handle_db_result_as_json(
-        Prompt::get_prompt_for_user(&db, &claims.sub, &id)
+        Prompt::get_prompt_for_user(db, &claims.sub, &id)
             .await
             .map(|p| PromptInspect {
                 id: p.id.to_string(),
@@ -142,7 +142,7 @@ async fn delete_prompt(
     with_user_guard!(claims, db);
 
     handle_db_result_as_json(
-        Prompt::delete_prompt_for_user(&db, &claims.sub, &id)
+        Prompt::delete_prompt_for_user(db, &claims.sub, &id)
             .await
             .map_err(Error::from),
     )

@@ -60,7 +60,7 @@ pub fn NavItem(
                   <div id="images-collapse" class=collapsed>
                     <ul class="list-unstyled fw-normal pb-1">
                       { move || {
-                          sub.into_iter().map(|p| {
+                          sub.iter().map(|p| {
                             let classes = move || if page_stack.get().current() == p {
                               "ms-5 ps-2 nav-link selected"
                             } else {
@@ -99,7 +99,7 @@ where
          {move || match user_info.get() {
          Some(user) => {
              let nav_items = if user.is_admin() { Page::main_admin_pages() } else { Page::main_user_pages() };
-             let nav_items: Vec<_> = nav_items.into_iter().map(|nav| view!{cx, <NavItem page_stack nav/>}.into_view(cx)).collect();
+             let nav_items: Vec<_> = nav_items.iter().map(|nav| view!{cx, <NavItem page_stack nav/>}.into_view(cx)).collect();
 
              view!{cx,
        <nav class="sidebar d-flex flex-column flex-shrink-0 p-3 text-white bg-darker col-md-3 col-lg-2">

@@ -141,7 +141,7 @@ fn Prompt<F>(
     dispatch_inference_action: F,
 ) -> impl IntoView
 where
-    F: FnOnce() -> () + Copy + 'static,
+    F: FnOnce() + Copy + 'static,
 {
     let current_list_page = create_rw_signal::<u32>(cx, 1);
 
@@ -256,12 +256,8 @@ where
                             class = "form-control"
                             placeholder = "1024"
                             on:keyup = move |ev: ev::KeyboardEvent| {
-                              match &*ev.key() {
-                                  _=> {
-                                    let val = event_target_value(&ev);
-                                    num_predict.update(|v|*v = val.parse().ok());
-                                  }
-                              }
+                                let val = event_target_value(&ev);
+                                num_predict.update(|v|*v = val.parse().ok());
                             }
                           />
                       </div>
@@ -272,12 +268,8 @@ where
                             class = "form-control"
                             placeholder = "8"
                             on:keyup = move |ev: ev::KeyboardEvent| {
-                              match &*ev.key() {
-                                  _=> {
-                                    let val = event_target_value(&ev);
-                                    n_batch.update(|v|*v = val.parse().ok());
-                                  }
-                              }
+                                let val = event_target_value(&ev);
+                                n_batch.update(|v|*v = val.parse().ok());
                             }
                           />
                       </div>
@@ -289,12 +281,8 @@ where
                               class = "form-control"
                               placeholder = "40"
                               on:keyup = move |ev: ev::KeyboardEvent| {
-                                match &*ev.key() {
-                                    _=> {
-                                      let val = event_target_value(&ev);
-                                      top_k.update(|v|*v = val.parse().ok());
-                                    }
-                                }
+                                  let val = event_target_value(&ev);
+                                  top_k.update(|v|*v = val.parse().ok());
                               }
                             />
                         </div>
@@ -304,12 +292,8 @@ where
                               class = "form-control"
                               placeholder = "0.95"
                               on:keyup = move |ev: ev::KeyboardEvent| {
-                                match &*ev.key() {
-                                    _=> {
-                                      let val = event_target_value(&ev);
-                                      top_p.update(|v|*v = val.parse().ok());
-                                    }
-                                }
+                                  let val = event_target_value(&ev);
+                                  top_p.update(|v|*v = val.parse().ok());
                               }
                             />
                         </div>
@@ -321,12 +305,8 @@ where
                             class = "form-control"
                             placeholder = "1.30"
                             on:keyup = move |ev: ev::KeyboardEvent| {
-                              match &*ev.key() {
-                                  _=> {
-                                    let val = event_target_value(&ev);
-                                    repeat_penalty.update(|v|*v = val.parse().ok());
-                                  }
-                              }
+                                let val = event_target_value(&ev);
+                                repeat_penalty.update(|v|*v = val.parse().ok());
                             }
                           />
                       </div>
@@ -337,12 +317,8 @@ where
                             class = "form-control"
                             placeholder = "0.80"
                             on:keyup = move |ev: ev::KeyboardEvent| {
-                              match &*ev.key() {
-                                  _=> {
-                                    let val = event_target_value(&ev);
-                                    temp.update(|v|*v = val.parse().ok());
-                                  }
-                              }
+                                let val = event_target_value(&ev);
+                                temp.update(|v|*v = val.parse().ok());
                             }
                           />
                       </div>

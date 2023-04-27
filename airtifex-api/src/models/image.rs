@@ -42,6 +42,7 @@ pub struct Image {
 }
 
 impl Image {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         user_id: Uuid,
         model: String,
@@ -87,22 +88,22 @@ impl Image {
             VALUES  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
             "#,
         )
-        .bind(&self.id)
-        .bind(&self.user_id)
+        .bind(self.id)
+        .bind(self.user_id)
         .bind(&self.model)
-        .bind(&self.width)
-        .bind(&self.height)
+        .bind(self.width)
+        .bind(self.height)
         .bind(&self.prompt)
         .bind(&self.input_image)
         .bind(&self.mask)
         .bind(&self.thumbnail)
-        .bind(&self.strength)
-        .bind(&self.n_steps)
-        .bind(&self.seed)
-        .bind(&self.num_samples)
-        .bind(&self.guidance_scale)
-        .bind(&self.processing)
-        .bind(&self.create_date)
+        .bind(self.strength)
+        .bind(self.n_steps)
+        .bind(self.seed)
+        .bind(self.num_samples)
+        .bind(self.guidance_scale)
+        .bind(self.processing)
+        .bind(self.create_date)
         .execute(db)
         .await
         .map(|_| ())

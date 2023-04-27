@@ -45,8 +45,7 @@ pub fn UserEdit(
                 Some(api) => match api.user_info(&username).await {
                     Ok(user) => {
                         email.set(user.email.clone());
-                        account_type
-                            .update(|account_type| *account_type = user.account_type.clone());
+                        account_type.update(|account_type| *account_type = user.account_type);
                         Some(user)
                     }
                     Err(e) => {
@@ -73,7 +72,7 @@ pub fn UserEdit(
             let user = username.clone();
             let request = UserEditRequest {
                 email: email.clone(),
-                account_type: account_type.clone(),
+                account_type: *account_type,
             };
             async move {
                 if let Some(api) = authorized_api.get() {
@@ -146,7 +145,7 @@ pub fn UserEdit(
                                name="account_type"
                                on:change = move |ev| {
                                  let val = event_target_value(&ev);
-                                 if let Some(acc_type) = AccountType::from_str(val) {
+                                 if let Some(acc_type) = AccountType::parse_str(val) {
                                      account_type.update(|a| *a = acc_type);
                                  }
                                }

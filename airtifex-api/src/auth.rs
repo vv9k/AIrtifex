@@ -24,7 +24,7 @@ const KEY_VALID_DURATION: i64 = 3600;
 static KEYS: Lazy<Keys> = Lazy::new(|| {
     let secret = std::env::var("JWT_SECRET").expect("JWT_SECRET must be set");
     let keys = Keys::new(secret.as_bytes());
-    let _ = std::env::remove_var("JWT_SECRET");
+    std::env::remove_var("JWT_SECRET");
     keys
 });
 

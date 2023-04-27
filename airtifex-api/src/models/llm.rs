@@ -52,7 +52,7 @@ impl LargeLanguageModel {
             VALUES  ($1, $2, $3)
             "#,
         )
-        .bind(&self.model_id)
+        .bind(self.model_id)
         .bind(&self.name)
         .bind(&self.description)
         .execute(db)

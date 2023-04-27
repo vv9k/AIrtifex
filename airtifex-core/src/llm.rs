@@ -10,11 +10,12 @@ pub struct ChatStartResponse {
     pub chat_id: String,
 }
 
-#[derive(Copy, Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Copy, Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
 #[repr(i32)]
 #[serde(rename_all = "lowercase")]
 #[cfg_attr(feature = "sql", derive(sqlx::Type))]
 pub enum ChatEntryType {
+    #[default]
     User = 1,
     Bot = 2,
 }
@@ -26,18 +27,12 @@ impl ChatEntryType {
             ChatEntryType::Bot => "bot",
         }
     }
-    pub fn from_str(s: impl AsRef<str>) -> Option<Self> {
+    pub fn parse_str(s: impl AsRef<str>) -> Option<Self> {
         match s.as_ref() {
             "user" => Some(ChatEntryType::User),
             "bot" => Some(ChatEntryType::Bot),
             _ => None,
         }
-    }
-}
-
-impl Default for ChatEntryType {
-    fn default() -> Self {
-        ChatEntryType::User
     }
 }
 

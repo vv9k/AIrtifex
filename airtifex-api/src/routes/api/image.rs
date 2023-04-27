@@ -44,7 +44,7 @@ async fn generate_image(
 
     log::info!("{request:?}");
 
-    let user_id = match User::get(&db, &claims.sub).await.map(|u| u.id) {
+    let user_id = match User::get(db, &claims.sub).await.map(|u| u.id) {
         Ok(id) => id,
         Err(e) => return ApiResponse::failure(e).internal_server_error(),
     };
@@ -124,7 +124,7 @@ async fn list_images(claims: Claims, state: State<SharedAppState>) -> Response {
     with_user_guard!(claims, db);
 
     handle_db_result_as_json(
-        Image::list(&db)
+        Image::list(db)
             .await
             .map(|e| {
                 e.into_iter()
@@ -160,7 +160,7 @@ async fn list_image_entries(
     with_user_guard!(claims, db);
 
     handle_db_result_as_json(
-        ImageSample::get_image_samples(&db, &id)
+        ImageSample::get_image_samples(db, &id)
             .await
             .map(|e| {
                 e.into_iter()
@@ -185,7 +185,7 @@ async fn get_image_entry(
     with_user_guard!(claims, db);
 
     handle_db_result_as_json(
-        ImageSample::get_sample(&db, &id, n)
+        ImageSample::get_sample(db, &id, n)
             .await
             .map(|e| ImageSampleInspect {
                 sample_id: e.sample_id.to_string(),
@@ -205,13 +205,13 @@ async fn get_image_metadata(
     let db = &state.db;
     with_user_guard!(claims, db);
 
-    let user_id = match User::get(&db, &claims.sub).await.map(|u| u.id) {
+    let user_id = match User::get(db, &claims.sub).await.map(|u| u.id) {
         Ok(id) => id.to_string(),
         Err(e) => return ApiResponse::failure(e).internal_server_error(),
     };
 
     handle_db_result_as_json(
-        Image::get_by_id(&db, &id)
+        Image::get_by_id(db, &id)
             .await
             .map(|image| ImageInspect {
                 id: image.id.to_string(),
@@ -242,7 +242,7 @@ async fn delete_image(
     let db = &state.db;
     with_user_guard!(claims, db);
 
-    handle_db_result_as_json(Image::delete(&db, &id).await.map_err(Error::from))
+    handle_db_result_as_json(Image::delete(db, &id).await.map_err(Error::from))
 }
 
 async fn list_models(claims: Claims, state: State<SharedAppState>) -> Response {
@@ -250,7 +250,7 @@ async fn list_models(claims: Claims, state: State<SharedAppState>) -> Response {
     with_user_guard!(claims, db);
 
     handle_db_result_as_json(
-        ImageModel::list(&db)
+        ImageModel::list(db)
             .await
             .map(|entries| {
                 entries

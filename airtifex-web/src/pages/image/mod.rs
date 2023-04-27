@@ -71,7 +71,8 @@ pub fn GenerateImage(
                     status_message.update(|m| {
                         *m = Message::Success(format!("successfully removed image {id}"));
                     });
-                    current_list_page.update(|p| *p = *p);
+                    current_list_page.update(|p| *p += 1);
+                    current_list_page.update(|p| *p -= 1);
                 }
             }
         } else {
@@ -139,7 +140,8 @@ pub fn GenerateImage(
                             response.image_id
                         ));
                     });
-                    current_list_page.update(|p| *p = *p);
+                    current_list_page.update(|p| *p += 1);
+                    current_list_page.update(|p| *p -= 1);
                 }
                 Err(e) => {
                     status_message.update(|m| {
@@ -213,7 +215,7 @@ fn GenerateImageForm<F>(
     dispatch_new_image_action: F,
 ) -> impl IntoView
 where
-    F: FnOnce() -> () + Copy + 'static,
+    F: FnOnce() + Copy + 'static,
 {
     let current_list_page = create_rw_signal(cx, 1);
     let is_advanced_settings_open = create_rw_signal(cx, false);

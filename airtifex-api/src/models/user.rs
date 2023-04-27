@@ -115,12 +115,12 @@ impl User {
            VALUES ($1, $2, $3, $4, $5, $6)
            "#,
         )
-        .bind(&self.id)
+        .bind(self.id)
         .bind(&self.username)
         .bind(&self.email)
         .bind(&self.password)
         .bind(self.account_type)
-        .bind(&self.registration_date)
+        .bind(self.registration_date)
         .execute(db)
         .await
         .map(|_| ())

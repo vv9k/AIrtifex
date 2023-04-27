@@ -46,7 +46,7 @@ async fn info(
         return ApiResponse::failure("Unauthorized to access user data").unauthorized();
     }
     handle_db_result_as_json(
-        User::get(&db, &username)
+        User::get(db, &username)
             .await
             .map(|user| GetUserEntry {
                 id: user.id.to_string(),
@@ -64,7 +64,7 @@ async fn list(claims: Claims, state: State<SharedAppState>, query: Query<ListQue
     with_admin_guard!(claims, db);
 
     handle_db_result_as_json(
-        User::list(&db, query.page, query.page_size, query.order_by)
+        User::list(db, query.page, query.page_size, query.order_by)
             .await
             .map_err(Error::from)
             .map(|users| {
@@ -90,7 +90,7 @@ async fn register(
     let db = &state.db;
     with_admin_guard!(claims, db);
     let user: User = user.0.into();
-    handle_db_result_as_json(user.create(&db).await.map(|_| user.id).map_err(Error::from))
+    handle_db_result_as_json(user.create(db).await.map(|_| user.id).map_err(Error::from))
 }
 
 async fn auth(state: State<SharedAppState>, credentials: Json<Credentials>) -> Response {
@@ -119,7 +119,7 @@ async fn change_password(
         return ApiResponse::failure("Password cannot be empty").bad_request();
     }
     handle_db_result_as_json(
-        User::change_pasword_by_username(&db, &username, request.new_password.clone())
+        User::change_pasword_by_username(db, &username, request.new_password.clone())
             .await
             .map_err(Error::from),
     )
@@ -133,7 +133,7 @@ async fn remove(
     let db = &state.db;
     with_admin_guard!(claims, db);
     handle_db_result_as_json(
-        User::delete_by_name(&db, &username)
+        User::delete_by_name(db, &username)
             .await
             .map_err(Error::from),
     )
@@ -148,7 +148,7 @@ async fn update(
     let db = &state.db;
     with_admin_guard!(claims, db);
     handle_db_result_as_json(
-        User::update_by_name(&db, &username, request.email, request.account_type)
+        User::update_by_name(db, &username, request.email, request.account_type)
             .await
             .map_err(Error::from),
     )

@@ -50,9 +50,9 @@ impl ImageSample {
             VALUES  ($1, $2, $3, $4)
             "#,
         )
-        .bind(&self.sample_id)
-        .bind(&self.image_id)
-        .bind(&self.n)
+        .bind(self.sample_id)
+        .bind(self.image_id)
+        .bind(self.n)
         .bind(&self.data)
         .execute(db)
         .await

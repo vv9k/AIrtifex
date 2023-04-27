@@ -93,10 +93,11 @@ pub fn initialize_model_and_handle_inferences(
                     input,
                     output,
                 } => {
-                    let user = ChatEntry::new_user(conversation_id.clone(), input);
-                    let bot = ChatEntry::new_bot(conversation_id.clone(), output);
+                    let user = ChatEntry::new_user(conversation_id, input);
+                    let bot = ChatEntry::new_bot(conversation_id, output);
                     let db = db.clone();
-                    let _ = runtime.spawn(async move {
+                    // TODO: store the futures somewhere and await them?
+                    runtime.spawn(async move {
                         if let Err(e) = user.create(&db).await {
                             log::error!("failed to save user chat entry - {e}")
                         }
@@ -113,7 +114,8 @@ pub fn initialize_model_and_handle_inferences(
                 } => {
                     let db = db.clone();
                     let prompt = Prompt::new(username, model.clone(), input, output, settings);
-                    let _ = runtime.spawn(async move {
+                    // TODO: store the futures somewhere and await them?
+                    runtime.spawn(async move {
                         if let Err(e) = prompt.create(&db).await {
                             log::error!("failed to save prompt - {e}")
                         }
@@ -323,7 +325,7 @@ impl RunningInferenceSession {
             self.id,
             self.state.processed_prompt
         );
-        let id = self.id.clone();
+        let id = self.id;
         self.session
             .feed_prompt(
                 model,

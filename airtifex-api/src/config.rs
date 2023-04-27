@@ -152,7 +152,7 @@ impl AsRef<str> for StableDiffusionVersion {
         match self {
             StableDiffusionVersion::V1_5 => "v1.5",
             StableDiffusionVersion::V2_1 => "v2.1",
-            StableDiffusionVersion::Custom(s) => &s,
+            StableDiffusionVersion::Custom(s) => s,
         }
     }
 }

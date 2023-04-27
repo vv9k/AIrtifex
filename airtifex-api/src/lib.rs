@@ -24,10 +24,12 @@ pub mod routes;
 
 use gen::{image::GenerateImageRequest, llm::InferenceRequest, ModelName};
 
-#[cfg(feature = "postgres")]
+#[cfg(all(feature = "postgres", not(feature = "sqlite")))]
 pub type DbPool = sqlx::PgPool;
-#[cfg(feature = "sqlite")]
+#[cfg(all(feature = "sqlite", not(feature = "postgres")))]
 pub type DbPool = sqlx::SqlitePool;
+#[cfg(all(not(feature = "sqlite"), not(feature = "postgres")))]
+pub type DbPool = ();
 
 pub type Result<T> = core::result::Result<T, errors::Error>;
 
@@ -50,7 +52,7 @@ impl Deref for SharedAppState {
     type Target = InnerAppState;
 
     fn deref(&self) -> &Self::Target {
-        &*self.0
+        &self.0
     }
 }
 

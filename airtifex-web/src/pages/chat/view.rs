@@ -129,10 +129,7 @@ pub fn ChatView(
 
     let prompt_submit_action = create_action(cx, move |p: &String| {
         let p = p.clone();
-        let request = ChatResponseRequest {
-            prompt: p,
-            ..Default::default()
-        };
+        let request = ChatResponseRequest { prompt: p };
         async move {
             let id = if let Some(id) = chat_id.get() {
                 id

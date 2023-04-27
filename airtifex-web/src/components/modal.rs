@@ -36,7 +36,7 @@ pub fn RemoveModal<F>(
     remove_action_fn: F,
 ) -> impl IntoView
 where
-    F: FnOnce() -> () + Copy + 'static,
+    F: FnOnce() + Copy + 'static,
 {
     let footer = create_rw_signal(
         cx,

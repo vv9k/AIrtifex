@@ -60,7 +60,7 @@ impl ImageModel {
             VALUES  ($1, $2, $3, $4, $5, $6)
             "#,
         )
-        .bind(&self.model_id)
+        .bind(self.model_id)
         .bind(&self.name)
         .bind(&self.description)
         .bind(self.feature_inpaint)

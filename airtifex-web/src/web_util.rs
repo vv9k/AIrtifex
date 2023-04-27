@@ -28,7 +28,7 @@ pub async fn read_file(file: web_sys::File) -> Result<Vec<u8>, JsValue> {
         let result = match reader.result() {
             Ok(val) => val,
             Err(e) => {
-                let _ = tx.send(Err(e.into()));
+                let _ = tx.send(Err(e));
                 return;
             }
         };
@@ -64,7 +64,7 @@ pub fn encode_image_base64(image: &[u8]) -> String {
         &base64::alphabet::STANDARD,
         base64::engine::general_purpose::PAD,
     );
-    let encoded = engine.encode(&image);
+    let encoded = engine.encode(image);
     format!("data:image/png;base64,{encoded}")
 }
 
@@ -94,14 +94,13 @@ impl WindowSize {
         let mut should_write = true;
 
         let closure = Closure::wrap(Box::new(move |_event: Event| {
-            if should_write {
-                if let None = size_w.try_update(|s| {
-                    let size = Self::new().expect("window size");
-                    s.width = size.width;
-                    s.height = size.height;
-                }) {
-                    should_write = false;
-                }
+            let update_size = |s: &mut Self| {
+                let size = Self::new().expect("window size");
+                s.width = size.width;
+                s.height = size.height;
+            };
+            if should_write && size_w.try_update(update_size).is_none() {
+                should_write = false;
             }
         }) as Box<dyn FnMut(_)>);
 

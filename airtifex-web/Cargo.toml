@@ -2,7 +2,6 @@
 name = "airtifex-web"
 version = "0.1.0"
 edition = "2021"
-force-target = "wasm32-unknown-unknown"
 
 [[bin]]
 name = "airtifex_web"

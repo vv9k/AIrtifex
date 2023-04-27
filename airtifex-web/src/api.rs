@@ -60,13 +60,11 @@ impl AuthorizedApi {
         into_json(response).await
     }
     async fn send(&self, req: Request) -> Result<Response> {
-        let response = req
-            .header("Authorization", &self.auth_header_value())
+        req.header("Authorization", &self.auth_header_value())
             .send()
             .await
-            .map_err(Error::from);
+            .map_err(Error::from)
         // log::info!("got response {response:?}");
-        response
     }
     pub async fn me(&self) -> Result<AuthenticatedUser> {
         let url = format!("{}/users/me", self.url);
@@ -200,5 +198,5 @@ where
 {
     let json = response.json::<ApiResponse>().await?;
     // log::info!("got json {json:?}");
-    json.into_result(|e| Error::ApiError(e))
+    json.into_result(Error::ApiError)
 }

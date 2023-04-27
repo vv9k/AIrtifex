@@ -70,7 +70,8 @@ pub fn Users(
                         users_message.update(|m| {
                             *m = Message::Success(format!("Successfully removed user {username}"));
                         });
-                        current_list_page.update(|p| *p = *p);
+                        current_list_page.update(|p| *p += 1);
+                        current_list_page.update(|p| *p -= 1);
                     }
                     Err(err) => users_message.update(|m| {
                         *m = Message::Error(format!("failed to remove user {username} - {err}"));

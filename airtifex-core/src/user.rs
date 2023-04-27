@@ -44,12 +44,13 @@ impl AuthenticatedUser {
 //}
 //}
 
-#[derive(Copy, Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Copy, Clone, Debug, Default, Serialize, Deserialize, PartialEq)]
 #[repr(i32)]
 #[serde(rename_all = "lowercase")]
 #[cfg_attr(feature = "sql", derive(sqlx::Type))]
 pub enum AccountType {
     Admin = 1,
+    #[default]
     User = 2,
     Service = 4,
 }
@@ -62,19 +63,13 @@ impl AccountType {
             AccountType::Service => "service",
         }
     }
-    pub fn from_str(s: impl AsRef<str>) -> Option<Self> {
+    pub fn parse_str(s: impl AsRef<str>) -> Option<Self> {
         match s.as_ref() {
             "admin" => Some(AccountType::Admin),
             "user" => Some(AccountType::User),
             "service" => Some(AccountType::Service),
             _ => None,
         }
-    }
-}
-
-impl Default for AccountType {
-    fn default() -> Self {
-        AccountType::User
     }
 }
 

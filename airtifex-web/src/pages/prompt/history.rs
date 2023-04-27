@@ -79,8 +79,7 @@ fn PromptListEntry(
     let window_size = web_util::WindowSize::signal(cx).expect("window size");
     let char_count = Signal::derive(cx, move || {
         let size = window_size.get();
-        let count = ((size.width / 64) + 20).max(30) as usize;
-        count
+        ((size.width / 64) + 20).max(30) as usize
     });
 
     view! {cx, <tr

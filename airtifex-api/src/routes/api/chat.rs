@@ -47,14 +47,14 @@ async fn inference(
         flume::Receiver<ChatStreamResult>,
     ) = flume::unbounded();
 
-    let history = match Chat::list_entries(&db, &id, &claims.sub).await {
+    let history = match Chat::list_entries(db, &id, &claims.sub).await {
         Ok(chat) => chat,
         Err(e) => {
             return ApiResponse::failure(e).internal_server_error();
         }
     };
 
-    let chat = match Chat::get_chat_for_user(&db, &claims.sub, &id).await {
+    let chat = match Chat::get_chat_for_user(db, &claims.sub, &id).await {
         Ok(chat) => chat,
         Err(e) => {
             return ApiResponse::failure(e).internal_server_error();
@@ -157,7 +157,7 @@ async fn list(claims: Claims, state: State<SharedAppState>) -> Response {
     with_user_guard!(claims, db);
 
     handle_db_result_as_json(
-        Chat::list_chats_of_user(&db, &claims.sub)
+        Chat::list_chats_of_user(db, &claims.sub)
             .await
             .map(|entries| {
                 entries
@@ -189,7 +189,7 @@ async fn get_chat(claims: Claims, state: State<SharedAppState>, Path(id): Path<U
     with_user_guard!(claims, db);
 
     handle_db_result_as_json(
-        Chat::get_chat_for_user(&db, &claims.sub, &id)
+        Chat::get_chat_for_user(db, &claims.sub, &id)
             .await
             .map(|chat| ChatListEntry {
                 id: chat.id.to_string(),
@@ -220,7 +220,7 @@ async fn get_chat_history(
     with_user_guard!(claims, db);
 
     handle_db_result_as_json(
-        ChatEntry::get_chat_entries(&db, &id, &claims.sub)
+        ChatEntry::get_chat_entries(db, &id, &claims.sub)
             .await
             .map(|entries| {
                 entries
@@ -242,7 +242,7 @@ async fn list_models(claims: Claims, state: State<SharedAppState>) -> Response {
     with_user_guard!(claims, db);
 
     handle_db_result_as_json(
-        LargeLanguageModel::list(&db)
+        LargeLanguageModel::list(db)
             .await
             .map(|entries| {
                 entries
@@ -266,12 +266,12 @@ async fn delete_chat(
     let db = &state.db;
     with_user_guard!(claims, db);
 
-    handle_db_result_as_json(Chat::delete(&db, &id).await.map_err(Error::from))
+    handle_db_result_as_json(Chat::delete(db, &id).await.map_err(Error::from))
 }
 
 async fn counters(claims: Claims, State(state): State<SharedAppState>) -> Response {
     let db = &state.db;
     with_user_guard!(claims, db);
 
-    handle_db_result_as_json(Chat::counters(&db, &claims.sub).await.map_err(Error::from))
+    handle_db_result_as_json(Chat::counters(db, &claims.sub).await.map_err(Error::from))
 }

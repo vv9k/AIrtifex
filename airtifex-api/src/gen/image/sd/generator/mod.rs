@@ -77,6 +77,7 @@ pub struct BaseImageGenerator {
 }
 
 impl BaseImageGenerator {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         request: BaseImageData,
         config: &StableDiffusionConfig,

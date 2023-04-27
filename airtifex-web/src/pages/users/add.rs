@@ -35,7 +35,7 @@ pub fn UserAdd(
                 username: username.clone(),
                 password: password.clone(),
                 email: email.clone(),
-                account_type: account_type.clone(),
+                account_type: *account_type,
             };
             async move {
                 if let Some(api) = authorized_api.get() {
@@ -155,7 +155,7 @@ pub fn UserAdd(
                              name="account_type"
                              on:change = move |ev| {
                                let val = event_target_value(&ev);
-                               if let Some(account_type) = AccountType::from_str(val) {
+                               if let Some(account_type) = AccountType::parse_str(val) {
                                    set_account_type.set(account_type);
                                }
                              }

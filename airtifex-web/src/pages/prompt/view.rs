@@ -19,9 +19,9 @@ pub fn PromptView(
     page_stack: RwSignal<PageStack>,
 ) -> impl IntoView {
     let params = use_params::<PromptParams>(cx);
-    let status_message = create_rw_signal(cx.clone(), Message::Empty);
+    let status_message = create_rw_signal(cx, Message::Empty);
     let window_size = web_util::WindowSize::signal(cx).expect("windows size");
-    let is_details_open = create_rw_signal(cx.clone(), false);
+    let is_details_open = create_rw_signal(cx, false);
 
     let prompt_id = Signal::derive(cx, move || params.get().ok().and_then(|p| p.prompt_id));
 
@@ -50,7 +50,7 @@ pub fn PromptView(
 
     let model = Signal::derive(cx, move || {
         if let Some(Some(prompt)) = prompt.read(cx) {
-            prompt.model.clone()
+            prompt.model
         } else {
             Default::default()
         }

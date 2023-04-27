@@ -42,7 +42,8 @@ pub fn initialize(
             let db = db.clone();
             if let Ok(data) = std::fs::read(&save_data_request.path) {
                 let thumbnail = std::fs::read(&save_data_request.thumbnail);
-                let _ = runtime.spawn(async move {
+                // TODO: verify the result of this
+                runtime.spawn(async move {
                     log::debug!(
                         "[{}][{}] saving image to DB",
                         save_data_request.id,
@@ -148,9 +149,9 @@ pub fn initialize(
                                     match ImageToImageGenerator::new(
                                         data,
                                         &config,
-                                        clip_device.clone(),
-                                        unet_device.clone(),
-                                        vae_device.clone(),
+                                        clip_device,
+                                        unet_device,
+                                        vae_device,
                                         tx_results.clone(),
                                         tmp.path(),
                                     ) {
@@ -173,9 +174,9 @@ pub fn initialize(
                                     match InpaintImageGenerator::new(
                                         data,
                                         &config,
-                                        clip_device.clone(),
-                                        unet_device.clone(),
-                                        vae_device.clone(),
+                                        clip_device,
+                                        unet_device,
+                                        vae_device,
                                         tx_results.clone(),
                                         tmp.path(),
                                     ) {
@@ -200,9 +201,9 @@ pub fn initialize(
                                     match TextToImageGenerator::new(
                                         data,
                                         &config,
-                                        clip_device.clone(),
-                                        unet_device.clone(),
-                                        vae_device.clone(),
+                                        clip_device,
+                                        unet_device,
+                                        vae_device,
                                         tx_results.clone(),
                                         tmp.path(),
                                     ) {

@@ -64,17 +64,15 @@ async fn inner(runtime: Arc<Runtime>) -> Result<()> {
                     .map_err(Error::DatabaseError)?,
             );
 
-            #[cfg(feature = "sqlite")]
+            #[cfg(all(feature = "sqlite", not(feature = "postgres")))]
             {
                 airtifex_api::models::run_pragma(&db_pool).await?;
-                let migrations = sqlx::migrate!("migrations/sqlite").run(&*db_pool).await?;
-                tracing::debug!("{:?} {:?}", migrations, db_pool);
+                sqlx::migrate!("migrations/sqlite").run(&*db_pool).await?;
             }
 
-            #[cfg(feature = "postgres")]
+            #[cfg(all(feature = "postgres", not(feature = "sqlite")))]
             {
-                let migrations = sqlx::migrate!("migrations/postgres").run(&*db_pool).await?;
-                tracing::debug!("{:?} {:?}", migrations, db_pool);
+                sqlx::migrate!("migrations/postgres").run(&*db_pool).await?;
             }
 
             let context = ClockContext::new(0);
@@ -82,7 +80,7 @@ async fn inner(runtime: Arc<Runtime>) -> Result<()> {
             let user = User::new("admin", "admin", "", AccountType::Admin);
             let _ = user.create(&db_pool).await;
 
-            let listen = (config.listen_addr.clone(), config.listen_port.clone());
+            let listen = (config.listen_addr, config.listen_port);
 
             let tx_inference_req =
                 gen::llm::initialize_models(db_pool.clone(), &config, runtime.clone()).await?;
