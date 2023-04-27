@@ -43,10 +43,9 @@ jobs:
         uses: hecrj/setup-rust-action@v1
         with:
           rust-version: nightly
-          components: trunk,cargo-chef
       - name: Checkout
         uses: actions/checkout@v3
       - name: Test
-        run: cargo test --all-target --all-features
+        run: cargo test --all-targets --all-features
       - name: Build docker image
         run: make build_docker
