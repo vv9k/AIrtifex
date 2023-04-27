@@ -101,11 +101,16 @@ pub struct OneshotInferenceRequest {
     pub temp: Option<f32>,
     #[serde(default = "default_play_back_tokens")]
     pub play_back_tokens: bool,
+    #[serde(default = "default_save_inference_request")]
     pub save: bool,
 }
 
 fn default_play_back_tokens() -> bool {
     true
+}
+
+fn default_save_inference_request() -> bool {
+    false
 }
 
 pub type ChatStreamResult = Result<String, String>;
