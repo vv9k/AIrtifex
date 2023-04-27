@@ -66,8 +66,8 @@ pub fn NavItem(
                             } else {
                               "ms-5 ps-2 nav-link"
                             };
-                            view!{ cx, 
-                              <li 
+                            view!{ cx,
+                              <li
                                 class=classes
                                 style="cursor: pointer;"
                                 on:click=move |_| pages::goto(cx, p.raw_path()).expect("subpage")

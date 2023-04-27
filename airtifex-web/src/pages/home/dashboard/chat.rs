@@ -27,15 +27,15 @@ pub fn RecentChats(cx: Scope, chats: Resource<(), Vec<ChatListEntry>>) -> impl I
                     }).collect::<Vec<_>>();
 
                     if count > DISPLAY_COUNT {
-                        views.push(view!{ cx, 
-                            <tr 
+                        views.push(view!{ cx,
+                            <tr
                                 class="text-white no-border"
                                 style="cursor: pointer;"
                                 on:click={move |_| {
                                     pages::goto(cx, Page::Chat).expect("chat page");
                                 }}
                             >
-                                <td 
+                                <td
                                     class="text-secondary text-center" 
                                     colspan="2" 
                                     scope="col"
