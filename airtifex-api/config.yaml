@@ -9,18 +9,23 @@ llms:
   - model_path: ./llm_models/ggml-alpaca-7b-q4.bin
     model_description: Alpaca 7B, quantized
     float16: false
+    type: Llama
   # - model_path: ./llm_models/int4_fixed_zero.bin
   #   model_description: Dolly v2 12B, 4bit quantized
   #   float16: false
+  #   type: Llama
   # - model_path: ./llm_models/ggml-alpaca-13b-q4.bin
   #   model_description: Alpaca 13B, quantized
   #   float16: false
+  #   type: Llama
   #- model_path: ./llm_models/ggml-vicuna-13b-4bit-rev1.bin
     #model_description: Vicuna 13B, quantized
     #float16: false
+  #   type: Llama
   #- model_path: ./llm_models/ggml-alpaca-30b-q4-r1.bin
     #model_description: Alpaca 30B, quantized, rev. 1
     #float16: false
+  #   type: Llama
 
 stable_diffusion:
   - version: v2.1
