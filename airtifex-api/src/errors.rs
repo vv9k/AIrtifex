@@ -37,5 +37,5 @@ pub enum Error {
     #[error("Failed to send token to receiver - {0}")]
     InferenceSend(flume::SendError<airtifex_core::llm::ChatStreamResult>),
     #[error(transparent)]
-    InferenceError(#[from] llama_rs::InferenceError),
+    InferenceError(#[from] llm::InferenceError),
 }

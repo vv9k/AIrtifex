@@ -1,5 +1,5 @@
 use crate::{
-    config::LlmConfig,
+    config::{LlmConfig, LlmType},
     gen::ModelName,
     id::Uuid,
     models::{chat_entry::ChatEntry, prompt::Prompt},
@@ -7,9 +7,9 @@ use crate::{
 };
 use airtifex_core::llm::{ChatEntryType, ChatStreamResult, InferenceSettings};
 
-use llama_rs::{
-    InferenceError, InferenceParameters, InferenceSession, InferenceSessionParameters,
-    LoadProgress, Model, ModelKVMemoryType, TokenBias,
+use llm::{
+    InferenceError, InferenceParameters, InferenceSession, InferenceSessionConfig, LoadProgress,
+    Model, ModelKVMemoryType, TokenBias,
 };
 use rand::{rngs::ThreadRng, thread_rng};
 use std::{collections::VecDeque, sync::Arc};
@@ -180,68 +180,90 @@ pub fn initialize_model_and_handle_inferences(
 }
 
 struct InferenceSessionManager {
-    model: llama_rs::Model,
+    model: Box<dyn llm::Model>,
     config: LlmConfig,
 }
 
 impl InferenceSessionManager {
     fn new(config: LlmConfig) -> Self {
-        // Load model
-        let model = llama_rs::Model::load(
-            &config.model_path,
-            true,
-            config.num_ctx_tokens,
-            |progress| {
-                match progress {
-                    LoadProgress::HyperparametersLoaded(hparams) => {
-                        log::debug!("Loaded hyperparameters {hparams:#?}")
-                    }
-                    //LoadProgress::BadToken { index } => {
-                    //log::info!("Warning: Bad token in vocab at index {index}")
-                    //}
-                    LoadProgress::ContextSize { bytes } => log::info!(
-                        "ggml ctx size = {:.2} MB\n",
-                        bytes as f64 / (1024.0 * 1024.0)
-                    ),
-                    LoadProgress::PartLoading {
-                        file,
-                        current_part,
-                        total_parts,
-                    } => {
-                        let current_part = current_part + 1;
-                        log::info!(
-                            "Loading model part {}/{} from '{}'\n",
-                            current_part,
-                            total_parts,
-                            file.to_string_lossy(),
-                        )
-                    }
-                    LoadProgress::PartTensorLoaded {
-                        current_tensor,
-                        tensor_count,
-                        ..
-                    } => {
-                        let current_tensor = current_tensor + 1;
-                        if current_tensor % 8 == 0 {
-                            log::info!("Loaded tensor {current_tensor}/{tensor_count}");
-                        }
-                    }
-                    LoadProgress::PartLoaded {
-                        file,
-                        byte_size,
-                        tensor_count,
-                    } => {
-                        log::info!("Loading of '{}' complete", file.to_string_lossy());
-                        log::info!(
-                            "Model size = {:.2} MB / num tensors = {}",
-                            byte_size as f64 / 1024.0 / 1024.0,
-                            tensor_count
-                        );
+        let load_callback = |progress| {
+            match progress {
+                LoadProgress::HyperparametersLoaded => {
+                    log::debug!("Loaded hyperparameters")
+                }
+                //LoadProgress::BadToken { index } => {
+                //log::info!("Warning: Bad token in vocab at index {index}")
+                //}
+                LoadProgress::ContextSize { bytes } => log::info!(
+                    "ggml ctx size = {:.2} MB\n",
+                    bytes as f64 / (1024.0 * 1024.0)
+                ),
+                LoadProgress::TensorLoaded {
+                    current_tensor,
+                    tensor_count,
+                    ..
+                } => {
+                    let current_tensor = current_tensor + 1;
+                    if current_tensor % 8 == 0 {
+                        log::info!("Loaded tensor {current_tensor}/{tensor_count}");
                     }
                 }
-            },
-        )
-        .expect("Could not load model");
+                LoadProgress::Loaded {
+                    file_size,
+                    tensor_count,
+                } => {
+                    log::info!(
+                        "Model size = {:.2} MB / num tensors = {}",
+                        file_size as f64 / 1024.0 / 1024.0,
+                        tensor_count
+                    );
+                }
+            }
+        };
+
+        // Load model
+        let model = match config.type_ {
+            LlmType::Bloom => Box::new(
+                llm::load::<llm::models::Bloom>(
+                    &config.model_path,
+                    Default::default(),
+                    load_callback,
+                )
+                .expect("Could not load model"),
+            ) as Box<dyn llm::Model>,
+            LlmType::Gpt2 => Box::new(
+                llm::load::<llm::models::Gpt2>(
+                    &config.model_path,
+                    Default::default(),
+                    load_callback,
+                )
+                .expect("Could not load model"),
+            ) as Box<dyn llm::Model>,
+            LlmType::GptJ => Box::new(
+                llm::load::<llm::models::GptJ>(
+                    &config.model_path,
+                    Default::default(),
+                    load_callback,
+                )
+                .expect("Could not load model"),
+            ) as Box<dyn llm::Model>,
+            LlmType::Llama => Box::new(
+                llm::load::<llm::models::Llama>(
+                    &config.model_path,
+                    Default::default(),
+                    load_callback,
+                )
+                .expect("Could not load model"),
+            ) as Box<dyn llm::Model>,
+            LlmType::Neox => Box::new(
+                llm::load::<llm::models::NeoX>(
+                    &config.model_path,
+                    Default::default(),
+                    load_callback,
+                )
+                .expect("Could not load model"),
+            ) as Box<dyn llm::Model>,
+        };
 
         Self { model, config }
     }
@@ -253,10 +275,9 @@ impl InferenceSessionManager {
             } else {
                 ModelKVMemoryType::Float32
             };
-            InferenceSessionParameters {
+            InferenceSessionConfig {
                 memory_k_type: mem_typ,
                 memory_v_type: mem_typ,
-                repetition_penalty_last_n: self.config.repeat_last_n,
             }
         };
 
@@ -271,7 +292,7 @@ impl InferenceSessionManager {
                 .unwrap_or(self.config.repeat_penalty),
             temperature: request.settings.temp.unwrap_or(self.config.temperature),
             bias_tokens: TokenBias::default(),
-            play_back_previous_tokens: request.play_back_tokens,
+            repetition_penalty_last_n: 1,
         };
 
         let prompt = if let Some(chat) = &request.chat_data {
@@ -319,7 +340,7 @@ struct RunningInferenceSession {
 }
 
 impl RunningInferenceSession {
-    fn feed_prompt(&mut self, model: &Model) -> Result<(), crate::Error> {
+    fn feed_prompt(&mut self, model: &Box<dyn Model>) -> Result<(), crate::Error> {
         log::trace!(
             "[{}] Feeding prompt `{}`",
             self.id,
@@ -328,9 +349,10 @@ impl RunningInferenceSession {
         let id = self.id;
         self.session
             .feed_prompt(
-                model,
+                model.as_ref(),
                 &self.params,
                 &self.state.processed_prompt,
+                &mut Default::default(),
                 move |b| {
                     log::trace!("[{}] prompt part: {}", id, String::from_utf8_lossy(b));
                     Ok::<(), InferenceError>(())
@@ -386,12 +408,13 @@ impl RunningInferenceSession {
         tx_results: &Sender<SaveDataRequest>,
     ) -> Result<(), crate::Error> {
         log::trace!("[{}] infering next valid utf-8 token", self.id);
-        let mut buf = llama_rs::TokenUtf8Buffer::new();
+        let mut buf = llm::TokenUtf8Buffer::new();
 
         loop {
             let token = match self.session.infer_next_token(
-                &inference_session_manager.model,
+                inference_session_manager.model.as_ref(),
                 &self.params,
+                &mut Default::default(),
                 rng,
             ) {
                 Ok(token) => token,

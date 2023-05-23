@@ -44,6 +44,25 @@ fn default_num_threads() -> usize {
     num_cpus::get_physical()
 }
 
+#[derive(Clone, Copy, Deserialize, Serialize)]
+pub enum LlmType {
+    #[serde(alias = "bloom")]
+    Bloom,
+    #[serde(rename = "GPT-2")]
+    #[serde(alias = "gpt-2")]
+    Gpt2,
+    #[serde(rename = "GPT-J")]
+    #[serde(alias = "gpt-j")]
+    GptJ,
+    #[serde(alias = "LLaMa")]
+    #[serde(alias = "llama")]
+    Llama,
+    #[serde(alias = "NeoX")]
+    #[serde(alias = "neox")]
+    #[serde(alias = "Neo-X")]
+    Neox,
+}
+
 #[derive(Clone, Deserialize, Serialize)]
 pub struct LlmConfig {
     pub model_description: Option<String>,
@@ -72,6 +91,8 @@ pub struct LlmConfig {
     #[serde(default = "default_max_inference_sessions")]
     // Maximum concurent sessions for inference
     pub max_inference_sessions: usize,
+    #[serde(rename = "type")]
+    pub type_: LlmType,
 }
 
 pub struct Config {

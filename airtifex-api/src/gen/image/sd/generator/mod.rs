@@ -114,10 +114,10 @@ impl BaseImageGenerator {
             .map_err(GenImageError::PromptEncode)?;
 
         let tokens: Vec<i64> = tokens.into_iter().map(|x| x as i64).collect();
-        let tokens = Tensor::of_slice(&tokens).view((1, -1)).to(clip_device);
+        let tokens = Tensor::from_slice(&tokens).view((1, -1)).to(clip_device);
         let uncond_tokens = tokenizer.encode("").map_err(GenImageError::TokensEncode)?;
         let uncond_tokens: Vec<i64> = uncond_tokens.into_iter().map(|x| x as i64).collect();
-        let uncond_tokens = Tensor::of_slice(&uncond_tokens)
+        let uncond_tokens = Tensor::from_slice(&uncond_tokens)
             .view((1, -1))
             .to(clip_device);
 

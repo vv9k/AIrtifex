@@ -49,8 +49,12 @@ cd airtifex
 
 ## Getting the weights
 
-This repository doesn't contain any models/weights, you'll need to get them yourself before running the server. Currently, only LLaMa based models are supported like
-Alpaca, Vicuna etc.
+This repository doesn't contain any models/weights, you'll need to get them yourself before running the server. Currently supported model types are:
+ * Bloom
+ * GPT-2
+ * GPT-J
+ * LLaMa
+ * NeoX
 
 For image generation Stable Diffusion models can be used. Below are links to download pretrained weights:
  * https://huggingface.co/lmz/rust-stable-diffusion-v2-1
@@ -74,6 +78,7 @@ llms:
   - model_path: ./llm_models/ggml-alpaca-7b-q4.bin
     model_description: Alpaca 7B, quantized
     float16: false
+    type: LLaMa
 
 stable_diffusion:
   - version: v2.1
@@ -147,7 +152,7 @@ cd airtifex-web
 make serve_release
 ```
 
-The web app will be accessible at http://localhost:8080 by default and is configured to connect to the API server at localhost:6901. To configure it change the values in the `Trunk.toml` file.
+The web app will be accessible at http://localhost:8091 by default and is configured to connect to the API server at localhost:6901. To configure it change the values in the `Trunk.toml` file.
 
 
 ### Systemd Service
