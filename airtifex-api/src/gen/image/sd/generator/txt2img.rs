@@ -50,7 +50,7 @@ impl TextToImageGenerator {
     pub fn init_latents(&mut self) {
         tch::manual_seed(self.base_generator.request.seed + self.base_generator.sample_idx());
         self.latents = Tensor::randn(
-            &[
+            [
                 self.base_generator.bsize,
                 4,
                 self.base_generator.sd_config.height / 8,

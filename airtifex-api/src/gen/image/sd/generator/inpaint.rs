@@ -50,7 +50,7 @@ impl InpaintImageGenerator {
 
         let (mask, masked_image) = prepare_mask_and_masked_image(&input_image, &mask)?;
         let mask = mask.upsample_nearest2d(
-            &[
+            [
                 base_generator.sd_config.height / 8,
                 base_generator.sd_config.width / 8,
             ],
@@ -81,7 +81,7 @@ impl InpaintImageGenerator {
             (self.masked_image_dist.sample() * LATENTS_SCALE).to(self.base_generator.unet_device);
         self.masked_image_latents = Tensor::cat(&[&masked_image_latents, &masked_image_latents], 0);
         self.latents = Tensor::randn(
-            &[
+            [
                 self.base_generator.bsize,
                 4,
                 self.base_generator.sd_config.height / 8,

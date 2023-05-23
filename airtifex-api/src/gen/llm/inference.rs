@@ -146,7 +146,7 @@ pub fn initialize_model_and_handle_inferences(
                     while let Some(inference_request) = queue.pop_front() && free_spots > 0 {
                         let mut session = inference_session_manager.get_inference_session(inference_request);
 
-                        if let Err(e) = session.feed_prompt(&inference_session_manager.model) {
+                        if let Err(e) = session.feed_prompt(inference_session_manager.model.as_ref()) {
                             log::error!("failed to initialize inference session - {e}");
                         } else {
                             running_sessions.push_back(session);
@@ -340,7 +340,7 @@ struct RunningInferenceSession {
 }
 
 impl RunningInferenceSession {
-    fn feed_prompt(&mut self, model: &Box<dyn Model>) -> Result<(), crate::Error> {
+    fn feed_prompt(&mut self, model: &dyn Model) -> Result<(), crate::Error> {
         log::trace!(
             "[{}] Feeding prompt `{}`",
             self.id,
@@ -349,7 +349,7 @@ impl RunningInferenceSession {
         let id = self.id;
         self.session
             .feed_prompt(
-                model.as_ref(),
+                model,
                 &self.params,
                 &self.state.processed_prompt,
                 &mut Default::default(),
